@@ -1,0 +1,28 @@
+{
+  "name": "fluid-img",
+  "version": "0.0.1",
+  "description": "A web component for displaying images that intelligently resize to fit most any container.",
+  "author": "Voice NPO, Inc.",
+  "license": "Fluid-Img Revenue-Limited License",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest -t \"^[^@]+$\"",
+    "test:live": "vitest -t \"@LIVE\"",
+    "test:watch": "vitest watch"
+  },
+  "devDependencies": {
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "dependencies": {
+    "@types/node": "^22.15.21",
+    "ansi-colors": "^4.1.3",
+    "canvas": "^3.1.0",
+    "cli-progress": "^3.12.0",
+    "commander": "^14.0.0",
+    "globby": "^14.1.0"
+  }
+}
