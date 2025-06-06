@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WASM SIMD Seam Removal Benchmark</title>
+</head>
+<body>
+    <h1>WASM SIMD Seam Removal Benchmark</h1>
+    <button id="run-benchmark">Run Benchmark</button>
+    <pre id="output"></pre>
+
+    <script type="module">
+        import init, { benchmark_seam_removal } from './pkg/seam_removal_wasm.js';
+        
+        async function run() {
+            await init();
+            
+            document.getElementById('run-benchmark').addEventListener('click', () => {
+                const output = document.getElementById('output');
+                output.textContent = 'Running benchmark...\n';
+                
+                // Capture console.log output
+                const originalLog = console.log;
+                console.log = function(...args) {
+                    output.textContent += args.join(' ') + '\n';
+                    originalLog.apply(console, args);
+                };
+                
+                try {
+                    benchmark_seam_removal();
+                } catch (error) {
+                    output.textContent += 'Error: ' + error.message + '\n';
+                }
+                
+                console.log = originalLog;
+            });
+        }
+        
+        run();
+    </script>
+</body>
+</html> 

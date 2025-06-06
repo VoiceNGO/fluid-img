@@ -1,0 +1,22 @@
+.seam spec:
+-----------
+('SEAM'+seams)[]
+
+seams spec:
+-----------
+version: 1 byte
+stepSize - 1: 4 bits
+mergeSize - 1: 2 bits
+isVertical: 1 bit
+isCompressed: 1 bit
+imageWidth: 2 bytes
+imageHeight: 2 bytes
+numSeams: 2 bytes
+individualSeams[]
+
+individual seam spec:
+---------------------
+starting col or row: 2 bytes
+direction for each step of seam: 1 or 2 bits.  In compressed mode 0=left/down, 1=right/up.  In uncompresed mode 0=left/down, 10=straight, 11=right/up
+
+horizontal seams are stored as vertical seams, rotated 90º CCW before being saved, and are un-rotated after decompression

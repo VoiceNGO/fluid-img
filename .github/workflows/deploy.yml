@@ -1,0 +1,25 @@
+name: Deploy
+on:
+  push:
+    branches: [main, docs]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          ref: docs
+          path: docs
+      - run: |
+          mkdir site
+          cp -r docs/* site/
+          cp -r main/build site/
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site
