@@ -1084,7 +1084,7 @@
             }
             return dispatcher.useContext(Context);
           }
-          function useState2(initialState) {
+          function useState3(initialState) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useState(initialState);
           }
@@ -1887,7 +1887,7 @@
           exports.useMemo = useMemo;
           exports.useReducer = useReducer;
           exports.useRef = useRef;
-          exports.useState = useState2;
+          exports.useState = useState3;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
           exports.version = ReactVersion;
@@ -2383,9 +2383,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React6 = require_react();
+          var React7 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React6.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3990,7 +3990,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React6.Children.forEach(props.children, function(child) {
+                  React7.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23553,11 +23553,11 @@
   });
 
   // src/index.jsx
-  var import_react5 = __toESM(require_react());
+  var import_react6 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // src/App.jsx
-  var import_react4 = __toESM(require_react());
+  var import_react5 = __toESM(require_react());
 
   // src/components/ImageSelector.jsx
   var import_react = __toESM(require_react());
@@ -23581,29 +23581,16 @@
   }
   var ImageSelector_default = ImageSelector;
 
-  // src/components/ImageUploader.jsx
-  var import_react2 = __toESM(require_react());
-  function ImageUploader({ onImageUpload }) {
-    const handleFileChange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        onImageUpload(URL.createObjectURL(file));
-      }
-    };
-    return /* @__PURE__ */ import_react2.default.createElement("div", { className: "image-uploader" }, /* @__PURE__ */ import_react2.default.createElement("label", { htmlFor: "file-upload" }, "Upload an Image:"), /* @__PURE__ */ import_react2.default.createElement("input", { id: "file-upload", type: "file", accept: "image/*", onChange: handleFileChange }));
-  }
-  var ImageUploader_default = ImageUploader;
-
   // src/components/Seam.jsx
-  var import_react3 = __toESM(require_react());
-  function Seam({ src, showSeams, scaleDown, scaleUp }) {
+  var import_react2 = __toESM(require_react());
+  function Seam({ src, showSeams, scaleDown, scaleUp, seamMode }) {
     const style = {
       maxWidth: "100%",
       maxHeight: "100%",
       objectFit: "contain",
       border: showSeams ? "2px solid red" : "none"
     };
-    return /* @__PURE__ */ import_react3.default.createElement(
+    return /* @__PURE__ */ import_react2.default.createElement(
       "img",
       {
         src,
@@ -23614,13 +23601,91 @@
   }
   var Seam_default = Seam;
 
+  // src/components/Controls.jsx
+  var import_react4 = __toESM(require_react());
+
+  // src/components/ImageUploader.jsx
+  var import_react3 = __toESM(require_react());
+  function ImageUploader({ onImageUpload }) {
+    const handleFileChange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        onImageUpload(URL.createObjectURL(file));
+      }
+    };
+    return /* @__PURE__ */ import_react3.default.createElement("div", { className: "image-uploader" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "file-upload" }, "Upload an Image:"), /* @__PURE__ */ import_react3.default.createElement("input", { id: "file-upload", type: "file", accept: "image/*", onChange: handleFileChange }));
+  }
+  var ImageUploader_default = ImageUploader;
+
+  // src/components/Controls.jsx
+  function Controls({ config, setConfig, onImageUpload }) {
+    const [isCollapsed, setIsCollapsed] = (0, import_react4.useState)(false);
+    const handleConfigChange = (key, value) => {
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        [key]: value
+      }));
+    };
+    return /* @__PURE__ */ import_react4.default.createElement("div", { className: "controls-container" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "config-tab", onClick: () => setIsCollapsed(!isCollapsed) }, "Config ", isCollapsed ? "\u25B2" : "\u25BC"), !isCollapsed && /* @__PURE__ */ import_react4.default.createElement("div", { className: "controls-panel" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement(ImageUploader_default, { onImageUpload })), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Max scale down: ", config.scaleDown, "%"), /* @__PURE__ */ import_react4.default.createElement(
+      "input",
+      {
+        type: "range",
+        min: "0",
+        max: "100",
+        value: config.scaleDown,
+        onChange: (e) => handleConfigChange("scaleDown", e.target.value)
+      }
+    )), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Max scale up: ", config.scaleUp, "%"), /* @__PURE__ */ import_react4.default.createElement(
+      "input",
+      {
+        type: "range",
+        min: "0",
+        max: "100",
+        value: config.scaleUp,
+        onChange: (e) => handleConfigChange("scaleUp", e.target.value)
+      }
+    )), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Seam generation:"), /* @__PURE__ */ import_react4.default.createElement("div", { className: "toggle-switch" }, /* @__PURE__ */ import_react4.default.createElement(
+      "button",
+      {
+        className: config.seamMode === "fast" ? "active" : "",
+        onClick: () => handleConfigChange("seamMode", "fast")
+      },
+      "Fast"
+    ), /* @__PURE__ */ import_react4.default.createElement(
+      "button",
+      {
+        className: config.seamMode === "accurate" ? "active" : "",
+        onClick: () => handleConfigChange("seamMode", "accurate")
+      },
+      "Accurate"
+    ), /* @__PURE__ */ import_react4.default.createElement(
+      "button",
+      {
+        className: config.seamMode === "cached" ? "active" : "",
+        onClick: () => handleConfigChange("seamMode", "cached")
+      },
+      "Cached"
+    ))), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, /* @__PURE__ */ import_react4.default.createElement(
+      "input",
+      {
+        type: "checkbox",
+        checked: config.showSeams,
+        onChange: (e) => handleConfigChange("showSeams", e.target.checked)
+      }
+    ), "Show Seams"))));
+  }
+  var Controls_default = Controls;
+
   // src/App.jsx
   function App() {
-    const [selectedImage, setSelectedImage] = (0, import_react4.useState)("Broadway_tower.jpg");
-    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react4.useState)(null);
-    const [showSeams, setShowSeams] = (0, import_react4.useState)(false);
-    const [scaleDown, setScaleDown] = (0, import_react4.useState)(50);
-    const [scaleUp, setScaleUp] = (0, import_react4.useState)(50);
+    const [selectedImage, setSelectedImage] = (0, import_react5.useState)("Broadway_tower.jpg");
+    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react5.useState)(null);
+    const [config, setConfig] = (0, import_react5.useState)({
+      showSeams: false,
+      scaleDown: 50,
+      scaleUp: 50,
+      seamMode: "fast"
+    });
     const handleImageSelect = (imageName) => {
       setSelectedImage(imageName);
       setUploadedImageSrc(null);
@@ -23630,38 +23695,21 @@
       setSelectedImage(null);
     };
     const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : "");
-    return /* @__PURE__ */ import_react4.default.createElement("div", { className: "App" }, /* @__PURE__ */ import_react4.default.createElement("header", { className: "App-header" }, /* @__PURE__ */ import_react4.default.createElement("h1", null, "Live Seam Carving Demo")), /* @__PURE__ */ import_react4.default.createElement("main", { className: "App-main" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "left-panel" }, /* @__PURE__ */ import_react4.default.createElement(ImageSelector_default, { onSelect: handleImageSelect }), /* @__PURE__ */ import_react4.default.createElement("div", { className: "controls-panel" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement(ImageUploader_default, { onImageUpload: handleImageUpload })), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Max scale down: ", scaleDown, "%"), /* @__PURE__ */ import_react4.default.createElement(
-      "input",
+    return /* @__PURE__ */ import_react5.default.createElement("div", { className: "App" }, /* @__PURE__ */ import_react5.default.createElement("header", { className: "App-header" }, /* @__PURE__ */ import_react5.default.createElement("h1", null, "Live Seam Carving Demo")), /* @__PURE__ */ import_react5.default.createElement("main", { className: "App-main" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "left-panel" }, /* @__PURE__ */ import_react5.default.createElement(ImageSelector_default, { onSelect: handleImageSelect }), /* @__PURE__ */ import_react5.default.createElement(
+      Controls_default,
       {
-        type: "range",
-        min: "0",
-        max: "100",
-        value: scaleDown,
-        onChange: (e) => setScaleDown(e.target.value)
+        config,
+        setConfig,
+        onImageUpload: handleImageUpload
       }
-    )), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Max scale up: ", scaleUp, "%"), /* @__PURE__ */ import_react4.default.createElement(
-      "input",
-      {
-        type: "range",
-        min: "0",
-        max: "100",
-        value: scaleUp,
-        onChange: (e) => setScaleUp(e.target.value)
-      }
-    )), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, /* @__PURE__ */ import_react4.default.createElement(
-      "input",
-      {
-        type: "checkbox",
-        checked: showSeams,
-        onChange: (e) => setShowSeams(e.target.checked)
-      }
-    ), "Show Seams")))), /* @__PURE__ */ import_react4.default.createElement("div", { className: "main-content" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "seam-container-resizable" }, imageToDisplay && /* @__PURE__ */ import_react4.default.createElement(
+    )), /* @__PURE__ */ import_react5.default.createElement("div", { className: "main-content" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "seam-container-resizable" }, imageToDisplay && /* @__PURE__ */ import_react5.default.createElement(
       Seam_default,
       {
         src: imageToDisplay,
-        showSeams,
-        scaleDown,
-        scaleUp
+        showSeams: config.showSeams,
+        scaleDown: config.scaleDown,
+        scaleUp: config.scaleUp,
+        seamMode: config.seamMode
       }
     )))));
   }
@@ -23670,7 +23718,7 @@
   // src/index.jsx
   var root = import_client.default.createRoot(document.getElementById("root"));
   root.render(
-    /* @__PURE__ */ import_react5.default.createElement(import_react5.default.StrictMode, null, /* @__PURE__ */ import_react5.default.createElement(App_default, null))
+    /* @__PURE__ */ import_react6.default.createElement(import_react6.default.StrictMode, null, /* @__PURE__ */ import_react6.default.createElement(App_default, null))
   );
 })();
 /*! Bundled license information:

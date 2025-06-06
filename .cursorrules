@@ -1,4 +1,4 @@
-# Seams Project State
+# .cursorrules
 
 This is a React application that demonstrates seam carving.
 
@@ -13,3 +13,11 @@ This is a React application that demonstrates seam carving.
     - `ImageUploader.jsx`: A component for uploading images.
     - `ImageSelector.jsx`: A component for selecting from a list of preset images.
     - `Seam.jsx`: A placeholder component that will eventually implement the seam carving logic. It currently just displays the selected image.
+  - `src/`: Contains the React application source code.
+    - `index.jsx`: The entry point for the React application. Renders the `App` component.
+    - `App.jsx`: The main application component. It manages image state and a single `config` object for all seam carving parameters. It renders the `ImageSelector`, `Controls`, and `Seam` components.
+    - `components/`: Contains reusable React components.
+      - `Controls.jsx`: A component containing all user controls (sliders, toggles). It is collapsible and manages its own collapsed state.
+      - `ImageUploader.jsx`: A component for uploading images.
+      - `ImageSelector.jsx`: A component for selecting from a list of preset images.
+      - `Seam.jsx`: A placeholder component that displays the image and receives the `config` object.

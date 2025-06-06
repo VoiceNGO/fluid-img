@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
-import ImageUploader from './components/ImageUploader.jsx';
 import Seam from './components/Seam.jsx';
+import Controls from './components/Controls.jsx';
 
 function App() {
   const [selectedImage, setSelectedImage] = useState('Broadway_tower.jpg');
   const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
-  const [showSeams, setShowSeams] = useState(false);
-  const [scaleDown, setScaleDown] = useState(50);
-  const [scaleUp, setScaleUp] = useState(50);
+  const [config, setConfig] = useState({
+    showSeams: false,
+    scaleDown: 50,
+    scaleUp: 50,
+    seamMode: 'fast',
+  });
 
   const handleImageSelect = (imageName) => {
     setSelectedImage(imageName);
-    setUploadedImageSrc(null); // Clear uploaded image when a preset is chosen
+    setUploadedImageSrc(null);
   };
 
   const handleImageUpload = (imageSrc) => {
     setUploadedImageSrc(imageSrc);
-    setSelectedImage(null); // Clear preset image when one is uploaded
+    setSelectedImage(null);
   };
 
   const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : '');
@@ -30,50 +33,21 @@ function App() {
       <main className="App-main">
         <div className="left-panel">
           <ImageSelector onSelect={handleImageSelect} />
-          <div className="controls-panel">
-            <div className="control-group">
-              <ImageUploader onImageUpload={handleImageUpload} />
-            </div>
-            <div className="control-group">
-              <label>Max scale down: {scaleDown}%</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={scaleDown}
-                onChange={(e) => setScaleDown(e.target.value)}
-              />
-            </div>
-            <div className="control-group">
-              <label>Max scale up: {scaleUp}%</label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={scaleUp}
-                onChange={(e) => setScaleUp(e.target.value)}
-              />
-            </div>
-            <div className="control-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showSeams}
-                  onChange={e => setShowSeams(e.target.checked)}
-                />
-                Show Seams
-              </label>
-            </div>
-          </div>
+          <Controls
+            config={config}
+            setConfig={setConfig}
+            onImageUpload={handleImageUpload}
+          />
         </div>
         <div className="main-content">
           <div className="seam-container-resizable">
             {imageToDisplay && (
               <Seam
                 src={imageToDisplay}
-                showSeams={showSeams}
-                scaleDown={scaleDown}
-                scaleUp={scaleUp}
+                showSeams={config.showSeams}
+                scaleDown={config.scaleDown}
+                scaleUp={config.scaleUp}
+                seamMode={config.seamMode}
               />
             )}
           </div>
