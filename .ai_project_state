@@ -1,0 +1,15 @@
+# Seams Project State
+
+This is a React application that demonstrates seam carving.
+
+## Project Structure
+
+- `package.json`: Defines project dependencies and scripts. Uses `react`, `react-dom`, and `esbuild`.
+- `public/`: Contains the `index.html` and other static assets.
+- `src/`: Contains the React application source code.
+  - `index.jsx`: The entry point for the React application. Renders the `App` component.
+  - `App.jsx`: The main application component. It manages the state for the selected and uploaded images, and the controls for the seam carving visualization. It uses `ImageSelector`, `ImageUploader`, and `Seam` components.
+  - `components/`: Contains reusable React components.
+    - `ImageUploader.jsx`: A component for uploading images.
+    - `ImageSelector.jsx`: A component for selecting from a list of preset images.
+    - `Seam.jsx`: A placeholder component that will eventually implement the seam carving logic. It currently just displays the selected image.

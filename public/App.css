@@ -1,0 +1,74 @@
+.App {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.App-header {
+  background-color: #282c34;
+  padding: 5px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.App-header h1 {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.App-main {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.left-panel {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ccc;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 0 20px 0 0;
+}
+
+.seam-container-resizable {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 2px dashed #ccc;
+  resize: horizontal;
+  overflow: auto;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.controls-panel {
+  padding: 15px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+}
+
+.control-group {
+  margin-bottom: 15px;
+}
+
+.control-group:last-child {
+  margin-bottom: 0;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+} 
