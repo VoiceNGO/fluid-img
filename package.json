@@ -4,16 +4,25 @@
   "description": "A web component for displaying images that intelligently resize to fit most any container.",
   "author": "Voice NPO, Inc.",
   "license": "Fluid-Img Revenue-Limited License",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "vitest -t \"^[^@]+$\"",
     "test:live": "vitest -t \"@LIVE\"",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "build": "tsc",
+    "build:esbuild:prod": "esbuild build/renderer/index.js --bundle --outfile=build/renderer/index.minified.js --define:PRODUCTION=true --minify",
+    "watch": "tsc --watch"
+  },
+  "exports": {
+    "./matrix": "./build/utils/matrix/matrix.js"
   },
   "devDependencies": {
+    "esbuild": "^0.25.4",
     "eslint": "^9.27.0",
     "prettier": "^3.5.3",
+    "tinybench": "^4.0.1",
+    "type-fest": "^4.41.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
   },
