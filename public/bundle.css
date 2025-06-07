@@ -1,0 +1,61 @@
+/* src/components/DancingStickFigure.css */
+.stick-figure-container {
+  width: 50px;
+  height: 50px;
+}
+.stick-figure {
+  width: 100%;
+  height: 100%;
+}
+.stick-figure .arm {
+  transform-origin: 50px 40px;
+  transform-box: fill-box;
+}
+.stick-figure .leg {
+  transform-origin: 50px 60px;
+  transform-box: fill-box;
+}
+.stick-figure .arm.left {
+  animation: dance-arm-left 1s infinite ease-in-out;
+}
+.stick-figure .arm.right {
+  animation: dance-arm-right 1s infinite ease-in-out;
+}
+.stick-figure .leg.left {
+  animation: dance-leg-left 1s infinite ease-in-out;
+}
+.stick-figure .leg.right {
+  animation: dance-leg-right 1s infinite ease-in-out;
+}
+@keyframes dance-arm-left {
+  0%, 100% {
+    transform: rotate(0deg) translateY(-5px);
+  }
+  50% {
+    transform: rotate(20deg) translateY(0);
+  }
+}
+@keyframes dance-arm-right {
+  0%, 100% {
+    transform: rotate(0deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-20deg) translateY(-5px);
+  }
+}
+@keyframes dance-leg-left {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-15deg) translateX(5px);
+  }
+}
+@keyframes dance-leg-right {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(15deg) translateX(-5px);
+  }
+}

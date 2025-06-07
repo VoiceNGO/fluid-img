@@ -8,6 +8,7 @@ function App() {
   const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
   const [config, setConfig] = useState({
     showSeams: false,
+    showEnergyMap: false,
     scaleDown: 50,
     scaleUp: 50,
     seamMode: 'fast',
@@ -45,6 +46,7 @@ function App() {
               <Seam
                 src={imageToDisplay}
                 showSeams={config.showSeams}
+                showEnergyMap={config.showEnergyMap}
                 scaleDown={config.scaleDown}
                 scaleUp={config.scaleUp}
                 seamMode={config.seamMode}

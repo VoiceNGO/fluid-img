@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ImageUploader from './ImageUploader.jsx';
+import HelpTooltip from './HelpTooltip.jsx';
 
 function Controls({ config, setConfig, onImageUpload }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -22,7 +23,10 @@ function Controls({ config, setConfig, onImageUpload }) {
             <ImageUploader onImageUpload={onImageUpload} />
           </div>
           <div className="control-group">
-            <label>Max scale down: {config.scaleDown}%</label>
+            <label>
+              Max carve down: {config.scaleDown}%
+              <HelpTooltip>Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used.</HelpTooltip>
+            </label>
             <input
               type="range"
               min="0"
@@ -32,7 +36,10 @@ function Controls({ config, setConfig, onImageUpload }) {
             />
           </div>
           <div className="control-group">
-            <label>Max scale up: {config.scaleUp}%</label>
+            <label>
+              Max carve up: {config.scaleUp}%
+              <HelpTooltip>Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used.</HelpTooltip>
+            </label>
             <input
               type="range"
               min="0"
@@ -42,7 +49,14 @@ function Controls({ config, setConfig, onImageUpload }) {
             />
           </div>
           <div className="control-group">
-            <label>Seam generation:</label>
+            <label>
+              Seam generation:
+              <HelpTooltip>{`Fast: Picks the best from randomly generated seams.
+              
+              Accurate: Precise seam calculation.  Much slower.
+              
+              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download.`}</HelpTooltip>
+            </label>
             <div className="toggle-switch">
               <button
                 className={config.seamMode === 'fast' ? 'active' : ''}
@@ -71,7 +85,21 @@ function Controls({ config, setConfig, onImageUpload }) {
                 checked={config.showSeams}
                 onChange={(e) => handleConfigChange('showSeams', e.target.checked)}
               />
-              Show Seams
+              Animate Seam Carving
+              <HelpTooltip>
+                <img src="images/fight.gif" alt="Animation" />
+              </HelpTooltip>
+            </label>
+          </div>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={config.showEnergyMap}
+                onChange={(e) => handleConfigChange('showEnergyMap', e.target.checked)}
+              />
+              Show Energy Map
+              <HelpTooltip>Displays a grayscale 'energy map' of the image. Darker areas have lower energy and are more likely to be carved out by seams. Lighter areas are protected.</HelpTooltip>
             </label>
           </div>
         </div>

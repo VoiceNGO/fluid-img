@@ -4,8 +4,9 @@ This project is a React application for live seam carving.
 
 ## Key Files:
 
-- `src/App.jsx`: The main application component. It manages the state for the selected image, configuration, and uploaded images.
-- `src/components/Controls.jsx`: The control panel component. It allows users to change the configuration for seam carving.
+- `src/App.jsx`: The main application component. It manages the state for the selected image, configuration (including energy map), and uploaded images.
+- `src/components/Controls.jsx`: The control panel component. It allows users to change the configuration for seam carving, including showing the energy map. Contains tooltips.
 - `src/components/ImageSelector.jsx`: A component for selecting preset images.
-- `src/components/Seam.jsx`: A placeholder component for displaying the seam-carved image.
+- `src/components/Seam.jsx`: A placeholder component for displaying the seam-carved image. Will eventually display the energy map.
+- `src/components/HelpTooltip.jsx`: A component for displaying a help icon with a tooltip.
 - `public/App.css`: Styles for the application.

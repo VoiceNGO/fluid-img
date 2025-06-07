@@ -79,7 +79,8 @@
 }
 
 .control-group label {
-  display: block;
+  display: flex;
+  align-items: center;
   margin-bottom: 5px;
   font-size: 0.9rem;
   text-align: left;
@@ -116,4 +117,64 @@
 
 .toggle-switch button:focus {
   outline: none;
+}
+
+/* Help Tooltip */
+.help-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.help-icon {
+  cursor: help;
+  color: #555;
+}
+
+.help-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 220px;
+  background-color: #555;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  box-sizing: border-box;
+}
+
+.help-tooltip .tooltip-text.tooltip-component {
+  width: auto;
+  transform: translateX(-50%);
+  margin-left: 0;
+}
+
+.help-tooltip .tooltip-text.tooltip-component img {
+  max-width: 150px;
+  display: block;
+}
+
+.help-tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.help-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 } 

@@ -2383,9 +2383,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React7 = require_react();
+          var React8 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React8.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3990,7 +3990,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React7.Children.forEach(props.children, function(child) {
+                  React8.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23553,11 +23553,11 @@
   });
 
   // src/index.jsx
-  var import_react6 = __toESM(require_react());
+  var import_react7 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // src/App.jsx
-  var import_react5 = __toESM(require_react());
+  var import_react6 = __toESM(require_react());
 
   // src/components/ImageSelector.jsx
   var import_react = __toESM(require_react());
@@ -23602,7 +23602,7 @@
   var Seam_default = Seam;
 
   // src/components/Controls.jsx
-  var import_react4 = __toESM(require_react());
+  var import_react5 = __toESM(require_react());
 
   // src/components/ImageUploader.jsx
   var import_react3 = __toESM(require_react());
@@ -23617,16 +23617,43 @@
   }
   var ImageUploader_default = ImageUploader;
 
+  // src/components/HelpTooltip.jsx
+  var import_react4 = __toESM(require_react());
+  var HelpIcon = () => /* @__PURE__ */ import_react4.default.createElement(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: "16",
+      height: "16",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      className: "help-icon"
+    },
+    /* @__PURE__ */ import_react4.default.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+    /* @__PURE__ */ import_react4.default.createElement("path", { d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" }),
+    /* @__PURE__ */ import_react4.default.createElement("line", { x1: "12", y1: "17", x2: "12.01", y2: "17" })
+  );
+  function HelpTooltip({ children }) {
+    const isComponent = typeof children !== "string";
+    const tooltipClassName = `tooltip-text ${isComponent ? "tooltip-component" : ""}`;
+    return /* @__PURE__ */ import_react4.default.createElement("div", { className: "help-tooltip" }, /* @__PURE__ */ import_react4.default.createElement(HelpIcon, null), /* @__PURE__ */ import_react4.default.createElement("span", { className: tooltipClassName }, children));
+  }
+  var HelpTooltip_default = HelpTooltip;
+
   // src/components/Controls.jsx
   function Controls({ config, setConfig, onImageUpload }) {
-    const [isCollapsed, setIsCollapsed] = (0, import_react4.useState)(false);
+    const [isCollapsed, setIsCollapsed] = (0, import_react5.useState)(false);
     const handleConfigChange = (key, value) => {
       setConfig((prevConfig) => ({
         ...prevConfig,
         [key]: value
       }));
     };
-    return /* @__PURE__ */ import_react4.default.createElement("div", { className: "controls-container" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "config-tab", onClick: () => setIsCollapsed(!isCollapsed) }, "Config ", isCollapsed ? "\u25B2" : "\u25BC"), !isCollapsed && /* @__PURE__ */ import_react4.default.createElement("div", { className: "controls-panel" }, /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement(ImageUploader_default, { onImageUpload })), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Max scale down: ", config.scaleDown, "%"), /* @__PURE__ */ import_react4.default.createElement(
+    return /* @__PURE__ */ import_react5.default.createElement("div", { className: "controls-container" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "config-tab", onClick: () => setIsCollapsed(!isCollapsed) }, "Config ", isCollapsed ? "\u25B2" : "\u25BC"), !isCollapsed && /* @__PURE__ */ import_react5.default.createElement("div", { className: "controls-panel" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement(ImageUploader_default, { onImageUpload })), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, "Max carve down: ", config.scaleDown, "%", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, "Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used.")), /* @__PURE__ */ import_react5.default.createElement(
       "input",
       {
         type: "range",
@@ -23635,7 +23662,7 @@
         value: config.scaleDown,
         onChange: (e) => handleConfigChange("scaleDown", e.target.value)
       }
-    )), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Max scale up: ", config.scaleUp, "%"), /* @__PURE__ */ import_react4.default.createElement(
+    )), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, "Max carve up: ", config.scaleUp, "%", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, "Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used.")), /* @__PURE__ */ import_react5.default.createElement(
       "input",
       {
         type: "range",
@@ -23644,44 +23671,56 @@
         value: config.scaleUp,
         onChange: (e) => handleConfigChange("scaleUp", e.target.value)
       }
-    )), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, "Seam generation:"), /* @__PURE__ */ import_react4.default.createElement("div", { className: "toggle-switch" }, /* @__PURE__ */ import_react4.default.createElement(
+    )), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, "Seam generation:", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, `Fast: Picks the best from randomly generated seams.
+              
+              Accurate: Precise seam calculation.  Much slower.
+              
+              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download.`)), /* @__PURE__ */ import_react5.default.createElement("div", { className: "toggle-switch" }, /* @__PURE__ */ import_react5.default.createElement(
       "button",
       {
         className: config.seamMode === "fast" ? "active" : "",
         onClick: () => handleConfigChange("seamMode", "fast")
       },
       "Fast"
-    ), /* @__PURE__ */ import_react4.default.createElement(
+    ), /* @__PURE__ */ import_react5.default.createElement(
       "button",
       {
         className: config.seamMode === "accurate" ? "active" : "",
         onClick: () => handleConfigChange("seamMode", "accurate")
       },
       "Accurate"
-    ), /* @__PURE__ */ import_react4.default.createElement(
+    ), /* @__PURE__ */ import_react5.default.createElement(
       "button",
       {
         className: config.seamMode === "cached" ? "active" : "",
         onClick: () => handleConfigChange("seamMode", "cached")
       },
       "Cached"
-    ))), /* @__PURE__ */ import_react4.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react4.default.createElement("label", null, /* @__PURE__ */ import_react4.default.createElement(
+    ))), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, /* @__PURE__ */ import_react5.default.createElement(
       "input",
       {
         type: "checkbox",
         checked: config.showSeams,
         onChange: (e) => handleConfigChange("showSeams", e.target.checked)
       }
-    ), "Show Seams"))));
+    ), "Animate Seam Carving", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, /* @__PURE__ */ import_react5.default.createElement("img", { src: "images/fight.gif", alt: "Animation" })))), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, /* @__PURE__ */ import_react5.default.createElement(
+      "input",
+      {
+        type: "checkbox",
+        checked: config.showEnergyMap,
+        onChange: (e) => handleConfigChange("showEnergyMap", e.target.checked)
+      }
+    ), "Show Energy Map", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, "Displays a grayscale 'energy map' of the image. Darker areas have lower energy and are more likely to be carved out by seams. Lighter areas are protected.")))));
   }
   var Controls_default = Controls;
 
   // src/App.jsx
   function App() {
-    const [selectedImage, setSelectedImage] = (0, import_react5.useState)("Broadway_tower.jpg");
-    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react5.useState)(null);
-    const [config, setConfig] = (0, import_react5.useState)({
+    const [selectedImage, setSelectedImage] = (0, import_react6.useState)("Broadway_tower.jpg");
+    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react6.useState)(null);
+    const [config, setConfig] = (0, import_react6.useState)({
       showSeams: false,
+      showEnergyMap: false,
       scaleDown: 50,
       scaleUp: 50,
       seamMode: "fast"
@@ -23695,18 +23734,19 @@
       setSelectedImage(null);
     };
     const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : "");
-    return /* @__PURE__ */ import_react5.default.createElement("div", { className: "App" }, /* @__PURE__ */ import_react5.default.createElement("header", { className: "App-header" }, /* @__PURE__ */ import_react5.default.createElement("h1", null, "Live Seam Carving Demo")), /* @__PURE__ */ import_react5.default.createElement("main", { className: "App-main" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "left-panel" }, /* @__PURE__ */ import_react5.default.createElement(ImageSelector_default, { onSelect: handleImageSelect }), /* @__PURE__ */ import_react5.default.createElement(
+    return /* @__PURE__ */ import_react6.default.createElement("div", { className: "App" }, /* @__PURE__ */ import_react6.default.createElement("header", { className: "App-header" }, /* @__PURE__ */ import_react6.default.createElement("h1", null, "Live Seam Carving Demo")), /* @__PURE__ */ import_react6.default.createElement("main", { className: "App-main" }, /* @__PURE__ */ import_react6.default.createElement("div", { className: "left-panel" }, /* @__PURE__ */ import_react6.default.createElement(ImageSelector_default, { onSelect: handleImageSelect }), /* @__PURE__ */ import_react6.default.createElement(
       Controls_default,
       {
         config,
         setConfig,
         onImageUpload: handleImageUpload
       }
-    )), /* @__PURE__ */ import_react5.default.createElement("div", { className: "main-content" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "seam-container-resizable" }, imageToDisplay && /* @__PURE__ */ import_react5.default.createElement(
+    )), /* @__PURE__ */ import_react6.default.createElement("div", { className: "main-content" }, /* @__PURE__ */ import_react6.default.createElement("div", { className: "seam-container-resizable" }, imageToDisplay && /* @__PURE__ */ import_react6.default.createElement(
       Seam_default,
       {
         src: imageToDisplay,
         showSeams: config.showSeams,
+        showEnergyMap: config.showEnergyMap,
         scaleDown: config.scaleDown,
         scaleUp: config.scaleUp,
         seamMode: config.seamMode
@@ -23718,7 +23758,7 @@
   // src/index.jsx
   var root = import_client.default.createRoot(document.getElementById("root"));
   root.render(
-    /* @__PURE__ */ import_react6.default.createElement(import_react6.default.StrictMode, null, /* @__PURE__ */ import_react6.default.createElement(App_default, null))
+    /* @__PURE__ */ import_react7.default.createElement(import_react7.default.StrictMode, null, /* @__PURE__ */ import_react7.default.createElement(App_default, null))
   );
 })();
 /*! Bundled license information:
