@@ -11,8 +11,16 @@ export function deleteArrayIndices<T extends TypedArray>(
 
   let resultOffset = 0;
   let sourceStart = 0;
+  let lastIndex = -1;
 
   for (const deleteIndex of uniqueSortedIndicesToRemove) {
+    if (lastIndex === deleteIndex) {
+      throw new Error('[deleteArrayIndices]: Duplicate index detected');
+    }
+    if (lastIndex > deleteIndex) {
+      throw new Error('[deleteArrayIndices]: Indices are not sorted');
+    }
+
     const chunkSize = deleteIndex - sourceStart;
 
     if (chunkSize > 0) {
@@ -21,6 +29,7 @@ export function deleteArrayIndices<T extends TypedArray>(
     }
 
     sourceStart = deleteIndex + elementsPerRemoval;
+    lastIndex = deleteIndex;
   }
 
   if (sourceStart < array.length) {
@@ -28,35 +37,4 @@ export function deleteArrayIndices<T extends TypedArray>(
   }
 
   return result;
-}
-
-if (true) {
-  console.log('Starting performance test for deleteArrayIndices');
-
-  const size = 10;
-  console.log(`Generating ${size.toLocaleString()} random elements...`);
-  const testArray = new Uint32Array(size);
-  for (let i = 0; i < size; i++) {
-    testArray[i] = Math.floor(Math.random() * 1000000);
-  }
-
-  const indicesToRemoveCount = 6;
-  console.log(`Generating ${indicesToRemoveCount.toLocaleString()} indices to remove...`);
-  const indicesToRemove = new Set<number>();
-  while (indicesToRemove.size < indicesToRemoveCount) {
-    indicesToRemove.add(Math.floor(Math.random() * size));
-  }
-  const sortedIndicesToRemove = Array.from(indicesToRemove).sort((a, b) => a - b);
-
-  console.log('Running deleteArrayIndices...');
-  const startTime = performance.now();
-  const result = deleteArrayIndices(testArray, sortedIndicesToRemove);
-  const endTime = performance.now();
-
-  const elapsedMs = endTime - startTime;
-  console.log(`Operation completed in ${elapsedMs.toFixed(2)}ms`);
-  console.log(
-    `Removed ${indicesToRemoveCount.toLocaleString()} elements from array of ${size.toLocaleString()}`
-  );
-  console.log(`Result array length: ${result.length.toLocaleString()}`);
 }
