@@ -1,7 +1,5 @@
 import type { Tagged } from 'type-fest';
 
-export type URLString = Tagged<string, 'urlString'>;
-
 export type SeamDirection = 'horizontal' | 'vertical';
 export type SeamDirectionWithBoth = SeamDirection | 'both';
 
@@ -29,6 +27,8 @@ export type SeamData = {
   stepSize: number;
   mergeSize: number;
 };
+
+export type GeneratorType = 'random' | 'precise' | 'cached';
 
 // export interface SeamGeneratorConstructor {
 //   new (imageData: ImageData): SeamGenerator;

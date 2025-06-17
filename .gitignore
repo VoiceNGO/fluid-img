@@ -1,1 +1,7 @@
 node_modules
+dist
+.vite
+*.local
+.DS_Store
+docs
+.cursorrules
