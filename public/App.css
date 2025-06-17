@@ -43,7 +43,8 @@
   height: 100%;
   margin: 0;
   border: 2px dashed #ccc;
-  resize: horizontal;
+  box-sizing: border-box;
+  resize: both;
   overflow: auto;
   display: flex;
   justify-content: flex-start;
@@ -86,7 +87,7 @@
   text-align: left;
 }
 
-.control-group input[type="range"] {
+.control-group input[type="range"], .control-group input[type="file"] {
   width: 100%;
 }
 

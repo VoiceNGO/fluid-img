@@ -1,6 +1,6 @@
+import '../../build/web-component.minified.js';
 import React, { useState } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
-import Seam from './components/Seam.jsx';
 import Controls from './components/Controls.jsx';
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
     showEnergyMap: false,
     scaleDown: 50,
     scaleUp: 50,
-    seamMode: 'fast',
+    generator: 'random',
   });
 
   const handleImageSelect = (imageName) => {
@@ -43,13 +43,13 @@ function App() {
         <div className="main-content">
           <div className="seam-container-resizable">
             {imageToDisplay && (
-              <Seam
+              <img-responsive
                 src={imageToDisplay}
                 showSeams={config.showSeams}
                 showEnergyMap={config.showEnergyMap}
                 scaleDown={config.scaleDown}
                 scaleUp={config.scaleUp}
-                seamMode={config.seamMode}
+                generator={config.generator}
               />
             )}
           </div>

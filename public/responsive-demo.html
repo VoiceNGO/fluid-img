@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Image Demo</title>
+    <script src="web-component.minified.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+        img-responsive {
+            display: block; /* Ensure it takes full width */
+            margin-bottom: 20px; /* Space between images */
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Rotate your device or resize your browser</h1>
+
+    <img-responsive src="./images/Broadway_tower.jpg" height="300" width="100%"></img-responsive>
+    <img-responsive src="./images/dogs-on-beach.jpg" height="300" width="100%"></img-responsive>
+    <img-responsive src="./images/kiyomizu.jpg" height="300" width="100%"></img-responsive>
+    <img-responsive src="./images/neuschwanstein.jpg" height="300" width="100%"></img-responsive>
+</body>
+</html>

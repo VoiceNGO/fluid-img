@@ -59,20 +59,20 @@ function Controls({ config, setConfig, onImageUpload }) {
             </label>
             <div className="toggle-switch">
               <button
-                className={config.seamMode === 'fast' ? 'active' : ''}
-                onClick={() => handleConfigChange('seamMode', 'fast')}
+                className={config.generator === 'random' ? 'active' : ''}
+                onClick={() => handleConfigChange('generator', 'random')}
               >
                 Fast
               </button>
               <button
-                className={config.seamMode === 'accurate' ? 'active' : ''}
-                onClick={() => handleConfigChange('seamMode', 'accurate')}
+                className={config.generator === 'full' ? 'active' : ''}
+                onClick={() => handleConfigChange('generator', 'full')}
               >
                 Accurate
               </button>
               <button
-                className={config.seamMode === 'cached' ? 'active' : ''}
-                onClick={() => handleConfigChange('seamMode', 'cached')}
+                className={config.generator === 'cached' ? 'active' : ''}
+                onClick={() => handleConfigChange('generator', 'cached')}
               >
                 Cached
               </button>

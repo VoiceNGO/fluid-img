@@ -7,10 +7,12 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "esbuild": "^0.20.2"
+    "esbuild": "^0.20.2",
+    "express": "^5.1.0"
   },
   "scripts": {
-    "build": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment"
+    "build": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment",
+    "watch": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment --watch"
   },
   "eslintConfig": {
     "extends": [

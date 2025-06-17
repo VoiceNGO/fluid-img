@@ -1,3 +1,4 @@
+"use strict";
 (() => {
   var __create = Object.create;
   var __defProp = Object.defineProperty;
@@ -2383,9 +2384,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React8 = require_react();
+          var React7 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React8.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3990,7 +3991,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React8.Children.forEach(props.children, function(child) {
+                  React7.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23552,15 +23553,1597 @@
     }
   });
 
+  // node_modules/react/cjs/react-jsx-runtime.development.js
+  var require_react_jsx_runtime_development = __commonJS({
+    "node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
+      "use strict";
+      if (true) {
+        (function() {
+          "use strict";
+          var React7 = require_react();
+          var REACT_ELEMENT_TYPE = Symbol.for("react.element");
+          var REACT_PORTAL_TYPE = Symbol.for("react.portal");
+          var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+          var REACT_STRICT_MODE_TYPE = Symbol.for("react.strict_mode");
+          var REACT_PROFILER_TYPE = Symbol.for("react.profiler");
+          var REACT_PROVIDER_TYPE = Symbol.for("react.provider");
+          var REACT_CONTEXT_TYPE = Symbol.for("react.context");
+          var REACT_FORWARD_REF_TYPE = Symbol.for("react.forward_ref");
+          var REACT_SUSPENSE_TYPE = Symbol.for("react.suspense");
+          var REACT_SUSPENSE_LIST_TYPE = Symbol.for("react.suspense_list");
+          var REACT_MEMO_TYPE = Symbol.for("react.memo");
+          var REACT_LAZY_TYPE = Symbol.for("react.lazy");
+          var REACT_OFFSCREEN_TYPE = Symbol.for("react.offscreen");
+          var MAYBE_ITERATOR_SYMBOL = Symbol.iterator;
+          var FAUX_ITERATOR_SYMBOL = "@@iterator";
+          function getIteratorFn(maybeIterable) {
+            if (maybeIterable === null || typeof maybeIterable !== "object") {
+              return null;
+            }
+            var maybeIterator = MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL];
+            if (typeof maybeIterator === "function") {
+              return maybeIterator;
+            }
+            return null;
+          }
+          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          function error(format) {
+            {
+              {
+                for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+                  args[_key2 - 1] = arguments[_key2];
+                }
+                printWarning("error", format, args);
+              }
+            }
+          }
+          function printWarning(level, format, args) {
+            {
+              var ReactDebugCurrentFrame2 = ReactSharedInternals.ReactDebugCurrentFrame;
+              var stack = ReactDebugCurrentFrame2.getStackAddendum();
+              if (stack !== "") {
+                format += "%s";
+                args = args.concat([stack]);
+              }
+              var argsWithFormat = args.map(function(item) {
+                return String(item);
+              });
+              argsWithFormat.unshift("Warning: " + format);
+              Function.prototype.apply.call(console[level], console, argsWithFormat);
+            }
+          }
+          var enableScopeAPI = false;
+          var enableCacheElement = false;
+          var enableTransitionTracing = false;
+          var enableLegacyHidden = false;
+          var enableDebugTracing = false;
+          var REACT_MODULE_REFERENCE;
+          {
+            REACT_MODULE_REFERENCE = Symbol.for("react.module.reference");
+          }
+          function isValidElementType(type) {
+            if (typeof type === "string" || typeof type === "function") {
+              return true;
+            }
+            if (type === REACT_FRAGMENT_TYPE || type === REACT_PROFILER_TYPE || enableDebugTracing || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || enableLegacyHidden || type === REACT_OFFSCREEN_TYPE || enableScopeAPI || enableCacheElement || enableTransitionTracing) {
+              return true;
+            }
+            if (typeof type === "object" && type !== null) {
+              if (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || // This needs to include all possible module reference object
+              // types supported by any Flight configuration anywhere since
+              // we don't know which Flight build this will end up being used
+              // with.
+              type.$$typeof === REACT_MODULE_REFERENCE || type.getModuleId !== void 0) {
+                return true;
+              }
+            }
+            return false;
+          }
+          function getWrappedName(outerType, innerType, wrapperName) {
+            var displayName = outerType.displayName;
+            if (displayName) {
+              return displayName;
+            }
+            var functionName = innerType.displayName || innerType.name || "";
+            return functionName !== "" ? wrapperName + "(" + functionName + ")" : wrapperName;
+          }
+          function getContextName(type) {
+            return type.displayName || "Context";
+          }
+          function getComponentNameFromType(type) {
+            if (type == null) {
+              return null;
+            }
+            {
+              if (typeof type.tag === "number") {
+                error("Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue.");
+              }
+            }
+            if (typeof type === "function") {
+              return type.displayName || type.name || null;
+            }
+            if (typeof type === "string") {
+              return type;
+            }
+            switch (type) {
+              case REACT_FRAGMENT_TYPE:
+                return "Fragment";
+              case REACT_PORTAL_TYPE:
+                return "Portal";
+              case REACT_PROFILER_TYPE:
+                return "Profiler";
+              case REACT_STRICT_MODE_TYPE:
+                return "StrictMode";
+              case REACT_SUSPENSE_TYPE:
+                return "Suspense";
+              case REACT_SUSPENSE_LIST_TYPE:
+                return "SuspenseList";
+            }
+            if (typeof type === "object") {
+              switch (type.$$typeof) {
+                case REACT_CONTEXT_TYPE:
+                  var context = type;
+                  return getContextName(context) + ".Consumer";
+                case REACT_PROVIDER_TYPE:
+                  var provider = type;
+                  return getContextName(provider._context) + ".Provider";
+                case REACT_FORWARD_REF_TYPE:
+                  return getWrappedName(type, type.render, "ForwardRef");
+                case REACT_MEMO_TYPE:
+                  var outerName = type.displayName || null;
+                  if (outerName !== null) {
+                    return outerName;
+                  }
+                  return getComponentNameFromType(type.type) || "Memo";
+                case REACT_LAZY_TYPE: {
+                  var lazyComponent = type;
+                  var payload = lazyComponent._payload;
+                  var init = lazyComponent._init;
+                  try {
+                    return getComponentNameFromType(init(payload));
+                  } catch (x) {
+                    return null;
+                  }
+                }
+              }
+            }
+            return null;
+          }
+          var assign = Object.assign;
+          var disabledDepth = 0;
+          var prevLog;
+          var prevInfo;
+          var prevWarn;
+          var prevError;
+          var prevGroup;
+          var prevGroupCollapsed;
+          var prevGroupEnd;
+          function disabledLog() {
+          }
+          disabledLog.__reactDisabledLog = true;
+          function disableLogs() {
+            {
+              if (disabledDepth === 0) {
+                prevLog = console.log;
+                prevInfo = console.info;
+                prevWarn = console.warn;
+                prevError = console.error;
+                prevGroup = console.group;
+                prevGroupCollapsed = console.groupCollapsed;
+                prevGroupEnd = console.groupEnd;
+                var props = {
+                  configurable: true,
+                  enumerable: true,
+                  value: disabledLog,
+                  writable: true
+                };
+                Object.defineProperties(console, {
+                  info: props,
+                  log: props,
+                  warn: props,
+                  error: props,
+                  group: props,
+                  groupCollapsed: props,
+                  groupEnd: props
+                });
+              }
+              disabledDepth++;
+            }
+          }
+          function reenableLogs() {
+            {
+              disabledDepth--;
+              if (disabledDepth === 0) {
+                var props = {
+                  configurable: true,
+                  enumerable: true,
+                  writable: true
+                };
+                Object.defineProperties(console, {
+                  log: assign({}, props, {
+                    value: prevLog
+                  }),
+                  info: assign({}, props, {
+                    value: prevInfo
+                  }),
+                  warn: assign({}, props, {
+                    value: prevWarn
+                  }),
+                  error: assign({}, props, {
+                    value: prevError
+                  }),
+                  group: assign({}, props, {
+                    value: prevGroup
+                  }),
+                  groupCollapsed: assign({}, props, {
+                    value: prevGroupCollapsed
+                  }),
+                  groupEnd: assign({}, props, {
+                    value: prevGroupEnd
+                  })
+                });
+              }
+              if (disabledDepth < 0) {
+                error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
+              }
+            }
+          }
+          var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
+          var prefix;
+          function describeBuiltInComponentFrame(name, source, ownerFn) {
+            {
+              if (prefix === void 0) {
+                try {
+                  throw Error();
+                } catch (x) {
+                  var match = x.stack.trim().match(/\n( *(at )?)/);
+                  prefix = match && match[1] || "";
+                }
+              }
+              return "\n" + prefix + name;
+            }
+          }
+          var reentry = false;
+          var componentFrameCache;
+          {
+            var PossiblyWeakMap = typeof WeakMap === "function" ? WeakMap : Map;
+            componentFrameCache = new PossiblyWeakMap();
+          }
+          function describeNativeComponentFrame(fn, construct) {
+            if (!fn || reentry) {
+              return "";
+            }
+            {
+              var frame = componentFrameCache.get(fn);
+              if (frame !== void 0) {
+                return frame;
+              }
+            }
+            var control;
+            reentry = true;
+            var previousPrepareStackTrace = Error.prepareStackTrace;
+            Error.prepareStackTrace = void 0;
+            var previousDispatcher;
+            {
+              previousDispatcher = ReactCurrentDispatcher.current;
+              ReactCurrentDispatcher.current = null;
+              disableLogs();
+            }
+            try {
+              if (construct) {
+                var Fake = function() {
+                  throw Error();
+                };
+                Object.defineProperty(Fake.prototype, "props", {
+                  set: function() {
+                    throw Error();
+                  }
+                });
+                if (typeof Reflect === "object" && Reflect.construct) {
+                  try {
+                    Reflect.construct(Fake, []);
+                  } catch (x) {
+                    control = x;
+                  }
+                  Reflect.construct(fn, [], Fake);
+                } else {
+                  try {
+                    Fake.call();
+                  } catch (x) {
+                    control = x;
+                  }
+                  fn.call(Fake.prototype);
+                }
+              } else {
+                try {
+                  throw Error();
+                } catch (x) {
+                  control = x;
+                }
+                fn();
+              }
+            } catch (sample) {
+              if (sample && control && typeof sample.stack === "string") {
+                var sampleLines = sample.stack.split("\n");
+                var controlLines = control.stack.split("\n");
+                var s = sampleLines.length - 1;
+                var c = controlLines.length - 1;
+                while (s >= 1 && c >= 0 && sampleLines[s] !== controlLines[c]) {
+                  c--;
+                }
+                for (; s >= 1 && c >= 0; s--, c--) {
+                  if (sampleLines[s] !== controlLines[c]) {
+                    if (s !== 1 || c !== 1) {
+                      do {
+                        s--;
+                        c--;
+                        if (c < 0 || sampleLines[s] !== controlLines[c]) {
+                          var _frame = "\n" + sampleLines[s].replace(" at new ", " at ");
+                          if (fn.displayName && _frame.includes("<anonymous>")) {
+                            _frame = _frame.replace("<anonymous>", fn.displayName);
+                          }
+                          {
+                            if (typeof fn === "function") {
+                              componentFrameCache.set(fn, _frame);
+                            }
+                          }
+                          return _frame;
+                        }
+                      } while (s >= 1 && c >= 0);
+                    }
+                    break;
+                  }
+                }
+              }
+            } finally {
+              reentry = false;
+              {
+                ReactCurrentDispatcher.current = previousDispatcher;
+                reenableLogs();
+              }
+              Error.prepareStackTrace = previousPrepareStackTrace;
+            }
+            var name = fn ? fn.displayName || fn.name : "";
+            var syntheticFrame = name ? describeBuiltInComponentFrame(name) : "";
+            {
+              if (typeof fn === "function") {
+                componentFrameCache.set(fn, syntheticFrame);
+              }
+            }
+            return syntheticFrame;
+          }
+          function describeFunctionComponentFrame(fn, source, ownerFn) {
+            {
+              return describeNativeComponentFrame(fn, false);
+            }
+          }
+          function shouldConstruct(Component) {
+            var prototype = Component.prototype;
+            return !!(prototype && prototype.isReactComponent);
+          }
+          function describeUnknownElementTypeFrameInDEV(type, source, ownerFn) {
+            if (type == null) {
+              return "";
+            }
+            if (typeof type === "function") {
+              {
+                return describeNativeComponentFrame(type, shouldConstruct(type));
+              }
+            }
+            if (typeof type === "string") {
+              return describeBuiltInComponentFrame(type);
+            }
+            switch (type) {
+              case REACT_SUSPENSE_TYPE:
+                return describeBuiltInComponentFrame("Suspense");
+              case REACT_SUSPENSE_LIST_TYPE:
+                return describeBuiltInComponentFrame("SuspenseList");
+            }
+            if (typeof type === "object") {
+              switch (type.$$typeof) {
+                case REACT_FORWARD_REF_TYPE:
+                  return describeFunctionComponentFrame(type.render);
+                case REACT_MEMO_TYPE:
+                  return describeUnknownElementTypeFrameInDEV(type.type, source, ownerFn);
+                case REACT_LAZY_TYPE: {
+                  var lazyComponent = type;
+                  var payload = lazyComponent._payload;
+                  var init = lazyComponent._init;
+                  try {
+                    return describeUnknownElementTypeFrameInDEV(init(payload), source, ownerFn);
+                  } catch (x) {
+                  }
+                }
+              }
+            }
+            return "";
+          }
+          var hasOwnProperty = Object.prototype.hasOwnProperty;
+          var loggedTypeFailures = {};
+          var ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
+          function setCurrentlyValidatingElement(element) {
+            {
+              if (element) {
+                var owner = element._owner;
+                var stack = describeUnknownElementTypeFrameInDEV(element.type, element._source, owner ? owner.type : null);
+                ReactDebugCurrentFrame.setExtraStackFrame(stack);
+              } else {
+                ReactDebugCurrentFrame.setExtraStackFrame(null);
+              }
+            }
+          }
+          function checkPropTypes(typeSpecs, values, location, componentName, element) {
+            {
+              var has = Function.call.bind(hasOwnProperty);
+              for (var typeSpecName in typeSpecs) {
+                if (has(typeSpecs, typeSpecName)) {
+                  var error$1 = void 0;
+                  try {
+                    if (typeof typeSpecs[typeSpecName] !== "function") {
+                      var err = Error((componentName || "React class") + ": " + location + " type `" + typeSpecName + "` is invalid; it must be a function, usually from the `prop-types` package, but received `" + typeof typeSpecs[typeSpecName] + "`.This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.");
+                      err.name = "Invariant Violation";
+                      throw err;
+                    }
+                    error$1 = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED");
+                  } catch (ex) {
+                    error$1 = ex;
+                  }
+                  if (error$1 && !(error$1 instanceof Error)) {
+                    setCurrentlyValidatingElement(element);
+                    error("%s: type specification of %s `%s` is invalid; the type checker function must return `null` or an `Error` but returned a %s. You may have forgotten to pass an argument to the type checker creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and shape all require an argument).", componentName || "React class", location, typeSpecName, typeof error$1);
+                    setCurrentlyValidatingElement(null);
+                  }
+                  if (error$1 instanceof Error && !(error$1.message in loggedTypeFailures)) {
+                    loggedTypeFailures[error$1.message] = true;
+                    setCurrentlyValidatingElement(element);
+                    error("Failed %s type: %s", location, error$1.message);
+                    setCurrentlyValidatingElement(null);
+                  }
+                }
+              }
+            }
+          }
+          var isArrayImpl = Array.isArray;
+          function isArray(a) {
+            return isArrayImpl(a);
+          }
+          function typeName(value) {
+            {
+              var hasToStringTag = typeof Symbol === "function" && Symbol.toStringTag;
+              var type = hasToStringTag && value[Symbol.toStringTag] || value.constructor.name || "Object";
+              return type;
+            }
+          }
+          function willCoercionThrow(value) {
+            {
+              try {
+                testStringCoercion(value);
+                return false;
+              } catch (e) {
+                return true;
+              }
+            }
+          }
+          function testStringCoercion(value) {
+            return "" + value;
+          }
+          function checkKeyStringCoercion(value) {
+            {
+              if (willCoercionThrow(value)) {
+                error("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", typeName(value));
+                return testStringCoercion(value);
+              }
+            }
+          }
+          var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
+          var RESERVED_PROPS = {
+            key: true,
+            ref: true,
+            __self: true,
+            __source: true
+          };
+          var specialPropKeyWarningShown;
+          var specialPropRefWarningShown;
+          var didWarnAboutStringRefs;
+          {
+            didWarnAboutStringRefs = {};
+          }
+          function hasValidRef(config) {
+            {
+              if (hasOwnProperty.call(config, "ref")) {
+                var getter = Object.getOwnPropertyDescriptor(config, "ref").get;
+                if (getter && getter.isReactWarning) {
+                  return false;
+                }
+              }
+            }
+            return config.ref !== void 0;
+          }
+          function hasValidKey(config) {
+            {
+              if (hasOwnProperty.call(config, "key")) {
+                var getter = Object.getOwnPropertyDescriptor(config, "key").get;
+                if (getter && getter.isReactWarning) {
+                  return false;
+                }
+              }
+            }
+            return config.key !== void 0;
+          }
+          function warnIfStringRefCannotBeAutoConverted(config, self) {
+            {
+              if (typeof config.ref === "string" && ReactCurrentOwner.current && self && ReactCurrentOwner.current.stateNode !== self) {
+                var componentName = getComponentNameFromType(ReactCurrentOwner.current.type);
+                if (!didWarnAboutStringRefs[componentName]) {
+                  error('Component "%s" contains the string ref "%s". Support for string refs will be removed in a future major release. This case cannot be automatically converted to an arrow function. We ask you to manually fix this case by using useRef() or createRef() instead. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-string-ref', getComponentNameFromType(ReactCurrentOwner.current.type), config.ref);
+                  didWarnAboutStringRefs[componentName] = true;
+                }
+              }
+            }
+          }
+          function defineKeyPropWarningGetter(props, displayName) {
+            {
+              var warnAboutAccessingKey = function() {
+                if (!specialPropKeyWarningShown) {
+                  specialPropKeyWarningShown = true;
+                  error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", displayName);
+                }
+              };
+              warnAboutAccessingKey.isReactWarning = true;
+              Object.defineProperty(props, "key", {
+                get: warnAboutAccessingKey,
+                configurable: true
+              });
+            }
+          }
+          function defineRefPropWarningGetter(props, displayName) {
+            {
+              var warnAboutAccessingRef = function() {
+                if (!specialPropRefWarningShown) {
+                  specialPropRefWarningShown = true;
+                  error("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", displayName);
+                }
+              };
+              warnAboutAccessingRef.isReactWarning = true;
+              Object.defineProperty(props, "ref", {
+                get: warnAboutAccessingRef,
+                configurable: true
+              });
+            }
+          }
+          var ReactElement = function(type, key, ref, self, source, owner, props) {
+            var element = {
+              // This tag allows us to uniquely identify this as a React Element
+              $$typeof: REACT_ELEMENT_TYPE,
+              // Built-in properties that belong on the element
+              type,
+              key,
+              ref,
+              props,
+              // Record the component responsible for creating this element.
+              _owner: owner
+            };
+            {
+              element._store = {};
+              Object.defineProperty(element._store, "validated", {
+                configurable: false,
+                enumerable: false,
+                writable: true,
+                value: false
+              });
+              Object.defineProperty(element, "_self", {
+                configurable: false,
+                enumerable: false,
+                writable: false,
+                value: self
+              });
+              Object.defineProperty(element, "_source", {
+                configurable: false,
+                enumerable: false,
+                writable: false,
+                value: source
+              });
+              if (Object.freeze) {
+                Object.freeze(element.props);
+                Object.freeze(element);
+              }
+            }
+            return element;
+          };
+          function jsxDEV(type, config, maybeKey, source, self) {
+            {
+              var propName;
+              var props = {};
+              var key = null;
+              var ref = null;
+              if (maybeKey !== void 0) {
+                {
+                  checkKeyStringCoercion(maybeKey);
+                }
+                key = "" + maybeKey;
+              }
+              if (hasValidKey(config)) {
+                {
+                  checkKeyStringCoercion(config.key);
+                }
+                key = "" + config.key;
+              }
+              if (hasValidRef(config)) {
+                ref = config.ref;
+                warnIfStringRefCannotBeAutoConverted(config, self);
+              }
+              for (propName in config) {
+                if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {
+                  props[propName] = config[propName];
+                }
+              }
+              if (type && type.defaultProps) {
+                var defaultProps = type.defaultProps;
+                for (propName in defaultProps) {
+                  if (props[propName] === void 0) {
+                    props[propName] = defaultProps[propName];
+                  }
+                }
+              }
+              if (key || ref) {
+                var displayName = typeof type === "function" ? type.displayName || type.name || "Unknown" : type;
+                if (key) {
+                  defineKeyPropWarningGetter(props, displayName);
+                }
+                if (ref) {
+                  defineRefPropWarningGetter(props, displayName);
+                }
+              }
+              return ReactElement(type, key, ref, self, source, ReactCurrentOwner.current, props);
+            }
+          }
+          var ReactCurrentOwner$1 = ReactSharedInternals.ReactCurrentOwner;
+          var ReactDebugCurrentFrame$1 = ReactSharedInternals.ReactDebugCurrentFrame;
+          function setCurrentlyValidatingElement$1(element) {
+            {
+              if (element) {
+                var owner = element._owner;
+                var stack = describeUnknownElementTypeFrameInDEV(element.type, element._source, owner ? owner.type : null);
+                ReactDebugCurrentFrame$1.setExtraStackFrame(stack);
+              } else {
+                ReactDebugCurrentFrame$1.setExtraStackFrame(null);
+              }
+            }
+          }
+          var propTypesMisspellWarningShown;
+          {
+            propTypesMisspellWarningShown = false;
+          }
+          function isValidElement(object) {
+            {
+              return typeof object === "object" && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+            }
+          }
+          function getDeclarationErrorAddendum() {
+            {
+              if (ReactCurrentOwner$1.current) {
+                var name = getComponentNameFromType(ReactCurrentOwner$1.current.type);
+                if (name) {
+                  return "\n\nCheck the render method of `" + name + "`.";
+                }
+              }
+              return "";
+            }
+          }
+          function getSourceInfoErrorAddendum(source) {
+            {
+              if (source !== void 0) {
+                var fileName = source.fileName.replace(/^.*[\\\/]/, "");
+                var lineNumber = source.lineNumber;
+                return "\n\nCheck your code at " + fileName + ":" + lineNumber + ".";
+              }
+              return "";
+            }
+          }
+          var ownerHasKeyUseWarning = {};
+          function getCurrentComponentErrorInfo(parentType) {
+            {
+              var info = getDeclarationErrorAddendum();
+              if (!info) {
+                var parentName = typeof parentType === "string" ? parentType : parentType.displayName || parentType.name;
+                if (parentName) {
+                  info = "\n\nCheck the top-level render call using <" + parentName + ">.";
+                }
+              }
+              return info;
+            }
+          }
+          function validateExplicitKey(element, parentType) {
+            {
+              if (!element._store || element._store.validated || element.key != null) {
+                return;
+              }
+              element._store.validated = true;
+              var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
+              if (ownerHasKeyUseWarning[currentComponentErrorInfo]) {
+                return;
+              }
+              ownerHasKeyUseWarning[currentComponentErrorInfo] = true;
+              var childOwner = "";
+              if (element && element._owner && element._owner !== ReactCurrentOwner$1.current) {
+                childOwner = " It was passed a child from " + getComponentNameFromType(element._owner.type) + ".";
+              }
+              setCurrentlyValidatingElement$1(element);
+              error('Each child in a list should have a unique "key" prop.%s%s See https://reactjs.org/link/warning-keys for more information.', currentComponentErrorInfo, childOwner);
+              setCurrentlyValidatingElement$1(null);
+            }
+          }
+          function validateChildKeys(node, parentType) {
+            {
+              if (typeof node !== "object") {
+                return;
+              }
+              if (isArray(node)) {
+                for (var i = 0; i < node.length; i++) {
+                  var child = node[i];
+                  if (isValidElement(child)) {
+                    validateExplicitKey(child, parentType);
+                  }
+                }
+              } else if (isValidElement(node)) {
+                if (node._store) {
+                  node._store.validated = true;
+                }
+              } else if (node) {
+                var iteratorFn = getIteratorFn(node);
+                if (typeof iteratorFn === "function") {
+                  if (iteratorFn !== node.entries) {
+                    var iterator = iteratorFn.call(node);
+                    var step;
+                    while (!(step = iterator.next()).done) {
+                      if (isValidElement(step.value)) {
+                        validateExplicitKey(step.value, parentType);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          function validatePropTypes(element) {
+            {
+              var type = element.type;
+              if (type === null || type === void 0 || typeof type === "string") {
+                return;
+              }
+              var propTypes;
+              if (typeof type === "function") {
+                propTypes = type.propTypes;
+              } else if (typeof type === "object" && (type.$$typeof === REACT_FORWARD_REF_TYPE || // Note: Memo only checks outer props here.
+              // Inner props are checked in the reconciler.
+              type.$$typeof === REACT_MEMO_TYPE)) {
+                propTypes = type.propTypes;
+              } else {
+                return;
+              }
+              if (propTypes) {
+                var name = getComponentNameFromType(type);
+                checkPropTypes(propTypes, element.props, "prop", name, element);
+              } else if (type.PropTypes !== void 0 && !propTypesMisspellWarningShown) {
+                propTypesMisspellWarningShown = true;
+                var _name = getComponentNameFromType(type);
+                error("Component %s declared `PropTypes` instead of `propTypes`. Did you misspell the property assignment?", _name || "Unknown");
+              }
+              if (typeof type.getDefaultProps === "function" && !type.getDefaultProps.isReactClassApproved) {
+                error("getDefaultProps is only used on classic React.createClass definitions. Use a static property named `defaultProps` instead.");
+              }
+            }
+          }
+          function validateFragmentProps(fragment) {
+            {
+              var keys = Object.keys(fragment.props);
+              for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (key !== "children" && key !== "key") {
+                  setCurrentlyValidatingElement$1(fragment);
+                  error("Invalid prop `%s` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.", key);
+                  setCurrentlyValidatingElement$1(null);
+                  break;
+                }
+              }
+              if (fragment.ref !== null) {
+                setCurrentlyValidatingElement$1(fragment);
+                error("Invalid attribute `ref` supplied to `React.Fragment`.");
+                setCurrentlyValidatingElement$1(null);
+              }
+            }
+          }
+          var didWarnAboutKeySpread = {};
+          function jsxWithValidation(type, props, key, isStaticChildren, source, self) {
+            {
+              var validType = isValidElementType(type);
+              if (!validType) {
+                var info = "";
+                if (type === void 0 || typeof type === "object" && type !== null && Object.keys(type).length === 0) {
+                  info += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.";
+                }
+                var sourceInfo = getSourceInfoErrorAddendum(source);
+                if (sourceInfo) {
+                  info += sourceInfo;
+                } else {
+                  info += getDeclarationErrorAddendum();
+                }
+                var typeString;
+                if (type === null) {
+                  typeString = "null";
+                } else if (isArray(type)) {
+                  typeString = "array";
+                } else if (type !== void 0 && type.$$typeof === REACT_ELEMENT_TYPE) {
+                  typeString = "<" + (getComponentNameFromType(type.type) || "Unknown") + " />";
+                  info = " Did you accidentally export a JSX literal instead of a component?";
+                } else {
+                  typeString = typeof type;
+                }
+                error("React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s", typeString, info);
+              }
+              var element = jsxDEV(type, props, key, source, self);
+              if (element == null) {
+                return element;
+              }
+              if (validType) {
+                var children = props.children;
+                if (children !== void 0) {
+                  if (isStaticChildren) {
+                    if (isArray(children)) {
+                      for (var i = 0; i < children.length; i++) {
+                        validateChildKeys(children[i], type);
+                      }
+                      if (Object.freeze) {
+                        Object.freeze(children);
+                      }
+                    } else {
+                      error("React.jsx: Static children should always be an array. You are likely explicitly calling React.jsxs or React.jsxDEV. Use the Babel transform instead.");
+                    }
+                  } else {
+                    validateChildKeys(children, type);
+                  }
+                }
+              }
+              {
+                if (hasOwnProperty.call(props, "key")) {
+                  var componentName = getComponentNameFromType(type);
+                  var keys = Object.keys(props).filter(function(k) {
+                    return k !== "key";
+                  });
+                  var beforeExample = keys.length > 0 ? "{key: someKey, " + keys.join(": ..., ") + ": ...}" : "{key: someKey}";
+                  if (!didWarnAboutKeySpread[componentName + beforeExample]) {
+                    var afterExample = keys.length > 0 ? "{" + keys.join(": ..., ") + ": ...}" : "{}";
+                    error('A props object containing a "key" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />', beforeExample, componentName, afterExample, componentName);
+                    didWarnAboutKeySpread[componentName + beforeExample] = true;
+                  }
+                }
+              }
+              if (type === REACT_FRAGMENT_TYPE) {
+                validateFragmentProps(element);
+              } else {
+                validatePropTypes(element);
+              }
+              return element;
+            }
+          }
+          function jsxWithValidationStatic(type, props, key) {
+            {
+              return jsxWithValidation(type, props, key, true);
+            }
+          }
+          function jsxWithValidationDynamic(type, props, key) {
+            {
+              return jsxWithValidation(type, props, key, false);
+            }
+          }
+          var jsx7 = jsxWithValidationDynamic;
+          var jsxs5 = jsxWithValidationStatic;
+          exports.Fragment = REACT_FRAGMENT_TYPE;
+          exports.jsx = jsx7;
+          exports.jsxs = jsxs5;
+        })();
+      }
+    }
+  });
+
+  // node_modules/react/jsx-runtime.js
+  var require_jsx_runtime = __commonJS({
+    "node_modules/react/jsx-runtime.js"(exports, module) {
+      "use strict";
+      if (false) {
+        module.exports = null;
+      } else {
+        module.exports = require_react_jsx_runtime_development();
+      }
+    }
+  });
+
   // src/index.jsx
-  var import_react7 = __toESM(require_react());
+  var import_react6 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
+  // ../build/web-component.minified.js
+  (() => {
+    var EvenWidthImage = class extends Image {
+      #rotate;
+      constructor(options = {}) {
+        super();
+        this.crossOrigin = `Anonymous`;
+        this.#rotate = !!options.rotate;
+      }
+      get width() {
+        const originalWidth = this.#rotate ? super.height : super.width;
+        return originalWidth - originalWidth % 2;
+      }
+      get height() {
+        return this.#rotate ? super.width : super.height;
+      }
+    };
+    var ImageLoader = class {
+      #src;
+      #imgPromise;
+      #imageDataPromise;
+      #rotate;
+      constructor(src, options = {}) {
+        this.#src = src;
+        this.#rotate = options.rotate ?? false;
+        this.#imgPromise = this.#loadImage();
+        this.#imageDataPromise = this.#imgPromise.then((img) => this.#loadImageData(img));
+      }
+      #loadImage() {
+        return new Promise((resolve, reject) => {
+          const src = this.#src;
+          const img = new EvenWidthImage({ rotate: this.#rotate });
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(`Failed to load image: ${src}`);
+          img.onabort = () => reject(`Image loading aborted: ${src}`);
+          img.src = src;
+        });
+      }
+      #loadImageData(image) {
+        return new Promise((resolve) => {
+          const canvas = new OffscreenCanvas(image.width, image.height);
+          const context = canvas.getContext("2d");
+          if (this.#rotate) {
+            context.translate(image.width, 0);
+            context.rotate(Math.PI / 2);
+          }
+          context.drawImage(image, 0, 0);
+          resolve(context.getImageData(0, 0, image.width, image.height));
+        });
+      }
+      get src() {
+        return this.#src;
+      }
+      get image() {
+        return this.#imgPromise;
+      }
+      get imageData() {
+        return this.#imageDataPromise;
+      }
+    };
+    var FullGeneratorClass = class {
+      #imageLoader;
+      constructor(options) {
+        this.#imageLoader = options.imageLoader;
+      }
+      async generateSeamGrid(minSeams) {
+        return new Uint16Array();
+      }
+    };
+    var FullGenerator = true ? FullGeneratorClass : throwGeneratorClass("FullGenerator");
+    var CachedGeneratorClass = class {
+      #imageLoader;
+      constructor(options) {
+        this.#imageLoader = options.imageLoader;
+      }
+      async generateSeamGrid(minSeams) {
+        return new Uint16Array();
+      }
+    };
+    var CachedGenerator = true ? CachedGeneratorClass : throwGeneratorClass("CachedGenerator");
+    var deterministicBinaryRnd = (seed1) => (seed2) => {
+      let h = seed1 ^ seed2;
+      h ^= h >>> 16;
+      h *= 2246822507;
+      h ^= h >>> 13;
+      h *= 3266489909;
+      h ^= h >>> 16;
+      return h & 1;
+    };
+    function deleteArrayIndices(array, uniqueSortedIndicesToRemove, elementsPerRemoval = 1) {
+      const newSize = array.length - uniqueSortedIndicesToRemove.length * elementsPerRemoval;
+      const ArrayConstructor = array.constructor;
+      const result = new ArrayConstructor(newSize);
+      let resultOffset = 0;
+      let sourceStart = 0;
+      let lastIndex = -1;
+      for (const deleteIndex of uniqueSortedIndicesToRemove) {
+        if (lastIndex === deleteIndex) {
+          throw new Error("[deleteArrayIndices]: Duplicate index detected");
+        }
+        if (lastIndex > deleteIndex) {
+          throw new Error("[deleteArrayIndices]: Indices are not sorted");
+        }
+        const chunkSize = deleteIndex - sourceStart;
+        if (chunkSize > 0) {
+          result.set(array.subarray(sourceStart, deleteIndex), resultOffset);
+          resultOffset += chunkSize;
+        }
+        sourceStart = deleteIndex + elementsPerRemoval;
+        lastIndex = deleteIndex;
+      }
+      if (sourceStart < array.length) {
+        result.set(array.subarray(sourceStart), resultOffset);
+      }
+      return result;
+    }
+    function getPixelIndex(x, y, width) {
+      return (y * width + x) * 4;
+    }
+    function getGrayscale(x, y, width, data) {
+      if (x < 0 || x >= width || y < 0 || y >= Math.floor(data.length / (width * 4))) {
+        return 0;
+      }
+      const i = getPixelIndex(x, y, width);
+      return 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    }
+    var EnergyMap2D = class {
+      #data;
+      #width;
+      #height;
+      #grayscaleMap;
+      #originalIndices;
+      constructor(imageData) {
+        this.#width = imageData.width;
+        this.#height = imageData.height;
+        this.#data = new Array(this.#height);
+        this.#grayscaleMap = new Array(this.#height);
+        this.#originalIndices = new Array(this.#height);
+        this.#fillOriginalIndices();
+        this.#computeGrayscaleMap(imageData);
+        this.#computeFullEnergyMap();
+      }
+      #fillOriginalIndices() {
+        for (let y = 0; y < this.#height; y++) {
+          this.#originalIndices[y] = new Uint32Array(this.#width);
+          for (let x = 0; x < this.#width; x++) {
+            this.#originalIndices[y][x] = y * this.#width + x;
+          }
+        }
+      }
+      #computeGrayscaleMap(imageData) {
+        for (let y = 0; y < this.#height; y++) {
+          this.#grayscaleMap[y] = new Uint8Array(this.#width);
+          for (let x = 0; x < this.#width; x++) {
+            this.#grayscaleMap[y][x] = getGrayscale(x, y, this.#width, imageData.data);
+          }
+        }
+      }
+      #computeFullEnergyMap() {
+        this.#data = new Array(this.#height);
+        for (let y = 0; y < this.#height; y++) {
+          this.#data[y] = new Uint8Array(this.#width);
+          const y1 = Math.max(0, y - 1);
+          const y3 = Math.min(this.#height - 1, y + 1);
+          const prevRow = this.#grayscaleMap[y1];
+          const currentRow = this.#grayscaleMap[y];
+          const nextRow = this.#grayscaleMap[y3];
+          for (let x = 0; x < this.#width; x++) {
+            const x1 = Math.max(0, x - 1);
+            const x3 = Math.min(this.#width - 1, x + 1);
+            const gx = -prevRow[x1] + prevRow[x3] + -currentRow[x1] * 2 + currentRow[x3] * 2 + -nextRow[x1] + nextRow[x3];
+            const gy = -prevRow[x1] + -prevRow[x] * 2 + -prevRow[x3] + nextRow[x1] + nextRow[x] * 2 + nextRow[x3];
+            const totalEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
+            this.#data[y][x] = totalEnergy >> 3;
+          }
+        }
+      }
+      get width() {
+        return this.#width;
+      }
+      get height() {
+        return this.#height;
+      }
+      get energyMap() {
+        return this.#data;
+      }
+      get originalIndices() {
+        return this.#originalIndices;
+      }
+      removeSeam(xIndices) {
+        for (let y = 0; y < this.#height; y++) {
+          const xToRemove = xIndices[y];
+          this.#data[y] = deleteArrayIndices(this.#data[y], [xToRemove]);
+          this.#originalIndices[y] = deleteArrayIndices(this.#originalIndices[y], [xToRemove]);
+        }
+        this.#width--;
+        const g = (colInNewCoord, removedOriginalIndex) => colInNewCoord < removedOriginalIndex ? colInNewCoord : colInNewCoord + 1;
+        for (let y = 0; y < this.#height; y++) {
+          const removedColOrigIdx = xIndices[y];
+          const y1 = Math.max(0, y - 1);
+          const y3 = Math.min(this.#height - 1, y + 1);
+          const prevRow = this.#grayscaleMap[y1];
+          const currentRow = this.#grayscaleMap[y];
+          const nextRow = this.#grayscaleMap[y3];
+          const columnsInNewDataToUpdate = [];
+          if (removedColOrigIdx > 0) {
+            columnsInNewDataToUpdate.push(removedColOrigIdx - 1);
+          }
+          if (removedColOrigIdx < this.#width) {
+            columnsInNewDataToUpdate.push(removedColOrigIdx);
+          }
+          for (const xCurrent of columnsInNewDataToUpdate) {
+            const x1 = Math.max(0, g(xCurrent - 1, removedColOrigIdx));
+            const x3 = Math.min(this.#grayscaleMap[0].length - 1, g(xCurrent + 1, removedColOrigIdx));
+            const xCenter = g(xCurrent, removedColOrigIdx);
+            const gx = -prevRow[x1] + prevRow[x3] + -currentRow[x1] * 2 + currentRow[x3] * 2 + -nextRow[x1] + nextRow[x3];
+            const gy = -prevRow[x1] + -prevRow[xCenter] * 2 + -prevRow[x3] + nextRow[x1] + nextRow[xCenter] * 2 + nextRow[x3];
+            const totalEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
+            this.#data[y][xCurrent] = totalEnergy >> 3;
+          }
+        }
+      }
+      removeSeams(seams) {
+        if (seams.length === 0) {
+          return;
+        }
+        const numSeamsToRemove = seams.length;
+        for (let y = 0; y < this.#height; y++) {
+          const indicesToRemoveForRow = seams.map((seamPath) => seamPath[y]).sort((a, b) => a - b);
+          this.#data[y] = deleteArrayIndices(this.#data[y], indicesToRemoveForRow);
+          this.#grayscaleMap[y] = deleteArrayIndices(this.#grayscaleMap[y], indicesToRemoveForRow);
+          this.#originalIndices[y] = deleteArrayIndices(this.#originalIndices[y], indicesToRemoveForRow);
+        }
+        this.#width -= numSeamsToRemove;
+        this.#computeFullEnergyMap();
+      }
+    };
+    var defaultOptions = {
+      batchPercentage: 0.1
+    };
+    var RandomGeneratorClass = class {
+      #imageLoader;
+      #energyMapPromise;
+      #seamGrid = new Uint16Array();
+      #connections = [];
+      #generatedSeams = 0;
+      #options;
+      constructor(options) {
+        this.#options = { ...defaultOptions, ...options };
+        this.#imageLoader = options.imageLoader;
+        this.#energyMapPromise = this.#createEnergyMap();
+      }
+      async #createEnergyMap() {
+        const imageData = await this.#imageLoader.imageData;
+        this.#seamGrid = new Uint16Array(imageData.width * imageData.height).fill(65535);
+        return new EnergyMap2D(imageData);
+      }
+      setBatchPercentage(percentage) {
+        this.#options.batchPercentage = percentage;
+      }
+      async #generateSeamBatch() {
+        const energyMap = await this.#energyMapPromise;
+        const originalIndices = energyMap.originalIndices;
+        const currentWidth = energyMap.width;
+        const currentHeight = energyMap.height;
+        this.#generateRandomConnections(currentWidth, currentHeight);
+        const seams = Array.from({ length: currentWidth }, (_, ix) => this.#getSeam(energyMap, ix));
+        seams.sort((a, b) => a.energy - b.energy);
+        const batchSize = Math.ceil(currentWidth * this.#options.batchPercentage) >> 1 << 1;
+        const batchSeams = seams.slice(0, batchSize);
+        let seamIndex = this.#generatedSeams;
+        for (let i = 0; i < batchSeams.length; i++) {
+          const seam = batchSeams[i];
+          seam.seam.forEach((x, y) => {
+            const originalIndex = originalIndices[y][x];
+            if (this.#seamGrid[originalIndex] !== 65535) {
+              throw new Error("Seam overlap detected");
+            }
+            this.#seamGrid[originalIndex] = seamIndex;
+          });
+          seamIndex++;
+        }
+        energyMap.removeSeams(batchSeams.map((seam) => seam.seam));
+        this.#generatedSeams += batchSeams.length;
+      }
+      #generateRandomConnections(width, height) {
+        const rndGenerator = deterministicBinaryRnd(width * height + 1);
+        this.#connections = Array.from({ length: height }, () => new Int8Array(width));
+        const lastRowIx = width - 1;
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            if (x === lastRowIx || rndGenerator(y * width + x)) {
+              this.#connections[y][x] = 0;
+            } else {
+              this.#connections[y][x] = 1;
+              this.#connections[y][x + 1] = -1;
+              x++;
+            }
+          }
+        }
+      }
+      #getSeam(energyMap, ix) {
+        const height = energyMap.height;
+        const seam = new Uint16Array(height);
+        const energyMapData = energyMap.energyMap;
+        let energy = 0;
+        let lastX = ix;
+        for (let y = 0; y < height; y++) {
+          seam[y] = lastX = lastX + this.#connections[y][lastX];
+          energy += energyMapData[y][lastX];
+        }
+        return { seam, energy };
+      }
+      async generateSeamGrid(minSeams) {
+        const { width } = await this.#imageLoader.image;
+        if (width < minSeams) {
+          throw new Error(`Cannot generate ${minSeams} seams for image with width ${width}`);
+        }
+        while (this.#generatedSeams < minSeams) {
+          await this.#generateSeamBatch();
+        }
+        return this.#seamGrid;
+      }
+    };
+    var RandomGenerator = true ? RandomGeneratorClass : throwGeneratorClass("RandomGenerator");
+    var Renderer = class {
+      #canvas;
+      #ctx;
+      #height = 0;
+      #width = 0;
+      #imageLoader;
+      #options;
+      #generator;
+      #redrawQueued = false;
+      constructor(config) {
+        const { parentNode, src, ...options } = config;
+        this.#options = this.#validateAndApplyDefaults(options);
+        this.#imageLoader = new ImageLoader(src, {
+          rotate: this.#options.scalingAxis === "vertical"
+        });
+        this.#generator = this.#createGenerator();
+        this.#initializeCanvas(parentNode);
+      }
+      destroy() {
+        this.#canvas.remove();
+      }
+      #createGenerator() {
+        const options = { ...this.#options, imageLoader: this.#imageLoader };
+        switch (options.generator) {
+          case "random":
+            return new RandomGenerator(options);
+          case "cached":
+            return new CachedGenerator(options);
+          default:
+            return new FullGenerator(options);
+        }
+      }
+      #validateAndApplyDefaults(options) {
+        const getConstrainedNumber = (name, defaultValue, min = 0, max = 1) => {
+          const value = options[name] ?? defaultValue;
+          if (value < min || value > max) {
+            throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
+          }
+          return value;
+        };
+        const newOptions = {
+          ...options,
+          carvingPriority: getConstrainedNumber("carvingPriority", 1),
+          maxCarveUpSeamPercentage: getConstrainedNumber("maxCarveUpSeamPercentage", 0.6),
+          maxCarveUpScale: getConstrainedNumber("maxCarveUpScale", 10, 1, 10),
+          maxCarveDownScale: getConstrainedNumber("maxCarveDownScale", 0.1),
+          scalingAxis: options.scalingAxis ?? "horizontal"
+        };
+        if (!newOptions.generator) {
+          newOptions.generator = "full";
+        }
+        return newOptions;
+      }
+      #initializeCanvas(parentNode) {
+        const parentNodeSize = parentNode.getBoundingClientRect();
+        this.#canvas = document.createElement("canvas");
+        this.#ctx = this.#canvas.getContext("2d");
+        this.#canvas.width = this.#width = parentNodeSize.width;
+        this.#canvas.height = this.#height = parentNodeSize.height;
+        parentNode.appendChild(this.#canvas);
+        this.#queueRedraw();
+      }
+      setSize(width, height) {
+        this.#canvas.width = this.#width = width;
+        this.#canvas.height = this.#height = height;
+        this.#queueRedraw();
+        return this;
+      }
+      setWidth(width) {
+        this.#canvas.width = this.#width = width;
+        this.#queueRedraw();
+        return this;
+      }
+      setHeight(height) {
+        this.#canvas.height = this.#height = height;
+        this.#queueRedraw();
+        return this;
+      }
+      setOptions(options) {
+        this.#options = this.#validateAndApplyDefaults({
+          ...this.#options,
+          ...options
+        });
+        this.#queueRedraw();
+        return this;
+      }
+      #queueRedraw() {
+        if (this.#redrawQueued) {
+          return;
+        }
+        this.#redrawQueued = true;
+        Promise.resolve().then(async () => {
+          await this.redraw();
+          this.#redrawQueued = false;
+        });
+      }
+      // The total number of seams to add or remove.
+      #determineCarvingParameters(imageData) {
+        const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } = this.#options;
+        const { width: originalWidth, height: originalHeight } = imageData;
+        const aspectRatio = originalWidth / originalHeight;
+        const scaledWidth = Math.round(this.#height * aspectRatio);
+        const pixelDelta = scaledWidth - this.#width;
+        if (pixelDelta === 0) {
+          return { availableSeams: 0, interpolationPixels: 0 };
+        }
+        const seamsToCalculate = Math.abs(pixelDelta) * carvingPriority;
+        const maxRatio = pixelDelta > 0 ? 1 - maxCarveDownScale : maxCarveUpSeamPercentage;
+        const maxSeams = originalWidth * maxRatio;
+        const direction = pixelDelta > 0 ? 1 : -1;
+        const availableSeams = Math.floor(Math.min(seamsToCalculate, maxSeams)) * direction;
+        if (direction === 1) {
+          return { availableSeams, interpolationPixels: 0 };
+        } else {
+          const targetEffectiveWidthByRatio = Math.round(originalHeight / this.#height * this.#width);
+          const targetPixelsNeeded = targetEffectiveWidthByRatio - originalWidth;
+          const maxCarveUpImageDataWidth = Math.floor(originalWidth * maxCarveUpScale);
+          const maxPixelsByScale = maxCarveUpImageDataWidth - originalWidth;
+          const totalPixelsToInsert = Math.max(0, Math.min(targetPixelsNeeded, maxPixelsByScale));
+          const interpolationPixels = totalPixelsToInsert;
+          return { availableSeams, interpolationPixels };
+        }
+      }
+      async redraw() {
+        const originalImageLoader = this.#imageLoader;
+        const originalImageData = await this.#imageLoader.imageData;
+        if (this.#imageLoader !== originalImageLoader) {
+          return this;
+        }
+        const { availableSeams, interpolationPixels } = this.#determineCarvingParameters(originalImageData);
+        let finalImageData;
+        if (availableSeams === 0) {
+          finalImageData = originalImageData;
+        } else {
+          const seamGrid = await this.#generator.generateSeamGrid(Math.abs(availableSeams));
+          if (availableSeams > 0) {
+            finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
+          } else {
+            finalImageData = this.#interpolatePixels(originalImageData, seamGrid, -availableSeams, interpolationPixels);
+          }
+        }
+        this.#canvas.width = finalImageData.width;
+        this.#canvas.height = finalImageData.height;
+        this.#ctx.putImageData(finalImageData, 0, 0);
+        const styleRef = this.#canvas.style;
+        const isVertical = this.#options.scalingAxis === "vertical";
+        styleRef.transformOrigin = "0 0";
+        styleRef.transform = isVertical ? "rotate(-90deg) translateX(-100%)" : "";
+        styleRef.width = `${isVertical ? this.#height : this.#width}px`;
+        styleRef.height = `${isVertical ? this.#width : this.#height}px`;
+        return this;
+      }
+      #interpolatePixels(originalImageData, seamGrid, seamsAvailable, totalPixelsToInsert) {
+        const { width: originalWidth, height, data: originalData } = originalImageData;
+        const newWidth = originalWidth + totalPixelsToInsert;
+        const newSize = newWidth * height * 4;
+        const newData = new Uint8ClampedArray(newSize);
+        let writeIndex = 0;
+        const numPixels = originalData.length / 4;
+        const basePixelsPerLocation = Math.floor(totalPixelsToInsert / seamsAvailable);
+        const extraPixelsCount = totalPixelsToInsert % seamsAvailable;
+        for (let readIndex = 0; readIndex < numPixels; readIndex++) {
+          const priority = seamGrid[readIndex];
+          const readIndexRgba = readIndex * 4;
+          if (priority < seamsAvailable) {
+            const addExtraPixel = extraPixelsCount > 0 && priority * extraPixelsCount % seamsAvailable < extraPixelsCount;
+            const pixelsToInterpolate = addExtraPixel ? basePixelsPerLocation + 1 : basePixelsPerLocation;
+            for (let i = 0; i < pixelsToInterpolate; i++) {
+              const x = readIndex % originalWidth;
+              if (x === 0) {
+                newData[writeIndex] = originalData[readIndexRgba];
+                newData[writeIndex + 1] = originalData[readIndexRgba + 1];
+                newData[writeIndex + 2] = originalData[readIndexRgba + 2];
+                newData[writeIndex + 3] = originalData[readIndexRgba + 3];
+              } else {
+                const leftReadIndexRgba = (readIndex - 1) * 4;
+                const interpolationFactor = (i + 1) / (pixelsToInterpolate + 1);
+                newData[writeIndex] = Math.round(originalData[leftReadIndexRgba] + (originalData[readIndexRgba] - originalData[leftReadIndexRgba]) * interpolationFactor);
+                newData[writeIndex + 1] = Math.round(originalData[leftReadIndexRgba + 1] + (originalData[readIndexRgba + 1] - originalData[leftReadIndexRgba + 1]) * interpolationFactor);
+                newData[writeIndex + 2] = Math.round(originalData[leftReadIndexRgba + 2] + (originalData[readIndexRgba + 2] - originalData[leftReadIndexRgba + 2]) * interpolationFactor);
+                newData[writeIndex + 3] = Math.round(originalData[leftReadIndexRgba + 3] + (originalData[readIndexRgba + 3] - originalData[leftReadIndexRgba + 3]) * interpolationFactor);
+              }
+              writeIndex += 4;
+            }
+          }
+          newData[writeIndex] = originalData[readIndexRgba];
+          newData[writeIndex + 1] = originalData[readIndexRgba + 1];
+          newData[writeIndex + 2] = originalData[readIndexRgba + 2];
+          newData[writeIndex + 3] = originalData[readIndexRgba + 3];
+          writeIndex += 4;
+        }
+        if (writeIndex !== newSize) {
+          console.error(`[Seams-1] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`);
+        }
+        return new ImageData(newData, newWidth, height);
+      }
+      #filterPixels(originalImageData, seamGrid, seamsToRemove) {
+        const { width: originalWidth, height, data: originalData } = originalImageData;
+        const newWidth = originalWidth - seamsToRemove;
+        const newSize = newWidth * height * 4;
+        const newData = new Uint8ClampedArray(newSize);
+        const numPixels = originalData.length / 4;
+        let writeIndex = 0;
+        for (let readIndex = 0; readIndex < numPixels; readIndex++) {
+          const priority = seamGrid[readIndex];
+          if (priority >= seamsToRemove) {
+            const readIndexRgba = readIndex * 4;
+            newData[writeIndex] = originalData[readIndexRgba];
+            newData[writeIndex + 1] = originalData[readIndexRgba + 1];
+            newData[writeIndex + 2] = originalData[readIndexRgba + 2];
+            newData[writeIndex + 3] = originalData[readIndexRgba + 3];
+            writeIndex += 4;
+          }
+        }
+        if (writeIndex !== newSize) {
+          console.error(`[Seams-2] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`);
+        }
+        return new ImageData(newData, newWidth, height);
+      }
+    };
+    function constrain(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
+    function parseNumber(val, fallback) {
+      if (!val)
+        return fallback;
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? fallback : parsed;
+    }
+    var ImgResponsive = class extends HTMLElement {
+      renderer = null;
+      resizeObserver = null;
+      updateQueue = /* @__PURE__ */ new Set();
+      constructor() {
+        super();
+      }
+      static get observedAttributes() {
+        return ["src", "width", "height", "min-width", "max-width", "min-height", "max-height"];
+      }
+      connectedCallback() {
+        this.setupResizeObserver();
+        this.initializeRenderer();
+      }
+      disconnectedCallback() {
+        this.renderer?.destroy();
+        this.renderer = null;
+        this.resizeObserver?.disconnect();
+        this.resizeObserver = null;
+      }
+      attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue === newValue)
+          return;
+        if (!this.updateQueue.size) {
+          setTimeout(this.processUpdates);
+        }
+        this.updateQueue.add(name);
+      }
+      processUpdates = () => {
+        const changes = Array.from(this.updateQueue);
+        this.updateQueue.clear();
+        if (changes.includes("src")) {
+          this.renderer?.destroy();
+          this.renderer = null;
+          this.initializeRenderer();
+          return;
+        }
+        if (!this.renderer)
+          return;
+        const dimensionAttributes = [
+          "width",
+          "height",
+          "min-width",
+          "max-width",
+          "min-height",
+          "max-height"
+        ];
+        const hasDimensionChanges = changes.some((attr) => dimensionAttributes.includes(attr));
+        const dimensions = hasDimensionChanges ? this.calculateDimensions() : {};
+        const otherOptions = {};
+        for (const attr of changes) {
+          if (!dimensionAttributes.includes(attr)) {
+            otherOptions[attr] = this.getAttribute(attr);
+          }
+        }
+        this.renderer.setOptions({ ...dimensions, ...otherOptions });
+      };
+      initializeRenderer() {
+        const src = this.getAttribute("src");
+        if (!src)
+          return;
+        const options = this.getCurrentOptions();
+        this.renderer = new Renderer({
+          ...options,
+          src,
+          parentNode: this
+        });
+      }
+      getNumericAttribute(name, fallback) {
+        return parseNumber(this.getAttribute(name), fallback);
+      }
+      calculateDimensions(availableWidth, availableHeight) {
+        if (availableWidth === void 0 || availableHeight === void 0) {
+          availableWidth = this.parentElement?.clientWidth ?? 0;
+          availableHeight = this.parentElement?.clientHeight ?? 0;
+        }
+        const requestedWidth = this.getNumericAttribute("width", Math.floor(availableWidth));
+        const requestedHeight = this.getNumericAttribute("height", Math.floor(availableHeight));
+        const minWidth = this.getNumericAttribute("min-width", 0);
+        const maxWidth = this.getNumericAttribute("max-width", Infinity);
+        const minHeight = this.getNumericAttribute("min-height", 0);
+        const maxHeight = this.getNumericAttribute("max-height", Infinity);
+        return {
+          width: constrain(requestedWidth, minWidth, maxWidth),
+          height: constrain(requestedHeight, minHeight, maxHeight),
+          minWidth,
+          maxWidth,
+          minHeight,
+          maxHeight
+        };
+      }
+      getAllAttributes() {
+        const attributes = {};
+        for (let i = 0; i < this.attributes.length; i++) {
+          const attr = this.attributes[i];
+          if (!["src", "width", "height", "min-width", "max-width", "min-height", "max-height"].includes(attr.name)) {
+            attributes[attr.name] = attr.value;
+          }
+        }
+        return attributes;
+      }
+      getCurrentOptions() {
+        const dimensions = this.calculateDimensions();
+        const allAttributes = this.getAllAttributes();
+        return {
+          ...dimensions,
+          ...allAttributes
+        };
+      }
+      setupResizeObserver() {
+        if (!this.parentElement)
+          return;
+        this.resizeObserver = new ResizeObserver((entries) => {
+          const dimensions = this.calculateDimensions();
+          this.renderer?.setSize(dimensions.width, dimensions.height);
+        });
+        this.resizeObserver.observe(this.parentElement);
+      }
+    };
+    customElements.define("img-responsive", ImgResponsive);
+  })();
+
   // src/App.jsx
-  var import_react6 = __toESM(require_react());
+  var import_react5 = __toESM(require_react());
 
   // src/components/ImageSelector.jsx
   var import_react = __toESM(require_react());
+  var import_jsx_runtime = __toESM(require_jsx_runtime());
   var images = [
     "Broadway_tower.jpg",
     "dogs-on-beach.jpg",
@@ -23568,44 +25151,25 @@
     "neuschwanstein.jpg"
   ];
   function ImageSelector({ onSelect }) {
-    return /* @__PURE__ */ import_react.default.createElement("div", { className: "image-selector" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "thumbnails" }, images.map((image) => /* @__PURE__ */ import_react.default.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "image-selector", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "thumbnails", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
       "img",
       {
-        key: image,
         src: `images/${image.replace(".jpg", "_thumb.jpg")}`,
         alt: `thumbnail ${image}`,
         className: "thumbnail",
         onClick: () => onSelect(image)
-      }
-    ))));
+      },
+      image
+    )) }) });
   }
   var ImageSelector_default = ImageSelector;
 
-  // src/components/Seam.jsx
-  var import_react2 = __toESM(require_react());
-  function Seam({ src, showSeams, scaleDown, scaleUp, seamMode }) {
-    const style = {
-      maxWidth: "100%",
-      maxHeight: "100%",
-      objectFit: "contain",
-      border: showSeams ? "2px solid red" : "none"
-    };
-    return /* @__PURE__ */ import_react2.default.createElement(
-      "img",
-      {
-        src,
-        alt: "Seam-carved",
-        style
-      }
-    );
-  }
-  var Seam_default = Seam;
-
   // src/components/Controls.jsx
-  var import_react5 = __toESM(require_react());
+  var import_react4 = __toESM(require_react());
 
   // src/components/ImageUploader.jsx
-  var import_react3 = __toESM(require_react());
+  var import_react2 = __toESM(require_react());
+  var import_jsx_runtime2 = __toESM(require_jsx_runtime());
   function ImageUploader({ onImageUpload }) {
     const handleFileChange = (event) => {
       const file = event.target.files[0];
@@ -23613,13 +25177,17 @@
         onImageUpload(URL.createObjectURL(file));
       }
     };
-    return /* @__PURE__ */ import_react3.default.createElement("div", { className: "image-uploader" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "file-upload" }, "Upload an Image:"), /* @__PURE__ */ import_react3.default.createElement("input", { id: "file-upload", type: "file", accept: "image/*", onChange: handleFileChange }));
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "image-uploader", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("label", { htmlFor: "file-upload", children: "Upload an Image:" }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("input", { id: "file-upload", type: "file", accept: "image/*", onChange: handleFileChange })
+    ] });
   }
   var ImageUploader_default = ImageUploader;
 
   // src/components/HelpTooltip.jsx
-  var import_react4 = __toESM(require_react());
-  var HelpIcon = () => /* @__PURE__ */ import_react4.default.createElement(
+  var import_react3 = __toESM(require_react());
+  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+  var HelpIcon = () => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
     "svg",
     {
       xmlns: "http://www.w3.org/2000/svg",
@@ -23631,99 +25199,153 @@
       strokeWidth: "2",
       strokeLinecap: "round",
       strokeLinejoin: "round",
-      className: "help-icon"
-    },
-    /* @__PURE__ */ import_react4.default.createElement("circle", { cx: "12", cy: "12", r: "10" }),
-    /* @__PURE__ */ import_react4.default.createElement("path", { d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" }),
-    /* @__PURE__ */ import_react4.default.createElement("line", { x1: "12", y1: "17", x2: "12.01", y2: "17" })
+      className: "help-icon",
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("circle", { cx: "12", cy: "12", r: "10" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("line", { x1: "12", y1: "17", x2: "12.01", y2: "17" })
+      ]
+    }
   );
   function HelpTooltip({ children }) {
     const isComponent = typeof children !== "string";
     const tooltipClassName = `tooltip-text ${isComponent ? "tooltip-component" : ""}`;
-    return /* @__PURE__ */ import_react4.default.createElement("div", { className: "help-tooltip" }, /* @__PURE__ */ import_react4.default.createElement(HelpIcon, null), /* @__PURE__ */ import_react4.default.createElement("span", { className: tooltipClassName }, children));
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "help-tooltip", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(HelpIcon, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: tooltipClassName, children })
+    ] });
   }
   var HelpTooltip_default = HelpTooltip;
 
   // src/components/Controls.jsx
+  var import_jsx_runtime4 = __toESM(require_jsx_runtime());
   function Controls({ config, setConfig, onImageUpload }) {
-    const [isCollapsed, setIsCollapsed] = (0, import_react5.useState)(false);
+    const [isCollapsed, setIsCollapsed] = (0, import_react4.useState)(false);
     const handleConfigChange = (key, value) => {
       setConfig((prevConfig) => ({
         ...prevConfig,
         [key]: value
       }));
     };
-    return /* @__PURE__ */ import_react5.default.createElement("div", { className: "controls-container" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "config-tab", onClick: () => setIsCollapsed(!isCollapsed) }, "Config ", isCollapsed ? "\u25B2" : "\u25BC"), !isCollapsed && /* @__PURE__ */ import_react5.default.createElement("div", { className: "controls-panel" }, /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement(ImageUploader_default, { onImageUpload })), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, "Max carve down: ", config.scaleDown, "%", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, "Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used.")), /* @__PURE__ */ import_react5.default.createElement(
-      "input",
-      {
-        type: "range",
-        min: "0",
-        max: "100",
-        value: config.scaleDown,
-        onChange: (e) => handleConfigChange("scaleDown", e.target.value)
-      }
-    )), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, "Max carve up: ", config.scaleUp, "%", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, "Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used.")), /* @__PURE__ */ import_react5.default.createElement(
-      "input",
-      {
-        type: "range",
-        min: "0",
-        max: "100",
-        value: config.scaleUp,
-        onChange: (e) => handleConfigChange("scaleUp", e.target.value)
-      }
-    )), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, "Seam generation:", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, `Fast: Picks the best from randomly generated seams.
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "controls-container", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "config-tab", onClick: () => setIsCollapsed(!isCollapsed), children: [
+        "Config ",
+        isCollapsed ? "\u25B2" : "\u25BC"
+      ] }),
+      !isCollapsed && /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "controls-panel", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "control-group", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ImageUploader_default, { onImageUpload }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "control-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
+            "Max carve down: ",
+            config.scaleDown,
+            "%",
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: "Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "input",
+            {
+              type: "range",
+              min: "0",
+              max: "100",
+              value: config.scaleDown,
+              onChange: (e) => handleConfigChange("scaleDown", e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "control-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
+            "Max carve up: ",
+            config.scaleUp,
+            "%",
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: "Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used." })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "input",
+            {
+              type: "range",
+              min: "0",
+              max: "100",
+              value: config.scaleUp,
+              onChange: (e) => handleConfigChange("scaleUp", e.target.value)
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "control-group", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
+            "Seam generation:",
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: `Fast: Picks the best from randomly generated seams.
               
               Accurate: Precise seam calculation.  Much slower.
               
-              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download.`)), /* @__PURE__ */ import_react5.default.createElement("div", { className: "toggle-switch" }, /* @__PURE__ */ import_react5.default.createElement(
-      "button",
-      {
-        className: config.seamMode === "fast" ? "active" : "",
-        onClick: () => handleConfigChange("seamMode", "fast")
-      },
-      "Fast"
-    ), /* @__PURE__ */ import_react5.default.createElement(
-      "button",
-      {
-        className: config.seamMode === "accurate" ? "active" : "",
-        onClick: () => handleConfigChange("seamMode", "accurate")
-      },
-      "Accurate"
-    ), /* @__PURE__ */ import_react5.default.createElement(
-      "button",
-      {
-        className: config.seamMode === "cached" ? "active" : "",
-        onClick: () => handleConfigChange("seamMode", "cached")
-      },
-      "Cached"
-    ))), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, /* @__PURE__ */ import_react5.default.createElement(
-      "input",
-      {
-        type: "checkbox",
-        checked: config.showSeams,
-        onChange: (e) => handleConfigChange("showSeams", e.target.checked)
-      }
-    ), "Animate Seam Carving", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, /* @__PURE__ */ import_react5.default.createElement("img", { src: "images/fight.gif", alt: "Animation" })))), /* @__PURE__ */ import_react5.default.createElement("div", { className: "control-group" }, /* @__PURE__ */ import_react5.default.createElement("label", null, /* @__PURE__ */ import_react5.default.createElement(
-      "input",
-      {
-        type: "checkbox",
-        checked: config.showEnergyMap,
-        onChange: (e) => handleConfigChange("showEnergyMap", e.target.checked)
-      }
-    ), "Show Energy Map", /* @__PURE__ */ import_react5.default.createElement(HelpTooltip_default, null, "Displays a grayscale 'energy map' of the image. Darker areas have lower energy and are more likely to be carved out by seams. Lighter areas are protected.")))));
+              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download.` })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "toggle-switch", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: config.generator === "random" ? "active" : "",
+                onClick: () => handleConfigChange("generator", "random"),
+                children: "Fast"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: config.generator === "full" ? "active" : "",
+                onClick: () => handleConfigChange("generator", "full"),
+                children: "Accurate"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
+                className: config.generator === "cached" ? "active" : "",
+                onClick: () => handleConfigChange("generator", "cached"),
+                children: "Cached"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "control-group", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "input",
+            {
+              type: "checkbox",
+              checked: config.showSeams,
+              onChange: (e) => handleConfigChange("showSeams", e.target.checked)
+            }
+          ),
+          "Animate Seam Carving",
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("img", { src: "images/fight.gif", alt: "Animation" }) })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "control-group", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+            "input",
+            {
+              type: "checkbox",
+              checked: config.showEnergyMap,
+              onChange: (e) => handleConfigChange("showEnergyMap", e.target.checked)
+            }
+          ),
+          "Show Energy Map",
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: "Displays a grayscale 'energy map' of the image. Darker areas have lower energy and are more likely to be carved out by seams. Lighter areas are protected." })
+        ] }) })
+      ] })
+    ] });
   }
   var Controls_default = Controls;
 
   // src/App.jsx
+  var import_jsx_runtime5 = __toESM(require_jsx_runtime());
   function App() {
-    const [selectedImage, setSelectedImage] = (0, import_react6.useState)("Broadway_tower.jpg");
-    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react6.useState)(null);
-    const [config, setConfig] = (0, import_react6.useState)({
+    const [selectedImage, setSelectedImage] = (0, import_react5.useState)("Broadway_tower.jpg");
+    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react5.useState)(null);
+    const [config, setConfig] = (0, import_react5.useState)({
       showSeams: false,
       showEnergyMap: false,
       scaleDown: 50,
       scaleUp: 50,
-      seamMode: "fast"
+      generator: "random"
     });
     const handleImageSelect = (imageName) => {
       setSelectedImage(imageName);
@@ -23734,31 +25356,41 @@
       setSelectedImage(null);
     };
     const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : "");
-    return /* @__PURE__ */ import_react6.default.createElement("div", { className: "App" }, /* @__PURE__ */ import_react6.default.createElement("header", { className: "App-header" }, /* @__PURE__ */ import_react6.default.createElement("h1", null, "Live Seam Carving Demo")), /* @__PURE__ */ import_react6.default.createElement("main", { className: "App-main" }, /* @__PURE__ */ import_react6.default.createElement("div", { className: "left-panel" }, /* @__PURE__ */ import_react6.default.createElement(ImageSelector_default, { onSelect: handleImageSelect }), /* @__PURE__ */ import_react6.default.createElement(
-      Controls_default,
-      {
-        config,
-        setConfig,
-        onImageUpload: handleImageUpload
-      }
-    )), /* @__PURE__ */ import_react6.default.createElement("div", { className: "main-content" }, /* @__PURE__ */ import_react6.default.createElement("div", { className: "seam-container-resizable" }, imageToDisplay && /* @__PURE__ */ import_react6.default.createElement(
-      Seam_default,
-      {
-        src: imageToDisplay,
-        showSeams: config.showSeams,
-        showEnergyMap: config.showEnergyMap,
-        scaleDown: config.scaleDown,
-        scaleUp: config.scaleUp,
-        seamMode: config.seamMode
-      }
-    )))));
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "App", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("header", { className: "App-header", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { children: "Live Seam Carving Demo" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("main", { className: "App-main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "left-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ImageSelector_default, { onSelect: handleImageSelect }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            Controls_default,
+            {
+              config,
+              setConfig,
+              onImageUpload: handleImageUpload
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "main-content", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "seam-container-resizable", children: imageToDisplay && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "img-responsive",
+          {
+            src: imageToDisplay,
+            showSeams: config.showSeams,
+            showEnergyMap: config.showEnergyMap,
+            scaleDown: config.scaleDown,
+            scaleUp: config.scaleUp,
+            generator: config.generator
+          }
+        ) }) })
+      ] })
+    ] });
   }
   var App_default = App;
 
   // src/index.jsx
+  var import_jsx_runtime6 = __toESM(require_jsx_runtime());
   var root = import_client.default.createRoot(document.getElementById("root"));
   root.render(
-    /* @__PURE__ */ import_react7.default.createElement(import_react7.default.StrictMode, null, /* @__PURE__ */ import_react7.default.createElement(App_default, null))
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(import_react6.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(App_default, {}) })
   );
 })();
 /*! Bundled license information:
@@ -23807,5 +25439,16 @@ react-dom/cjs/react-dom.development.js:
    * @return {boolean} True if the event is supported.
    * @internal
    * @license Modernizr 3.0.0pre (Custom Build) | MIT
+   *)
+
+react/cjs/react-jsx-runtime.development.js:
+  (**
+   * @license React
+   * react-jsx-runtime.development.js
+   *
+   * Copyright (c) Facebook, Inc. and its affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
    *)
 */
