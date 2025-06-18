@@ -1,4 +1,4 @@
-import '../../build/web-component.minified.js';
+import '../../build/img-responsive-web-component.js';
 import React, { useState } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
 import Controls from './components/Controls.jsx';
