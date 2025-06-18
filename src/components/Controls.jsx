@@ -24,28 +24,41 @@ function Controls({ config, setConfig, onImageUpload }) {
           </div>
           <div className="control-group">
             <label>
-              Max carve down: {config.scaleDown}%
+              Max down scaling: {config.maxCarveDownScale}%
               <HelpTooltip>Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used.</HelpTooltip>
             </label>
             <input
               type="range"
               min="0"
               max="100"
-              value={config.scaleDown}
-              onChange={(e) => handleConfigChange('scaleDown', e.target.value)}
+              value={config.maxCarveDownScale}
+              onChange={(e) => handleConfigChange('maxCarveDownScale', e.target.value)}
             />
           </div>
           <div className="control-group">
             <label>
-              Max carve up: {config.scaleUp}%
+              Max up scaling: {config.maxCarveUpScale}x
+              <HelpTooltip>Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used.</HelpTooltip>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={config.maxCarveUpScale}
+              onChange={(e) => handleConfigChange('maxCarveUpScale', e.target.value)}
+            />
+          </div>
+          <div className="control-group">
+            <label>
+              % of seams to use for enlarging: {config.maxCarveUpSeamPercentage}%
               <HelpTooltip>Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used.</HelpTooltip>
             </label>
             <input
               type="range"
               min="0"
               max="100"
-              value={config.scaleUp}
-              onChange={(e) => handleConfigChange('scaleUp', e.target.value)}
+              value={config.maxCarveUpSeamPercentage}
+              onChange={(e) => handleConfigChange('maxCarveUpSeamPercentage', e.target.value)}
             />
           </div>
           <div className="control-group">

@@ -179,3 +179,9 @@
   visibility: visible;
   opacity: 1;
 } 
+
+img-responsive {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

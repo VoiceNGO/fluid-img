@@ -9,8 +9,9 @@ function App() {
   const [config, setConfig] = useState({
     showSeams: false,
     showEnergyMap: false,
-    scaleDown: 50,
-    scaleUp: 50,
+    maxCarveUpSeamPercentage: 0.6,
+    maxCarveUpScale: 3,
+    maxCarveDownScale: 0.5,
     generator: 'random',
   });
 
@@ -47,8 +48,9 @@ function App() {
                 src={imageToDisplay}
                 showSeams={config.showSeams}
                 showEnergyMap={config.showEnergyMap}
-                scaleDown={config.scaleDown}
-                scaleUp={config.scaleUp}
+                maxCarveUpSeamPercentage={config.maxCarveUpSeamPercentage}
+                maxCarveUpScale={config.maxCarveUpScale}
+                maxCarveDownScale={config.maxCarveDownScale}
                 generator={config.generator}
               />
             )}
