@@ -20,7 +20,13 @@ class ImgResponsive extends HTMLElement {
   }
 
   static get observedAttributes(): string[] {
-    return ['src', 'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height'];
+    return [
+      'src',
+      'carving-priority',
+      'max-carve-up-seam-percentage',
+      'max-carve-up-scale',
+      'max-carve-down-scale',
+    ];
   }
 
   connectedCallback(): void {
@@ -57,26 +63,9 @@ class ImgResponsive extends HTMLElement {
 
     if (!this.renderer) return;
 
-    const dimensionAttributes = [
-      'width',
-      'height',
-      'min-width',
-      'max-width',
-      'min-height',
-      'max-height',
-    ];
-    const hasDimensionChanges = changes.some((attr) => dimensionAttributes.includes(attr));
-
-    const dimensions = hasDimensionChanges ? this.calculateDimensions() : {};
-
     const otherOptions: Record<string, string | null> = {};
-    for (const attr of changes) {
-      if (!dimensionAttributes.includes(attr)) {
-        otherOptions[attr] = this.getAttribute(attr);
-      }
-    }
 
-    this.renderer.setOptions({ ...dimensions, ...otherOptions });
+    this.renderer.setOptions(otherOptions);
   };
 
   private initializeRenderer(): void {
@@ -91,26 +80,11 @@ class ImgResponsive extends HTMLElement {
     });
   }
 
-  private getNumericAttribute(name: string, fallback: number): number {
-    return parseNumber(this.getAttribute(name), fallback);
-  }
+  private calculateDimensions() {
+    const width = this.clientWidth ?? 0;
+    const height = this.clientHeight ?? 0;
 
-  private calculateDimensions(availableWidth?: number, availableHeight?: number) {
-    availableWidth = availableWidth ?? this.clientWidth ?? 0;
-    availableHeight = availableHeight ?? this.clientHeight ?? 0;
-
-    const requestedWidth = this.getNumericAttribute('width', Math.floor(availableWidth));
-    const requestedHeight = this.getNumericAttribute('height', Math.floor(availableHeight));
-
-    const minWidth = this.getNumericAttribute('min-width', 0);
-    const maxWidth = this.getNumericAttribute('max-width', Infinity);
-    const minHeight = this.getNumericAttribute('min-height', 0);
-    const maxHeight = this.getNumericAttribute('max-height', Infinity);
-
-    return {
-      width: constrain(requestedWidth, minWidth, maxWidth),
-      height: constrain(requestedHeight, minHeight, maxHeight),
-    };
+    return { width, height };
   }
 
   private getAllAttributes(): Record<string, string> {
@@ -118,11 +92,7 @@ class ImgResponsive extends HTMLElement {
 
     for (let i = 0; i < this.attributes.length; i++) {
       const attr = this.attributes[i]!;
-      if (
-        !['src', 'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height'].includes(
-          attr.name
-        )
-      ) {
+      if (!['src'].includes(attr.name)) {
         attributes[attr.name] = attr.value;
       }
     }
@@ -148,7 +118,7 @@ class ImgResponsive extends HTMLElement {
       this.renderer?.setSize(dimensions.width, dimensions.height);
     });
 
-    this.resizeObserver.observe(this.parentElement);
+    this.resizeObserver.observe(this);
   }
 }
 

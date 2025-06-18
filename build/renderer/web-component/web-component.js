@@ -16,7 +16,13 @@ class ImgResponsive extends HTMLElement {
         super();
     }
     static get observedAttributes() {
-        return ['src', 'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height'];
+        return [
+            'src',
+            'carving-priority',
+            'max-carve-up-seam-percentage',
+            'max-carve-up-scale',
+            'max-carve-down-scale',
+        ];
     }
     connectedCallback() {
         this.setupResizeObserver();
@@ -46,23 +52,8 @@ class ImgResponsive extends HTMLElement {
         }
         if (!this.renderer)
             return;
-        const dimensionAttributes = [
-            'width',
-            'height',
-            'min-width',
-            'max-width',
-            'min-height',
-            'max-height',
-        ];
-        const hasDimensionChanges = changes.some((attr) => dimensionAttributes.includes(attr));
-        const dimensions = hasDimensionChanges ? this.calculateDimensions() : {};
         const otherOptions = {};
-        for (const attr of changes) {
-            if (!dimensionAttributes.includes(attr)) {
-                otherOptions[attr] = this.getAttribute(attr);
-            }
-        }
-        this.renderer.setOptions({ ...dimensions, ...otherOptions });
+        this.renderer.setOptions(otherOptions);
     };
     initializeRenderer() {
         const src = this.getAttribute('src');
@@ -75,28 +66,16 @@ class ImgResponsive extends HTMLElement {
             parentNode: this,
         });
     }
-    getNumericAttribute(name, fallback) {
-        return parseNumber(this.getAttribute(name), fallback);
-    }
-    calculateDimensions(availableWidth, availableHeight) {
-        availableWidth = availableWidth ?? this.clientWidth ?? 0;
-        availableHeight = availableHeight ?? this.clientHeight ?? 0;
-        const requestedWidth = this.getNumericAttribute('width', Math.floor(availableWidth));
-        const requestedHeight = this.getNumericAttribute('height', Math.floor(availableHeight));
-        const minWidth = this.getNumericAttribute('min-width', 0);
-        const maxWidth = this.getNumericAttribute('max-width', Infinity);
-        const minHeight = this.getNumericAttribute('min-height', 0);
-        const maxHeight = this.getNumericAttribute('max-height', Infinity);
-        return {
-            width: constrain(requestedWidth, minWidth, maxWidth),
-            height: constrain(requestedHeight, minHeight, maxHeight),
-        };
+    calculateDimensions() {
+        const width = this.clientWidth ?? 0;
+        const height = this.clientHeight ?? 0;
+        return { width, height };
     }
     getAllAttributes() {
         const attributes = {};
         for (let i = 0; i < this.attributes.length; i++) {
             const attr = this.attributes[i];
-            if (!['src', 'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height'].includes(attr.name)) {
+            if (!['src'].includes(attr.name)) {
                 attributes[attr.name] = attr.value;
             }
         }
@@ -117,7 +96,7 @@ class ImgResponsive extends HTMLElement {
             const dimensions = this.calculateDimensions();
             this.renderer?.setSize(dimensions.width, dimensions.height);
         });
-        this.resizeObserver.observe(this.parentElement);
+        this.resizeObserver.observe(this);
     }
 }
 customElements.define('img-responsive', ImgResponsive);

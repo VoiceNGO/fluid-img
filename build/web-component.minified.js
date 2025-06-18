@@ -60,6 +60,11 @@
     }
   };
 
+  // build/utils/to-camel-case/to-camel-case.js
+  function toCamelCase(str) {
+    return str.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+  }
+
   // build/generator/full-generator/full-generator.js
   var FullGeneratorClass = class {
     #imageLoader;
@@ -372,7 +377,7 @@
     }
     #validateAndApplyDefaults(options) {
       const getConstrainedNumber = (name, defaultValue, min = 0, max = 1) => {
-        const value = options[name] ?? defaultValue;
+        const value = Number(options[toCamelCase(name)] ?? defaultValue);
         if (value < min || value > max) {
           throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
         }
@@ -383,7 +388,7 @@
         carvingPriority: getConstrainedNumber("carvingPriority", 1),
         maxCarveUpSeamPercentage: getConstrainedNumber("maxCarveUpSeamPercentage", 0.6),
         maxCarveUpScale: getConstrainedNumber("maxCarveUpScale", 10, 1, 10),
-        maxCarveDownScale: getConstrainedNumber("maxCarveDownScale", 0.1),
+        maxCarveDownScale: getConstrainedNumber("maxCarveDownScale", 0),
         scalingAxis: options.scalingAxis ?? "horizontal"
       };
       if (!newOptions.generator) {
@@ -406,6 +411,7 @@
       this.#ctx = this.#canvas.getContext("2d");
       this.#canvas.width = this.#width = width;
       this.#canvas.height = this.#height = height;
+      this.#canvas.style.display = "block";
       parentNode.appendChild(this.#canvas);
       this.#queueRedraw();
     }
@@ -447,9 +453,9 @@
     #determineCarvingParameters(imageData) {
       const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } = this.#options;
       const { width: originalWidth, height: originalHeight } = imageData;
-      const aspectRatio = originalWidth / originalHeight;
-      const scaledWidth = Math.round(this.#height * aspectRatio);
-      const pixelDelta = scaledWidth - this.#width;
+      const targetAspectRatio = this.#width / this.#height;
+      const targetWidth = Math.round(originalHeight * targetAspectRatio);
+      const pixelDelta = originalWidth - targetWidth;
       if (pixelDelta === 0) {
         return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
       }
@@ -472,11 +478,7 @@
       }
     }
     async redraw() {
-      const originalImageLoader = this.#imageLoader;
       const originalImageData = await this.#imageLoader.imageData;
-      if (this.#imageLoader !== originalImageLoader) {
-        return this;
-      }
       const { availableSeams, interpolationPixels, carveDown } = this.#determineCarvingParameters(originalImageData);
       let finalImageData;
       if (availableSeams === 0) {
@@ -570,15 +572,6 @@
   };
 
   // build/renderer/web-component/web-component.js
-  function constrain(val, min, max) {
-    return Math.max(min, Math.min(max, val));
-  }
-  function parseNumber(val, fallback) {
-    if (!val)
-      return fallback;
-    const parsed = parseFloat(val);
-    return isNaN(parsed) ? fallback : parsed;
-  }
   var ImgResponsive = class extends HTMLElement {
     renderer = null;
     resizeObserver = null;
@@ -587,7 +580,13 @@
       super();
     }
     static get observedAttributes() {
-      return ["src", "width", "height", "min-width", "max-width", "min-height", "max-height"];
+      return [
+        "src",
+        "carving-priority",
+        "max-carve-up-seam-percentage",
+        "max-carve-up-scale",
+        "max-carve-down-scale"
+      ];
     }
     connectedCallback() {
       this.setupResizeObserver();
@@ -617,23 +616,8 @@
       }
       if (!this.renderer)
         return;
-      const dimensionAttributes = [
-        "width",
-        "height",
-        "min-width",
-        "max-width",
-        "min-height",
-        "max-height"
-      ];
-      const hasDimensionChanges = changes.some((attr) => dimensionAttributes.includes(attr));
-      const dimensions = hasDimensionChanges ? this.calculateDimensions() : {};
       const otherOptions = {};
-      for (const attr of changes) {
-        if (!dimensionAttributes.includes(attr)) {
-          otherOptions[attr] = this.getAttribute(attr);
-        }
-      }
-      this.renderer.setOptions({ ...dimensions, ...otherOptions });
+      this.renderer.setOptions(otherOptions);
     };
     initializeRenderer() {
       const src = this.getAttribute("src");
@@ -646,28 +630,16 @@
         parentNode: this
       });
     }
-    getNumericAttribute(name, fallback) {
-      return parseNumber(this.getAttribute(name), fallback);
-    }
-    calculateDimensions(availableWidth, availableHeight) {
-      availableWidth = availableWidth ?? this.clientWidth ?? 0;
-      availableHeight = availableHeight ?? this.clientHeight ?? 0;
-      const requestedWidth = this.getNumericAttribute("width", Math.floor(availableWidth));
-      const requestedHeight = this.getNumericAttribute("height", Math.floor(availableHeight));
-      const minWidth = this.getNumericAttribute("min-width", 0);
-      const maxWidth = this.getNumericAttribute("max-width", Infinity);
-      const minHeight = this.getNumericAttribute("min-height", 0);
-      const maxHeight = this.getNumericAttribute("max-height", Infinity);
-      return {
-        width: constrain(requestedWidth, minWidth, maxWidth),
-        height: constrain(requestedHeight, minHeight, maxHeight)
-      };
+    calculateDimensions() {
+      const width = this.clientWidth ?? 0;
+      const height = this.clientHeight ?? 0;
+      return { width, height };
     }
     getAllAttributes() {
       const attributes = {};
       for (let i = 0; i < this.attributes.length; i++) {
         const attr = this.attributes[i];
-        if (!["src", "width", "height", "min-width", "max-width", "min-height", "max-height"].includes(attr.name)) {
+        if (!["src"].includes(attr.name)) {
           attributes[attr.name] = attr.value;
         }
       }
@@ -688,7 +660,7 @@
         const dimensions = this.calculateDimensions();
         this.renderer?.setSize(dimensions.width, dimensions.height);
       });
-      this.resizeObserver.observe(this.parentElement);
+      this.resizeObserver.observe(this);
     }
   };
   customElements.define("img-responsive", ImgResponsive);
