@@ -24900,9 +24900,9 @@
       #determineCarvingParameters(imageData) {
         const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } = this.#options;
         const { width: originalWidth, height: originalHeight } = imageData;
-        const aspectRatio = originalWidth / originalHeight;
-        const scaledWidth = Math.round(this.#height * aspectRatio);
-        const pixelDelta = scaledWidth - this.#width;
+        const targetAspectRatio = this.#width / this.#height;
+        const targetWidth = Math.round(originalHeight * targetAspectRatio);
+        const pixelDelta = originalWidth - targetWidth;
         if (pixelDelta === 0) {
           return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
         }
@@ -25043,7 +25043,6 @@
         this.resizeObserver = null;
       }
       attributeChangedCallback(name, oldValue, newValue) {
-        debugger;
         if (oldValue === newValue)
           return;
         if (!this.updateQueue.size) {
