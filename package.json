@@ -1,0 +1,35 @@
+{
+  "name": "seam-carving-demo",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.2",
+    "express": "^5.1.0"
+  },
+  "scripts": {
+    "build": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment",
+    "watch": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment --watch"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

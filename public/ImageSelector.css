@@ -1,0 +1,25 @@
+.image-selector {
+  flex-grow: 1; /* Allows this container to fill available space */
+  overflow-y: auto; /* Enables scrolling */
+  padding: 20px; /* Provides spacing inside the scrollable area */
+}
+
+.thumbnails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align thumbnails to the left */
+}
+
+.thumbnail {
+  width: 200px;
+  /* height and object-fit removed */
+  display: block; /* Fixes vertical spacing issues */
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.thumbnail:hover {
+  /* border-color removed, replaced with a slight scale effect */
+  transform: scale(1.2); /* Increased zoom effect */
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); /* Added drop shadow */
+} 
