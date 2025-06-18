@@ -21,6 +21,8 @@ type GeneralOptions = {
   maxCarveUpScale?: number;
   maxCarveDownScale?: number;
   scalingAxis?: 'horizontal' | 'vertical';
+  width?: number;
+  height?: number;
 };
 
 // filter out options that the renderer provides internally
@@ -34,6 +36,7 @@ type TypedGeneratorOptions =
 type SeamOptions = GeneralOptions & TypedGeneratorOptions;
 
 type ProcessedSeamOptions = Required<GeneralOptions> & TypedGeneratorOptions;
+type CarveDirection = 'up' | 'down';
 
 export type RendererConfig = {
   parentNode: HTMLElement;
@@ -108,12 +111,24 @@ export class Renderer {
     return newOptions as ProcessedSeamOptions;
   }
 
+  #calculateDimensions(parentNode: HTMLElement): { width: number; height: number } {
+    let { width, height } = this.#options;
+    if (width === undefined || height === undefined) {
+      const parentNodeSize = parentNode.getBoundingClientRect();
+      width = width ?? parentNodeSize.width;
+      height = height ?? parentNodeSize.height;
+    }
+
+    return { width, height };
+  }
+
   #initializeCanvas(parentNode: HTMLElement): void {
-    const parentNodeSize = parentNode.getBoundingClientRect();
+    const { width, height } = this.#calculateDimensions(parentNode);
+
     this.#canvas = document.createElement('canvas');
     this.#ctx = this.#canvas.getContext('2d')!;
-    this.#canvas.width = this.#width = parentNodeSize.width;
-    this.#canvas.height = this.#height = parentNodeSize.height;
+    this.#canvas.width = this.#width = width;
+    this.#canvas.height = this.#height = height;
 
     parentNode.appendChild(this.#canvas);
 
@@ -121,22 +136,22 @@ export class Renderer {
   }
 
   setSize(width: number, height: number): this {
-    this.#canvas.width = this.#width = width;
-    this.#canvas.height = this.#height = height;
+    this.#width = width;
+    this.#height = height;
     this.#queueRedraw();
 
     return this;
   }
 
   setWidth(width: number): this {
-    this.#canvas.width = this.#width = width;
+    this.#width = width;
     this.#queueRedraw();
 
     return this;
   }
 
   setHeight(height: number): this {
-    this.#canvas.height = this.#height = height;
+    this.#height = height;
     this.#queueRedraw();
 
     return this;
@@ -169,6 +184,7 @@ export class Renderer {
   #determineCarvingParameters(imageData: ImageData): {
     availableSeams: number;
     interpolationPixels: number;
+    carveDown: boolean;
   } {
     const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } =
       this.#options;
@@ -179,19 +195,20 @@ export class Renderer {
     const pixelDelta = scaledWidth - this.#width;
 
     if (pixelDelta === 0) {
-      return { availableSeams: 0, interpolationPixels: 0 };
+      return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
     }
 
     const seamsToCalculate = Math.abs(pixelDelta) * carvingPriority;
     const maxRatio = pixelDelta > 0 ? 1 - maxCarveDownScale : maxCarveUpSeamPercentage;
     const maxSeams = originalWidth * maxRatio;
     const direction = pixelDelta > 0 ? 1 : -1;
+    const carveDown = pixelDelta > 0;
 
     const availableSeams = Math.floor(Math.min(seamsToCalculate, maxSeams)) * direction;
 
     // if shrinking
-    if (direction === 1) {
-      return { availableSeams, interpolationPixels: 0 };
+    if (carveDown) {
+      return { availableSeams, interpolationPixels: 0, carveDown };
     } else {
       // Calculate totalPixelsToInsert based on the effective target width driven by aspect ratio and canvas dimensions,
       // capped by maxCarveUpScale.
@@ -206,20 +223,14 @@ export class Renderer {
 
       const interpolationPixels = totalPixelsToInsert;
 
-      return { availableSeams, interpolationPixels };
+      return { availableSeams: -availableSeams, interpolationPixels, carveDown };
     }
   }
 
   async redraw(): Promise<this> {
-    const originalImageLoader = this.#imageLoader;
     const originalImageData = await this.#imageLoader.imageData;
 
-    // If the image loader was changed during the redraw, bail so that we don't accidentally race ourselves
-    if (this.#imageLoader !== originalImageLoader) {
-      return this;
-    }
-
-    const { availableSeams, interpolationPixels } =
+    const { availableSeams, interpolationPixels, carveDown } =
       this.#determineCarvingParameters(originalImageData);
 
     let finalImageData: ImageData;
@@ -227,14 +238,14 @@ export class Renderer {
     if (availableSeams === 0) {
       finalImageData = originalImageData;
     } else {
-      const seamGrid = await this.#generator.generateSeamGrid(Math.abs(availableSeams));
-      if (availableSeams > 0) {
+      const seamGrid = await this.#generator.generateSeamGrid(availableSeams);
+      if (carveDown) {
         finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
       } else {
         finalImageData = this.#interpolatePixels(
           originalImageData,
           seamGrid,
-          -availableSeams,
+          availableSeams,
           interpolationPixels
         );
       }

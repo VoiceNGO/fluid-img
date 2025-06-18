@@ -20,7 +20,6 @@ class ImgResponsive extends HTMLElement {
     }
     connectedCallback() {
         this.setupResizeObserver();
-        this.initializeRenderer();
     }
     disconnectedCallback() {
         this.renderer?.destroy();
@@ -80,10 +79,8 @@ class ImgResponsive extends HTMLElement {
         return parseNumber(this.getAttribute(name), fallback);
     }
     calculateDimensions(availableWidth, availableHeight) {
-        if (availableWidth === undefined || availableHeight === undefined) {
-            availableWidth = this.parentElement?.clientWidth ?? 0;
-            availableHeight = this.parentElement?.clientHeight ?? 0;
-        }
+        availableWidth = availableWidth ?? this.clientWidth ?? 0;
+        availableHeight = availableHeight ?? this.clientHeight ?? 0;
         const requestedWidth = this.getNumericAttribute('width', Math.floor(availableWidth));
         const requestedHeight = this.getNumericAttribute('height', Math.floor(availableHeight));
         const minWidth = this.getNumericAttribute('min-width', 0);
@@ -93,10 +90,6 @@ class ImgResponsive extends HTMLElement {
         return {
             width: constrain(requestedWidth, minWidth, maxWidth),
             height: constrain(requestedHeight, minHeight, maxHeight),
-            minWidth,
-            maxWidth,
-            minHeight,
-            maxHeight,
         };
     }
     getAllAttributes() {

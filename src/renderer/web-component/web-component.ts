@@ -25,7 +25,6 @@ class ImgResponsive extends HTMLElement {
 
   connectedCallback(): void {
     this.setupResizeObserver();
-    this.initializeRenderer();
   }
 
   disconnectedCallback(): void {
@@ -97,10 +96,8 @@ class ImgResponsive extends HTMLElement {
   }
 
   private calculateDimensions(availableWidth?: number, availableHeight?: number) {
-    if (availableWidth === undefined || availableHeight === undefined) {
-      availableWidth = this.parentElement?.clientWidth ?? 0;
-      availableHeight = this.parentElement?.clientHeight ?? 0;
-    }
+    availableWidth = availableWidth ?? this.clientWidth ?? 0;
+    availableHeight = availableHeight ?? this.clientHeight ?? 0;
 
     const requestedWidth = this.getNumericAttribute('width', Math.floor(availableWidth));
     const requestedHeight = this.getNumericAttribute('height', Math.floor(availableHeight));
@@ -113,15 +110,11 @@ class ImgResponsive extends HTMLElement {
     return {
       width: constrain(requestedWidth, minWidth, maxWidth),
       height: constrain(requestedHeight, minHeight, maxHeight),
-      minWidth,
-      maxWidth,
-      minHeight,
-      maxHeight,
     };
   }
 
-  private getAllAttributes(): Record<string, string | number> {
-    const attributes: Record<string, string | number> = {};
+  private getAllAttributes(): Record<string, string> {
+    const attributes: Record<string, string> = {};
 
     for (let i = 0; i < this.attributes.length; i++) {
       const attr = this.attributes[i]!;
