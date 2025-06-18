@@ -39,9 +39,9 @@ Usage: `<img-responsive src="image.jpg" generator="random" max-carve-up-scale="5
 
 Seam carving is a content-aware image resizing technique. It intelligently removes or adds pixels to an image, allowing it to be resized without distorting important content. [Wikedia article](https://en.wikipedia.org/wiki/Seam_carving) on the topic if you want to read more.
 
-Historically, performing seam carving directly within a web browser was impractical due to its computationally intensive nature, requiring significant processing power for real-time image manipulation. However, we're cheating.
+Historically, performing seam carving directly within a web browser was impractical due to its computationally intensive nature, requiring significant processing power for real-time image manipulation. However, I'm cheating.
 
-There are two implementations of the seam carving generator (well 3, but the full one isn't practical except in demos): Random and Cached
+There are three implementations of the seam carving generator, although the full implementation is not practical except for demos:
 
 ### Random Carving
 
@@ -53,17 +53,29 @@ Inspired by this whitepaper: [Real-time content-aware image resizing](https://we
 
 ### Cached Carving
 
-For cached seam carving, we are pre-calculating all the seams in an image on a server. Those seams get compressed into a custom `.seam` file, which is then just decoded on the client.
+For cached seam carving, one must pre-calculate all the seams in an image on a server. Those seams get compressed into a custom `.seam` file, which is then decoded on the client.
 
 ### Full Carving
 
-Exactly what it sounds like. Fully calculates optimum seams. Useful in a demo to see what an image will look like when scaled, but should not be used in production as it is very slow.
+Exactly what it sounds like. Fully calculates optimum seams in the browser. Useful in a demo to see what an image will look like when scaled, but should not be used in production as it is very slow.
 
 ## TODO
 
-[x] Web component
-[x] Renderer that takes data from generators and scales to any size
-[x] Random seam carving implementation
-[ ] Random+ seam carving implementation (see whitepaper linked above)
-[ ] Finish full seam carving implementation
-[ ] Finish cached seam carving implementation
+### High Priority
+
+- [x] Web component
+- [x] Renderer that takes data from generators and scales to any size
+- [x] Random generator
+- [ ] Vertical carving
+- [ ] Random+ generator (see whitepaper linked above)
+- [ ] Finish full generator
+- [ ] Finish cached generator
+
+## Low Priority
+
+- [ ] Masking
+- [ ] Facial recognition
+
+## Pipe Dream
+
+- [ ] 2D carving
