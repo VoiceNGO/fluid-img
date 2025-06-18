@@ -1,5 +1,6 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
 import { SeamPixelPriorityGrid } from '../../utils/seam-spec/seam-spec';
+import { toCamelCase } from '../../utils/to-camel-case/to-camel-case';
 import { FullGenerator, FullGeneratorOptions } from '../../generator/full-generator/full-generator';
 import {
   CachedGenerator,
@@ -36,7 +37,6 @@ type TypedGeneratorOptions =
 type SeamOptions = GeneralOptions & TypedGeneratorOptions;
 
 type ProcessedSeamOptions = Required<GeneralOptions> & TypedGeneratorOptions;
-type CarveDirection = 'up' | 'down';
 
 export type RendererConfig = {
   parentNode: HTMLElement;
@@ -88,7 +88,7 @@ export class Renderer {
       min: number = 0,
       max: number = 1
     ): number => {
-      const value = options[name] ?? defaultValue;
+      const value = Number(options[toCamelCase(name) as keyof SeamOptions] ?? defaultValue);
       if (value < min || value > max) {
         throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
       }
@@ -100,7 +100,7 @@ export class Renderer {
       carvingPriority: getConstrainedNumber('carvingPriority', 1),
       maxCarveUpSeamPercentage: getConstrainedNumber('maxCarveUpSeamPercentage', 0.6),
       maxCarveUpScale: getConstrainedNumber('maxCarveUpScale', 10, 1, 10),
-      maxCarveDownScale: getConstrainedNumber('maxCarveDownScale', 0.1),
+      maxCarveDownScale: getConstrainedNumber('maxCarveDownScale', 0),
       scalingAxis: options.scalingAxis ?? 'horizontal',
     };
 
@@ -129,6 +129,7 @@ export class Renderer {
     this.#ctx = this.#canvas.getContext('2d')!;
     this.#canvas.width = this.#width = width;
     this.#canvas.height = this.#height = height;
+    this.#canvas.style.display = 'block';
 
     parentNode.appendChild(this.#canvas);
 
@@ -190,9 +191,9 @@ export class Renderer {
       this.#options;
     const { width: originalWidth, height: originalHeight } = imageData;
 
-    const aspectRatio = originalWidth / originalHeight;
-    const scaledWidth = Math.round(this.#height * aspectRatio);
-    const pixelDelta = scaledWidth - this.#width;
+    const targetAspectRatio = this.#width / this.#height;
+    const targetWidth = Math.round(originalHeight * targetAspectRatio);
+    const pixelDelta = originalWidth - targetWidth;
 
     if (pixelDelta === 0) {
       return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
