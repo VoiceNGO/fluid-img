@@ -116,6 +116,7 @@ export class Renderer {
         const targetAspectRatio = this.#width / this.#height;
         const targetWidth = Math.round(originalHeight * targetAspectRatio);
         const pixelDelta = originalWidth - targetWidth;
+        //
         if (pixelDelta === 0) {
             return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
         }
