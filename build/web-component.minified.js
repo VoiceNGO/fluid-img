@@ -391,28 +391,37 @@
       }
       return newOptions;
     }
+    #calculateDimensions(parentNode) {
+      let { width, height } = this.#options;
+      if (width === void 0 || height === void 0) {
+        const parentNodeSize = parentNode.getBoundingClientRect();
+        width = width ?? parentNodeSize.width;
+        height = height ?? parentNodeSize.height;
+      }
+      return { width, height };
+    }
     #initializeCanvas(parentNode) {
-      const parentNodeSize = parentNode.getBoundingClientRect();
+      const { width, height } = this.#calculateDimensions(parentNode);
       this.#canvas = document.createElement("canvas");
       this.#ctx = this.#canvas.getContext("2d");
-      this.#canvas.width = this.#width = parentNodeSize.width;
-      this.#canvas.height = this.#height = parentNodeSize.height;
+      this.#canvas.width = this.#width = width;
+      this.#canvas.height = this.#height = height;
       parentNode.appendChild(this.#canvas);
       this.#queueRedraw();
     }
     setSize(width, height) {
-      this.#canvas.width = this.#width = width;
-      this.#canvas.height = this.#height = height;
+      this.#width = width;
+      this.#height = height;
       this.#queueRedraw();
       return this;
     }
     setWidth(width) {
-      this.#canvas.width = this.#width = width;
+      this.#width = width;
       this.#queueRedraw();
       return this;
     }
     setHeight(height) {
-      this.#canvas.height = this.#height = height;
+      this.#height = height;
       this.#queueRedraw();
       return this;
     }
@@ -442,15 +451,16 @@
       const scaledWidth = Math.round(this.#height * aspectRatio);
       const pixelDelta = scaledWidth - this.#width;
       if (pixelDelta === 0) {
-        return { availableSeams: 0, interpolationPixels: 0 };
+        return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
       }
       const seamsToCalculate = Math.abs(pixelDelta) * carvingPriority;
       const maxRatio = pixelDelta > 0 ? 1 - maxCarveDownScale : maxCarveUpSeamPercentage;
       const maxSeams = originalWidth * maxRatio;
       const direction = pixelDelta > 0 ? 1 : -1;
+      const carveDown = pixelDelta > 0;
       const availableSeams = Math.floor(Math.min(seamsToCalculate, maxSeams)) * direction;
-      if (direction === 1) {
-        return { availableSeams, interpolationPixels: 0 };
+      if (carveDown) {
+        return { availableSeams, interpolationPixels: 0, carveDown };
       } else {
         const targetEffectiveWidthByRatio = Math.round(originalHeight / this.#height * this.#width);
         const targetPixelsNeeded = targetEffectiveWidthByRatio - originalWidth;
@@ -458,7 +468,7 @@
         const maxPixelsByScale = maxCarveUpImageDataWidth - originalWidth;
         const totalPixelsToInsert = Math.max(0, Math.min(targetPixelsNeeded, maxPixelsByScale));
         const interpolationPixels = totalPixelsToInsert;
-        return { availableSeams, interpolationPixels };
+        return { availableSeams: -availableSeams, interpolationPixels, carveDown };
       }
     }
     async redraw() {
@@ -467,16 +477,16 @@
       if (this.#imageLoader !== originalImageLoader) {
         return this;
       }
-      const { availableSeams, interpolationPixels } = this.#determineCarvingParameters(originalImageData);
+      const { availableSeams, interpolationPixels, carveDown } = this.#determineCarvingParameters(originalImageData);
       let finalImageData;
       if (availableSeams === 0) {
         finalImageData = originalImageData;
       } else {
-        const seamGrid = await this.#generator.generateSeamGrid(Math.abs(availableSeams));
-        if (availableSeams > 0) {
+        const seamGrid = await this.#generator.generateSeamGrid(availableSeams);
+        if (carveDown) {
           finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
         } else {
-          finalImageData = this.#interpolatePixels(originalImageData, seamGrid, -availableSeams, interpolationPixels);
+          finalImageData = this.#interpolatePixels(originalImageData, seamGrid, availableSeams, interpolationPixels);
         }
       }
       this.#canvas.width = finalImageData.width;
@@ -581,7 +591,6 @@
     }
     connectedCallback() {
       this.setupResizeObserver();
-      this.initializeRenderer();
     }
     disconnectedCallback() {
       this.renderer?.destroy();
@@ -641,10 +650,8 @@
       return parseNumber(this.getAttribute(name), fallback);
     }
     calculateDimensions(availableWidth, availableHeight) {
-      if (availableWidth === void 0 || availableHeight === void 0) {
-        availableWidth = this.parentElement?.clientWidth ?? 0;
-        availableHeight = this.parentElement?.clientHeight ?? 0;
-      }
+      availableWidth = availableWidth ?? this.clientWidth ?? 0;
+      availableHeight = availableHeight ?? this.clientHeight ?? 0;
       const requestedWidth = this.getNumericAttribute("width", Math.floor(availableWidth));
       const requestedHeight = this.getNumericAttribute("height", Math.floor(availableHeight));
       const minWidth = this.getNumericAttribute("min-width", 0);
@@ -653,11 +660,7 @@
       const maxHeight = this.getNumericAttribute("max-height", Infinity);
       return {
         width: constrain(requestedWidth, minWidth, maxWidth),
-        height: constrain(requestedHeight, minHeight, maxHeight),
-        minWidth,
-        maxWidth,
-        minHeight,
-        maxHeight
+        height: constrain(requestedHeight, minHeight, maxHeight)
       };
     }
     getAllAttributes() {
