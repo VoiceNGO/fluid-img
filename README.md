@@ -15,6 +15,12 @@ Images that just scale, intelligently, to whatever size you want them to be (wit
 
 That's it. Scale the images however you like, they'll just do their thing.
 
+### Demo
+
+[Demo Here](https://voicengo.github.io/img-responsive/public/responsive-demo.html)
+
+Or, if you want to play with it with your own images, [here is a playground](https://voicengo.github.io/img-responsive/public)
+
 ## Options
 
 Usage: `<img-responsive src="image.jpg" generator="random" max-carve-up-scale="5"></img-responsive>`
