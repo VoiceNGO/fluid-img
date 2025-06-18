@@ -1,19 +1,12 @@
 import { Renderer } from '../renderer/renderer';
 
-function constrain(val: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, val));
-}
-
-function parseNumber(val: string | null, fallback: number): number {
-  if (!val) return fallback;
-  const parsed = parseFloat(val);
-  return isNaN(parsed) ? fallback : parsed;
-}
-
 class ImgResponsive extends HTMLElement {
   private renderer: Renderer | null = null;
   private resizeObserver: ResizeObserver | null = null;
+  private intersectionObserver: IntersectionObserver | null = null;
   private updateQueue = new Set<string>();
+  private isIntersecting = false;
+  private storedDimensions: { width: number; height: number } | null = null;
 
   constructor() {
     super();
@@ -26,11 +19,13 @@ class ImgResponsive extends HTMLElement {
       'max-carve-up-seam-percentage',
       'max-carve-up-scale',
       'max-carve-down-scale',
+      'on-screen-threshold',
     ];
   }
 
   connectedCallback(): void {
     this.setupResizeObserver();
+    this.setupIntersectionObserver();
   }
 
   disconnectedCallback(): void {
@@ -38,6 +33,8 @@ class ImgResponsive extends HTMLElement {
     this.renderer = null;
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
+    this.intersectionObserver?.disconnect();
+    this.intersectionObserver = null;
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -61,9 +58,21 @@ class ImgResponsive extends HTMLElement {
       return;
     }
 
+    if (changes.includes('on-screen-threshold')) {
+      this.setupIntersectionObserver();
+    }
+
     if (!this.renderer) return;
 
-    const otherOptions: Record<string, string | null> = {};
+    const otherOptions = changes.reduce(
+      (acc, key) => {
+        if (key !== 'src' && key !== 'on-screen-threshold') {
+          acc[key] = this.getAttribute(key);
+        }
+        return acc;
+      },
+      {} as Record<string, string | null>
+    );
 
     this.renderer.setOptions(otherOptions);
   };
@@ -87,22 +96,17 @@ class ImgResponsive extends HTMLElement {
     return { width, height };
   }
 
-  private getAllAttributes(): Record<string, string> {
-    const attributes: Record<string, string> = {};
-
-    for (let i = 0; i < this.attributes.length; i++) {
-      const attr = this.attributes[i]!;
-      if (!['src'].includes(attr.name)) {
-        attributes[attr.name] = attr.value;
-      }
-    }
-
-    return attributes;
-  }
-
   private getCurrentOptions(): Record<string, string | number> {
     const dimensions = this.calculateDimensions();
-    const allAttributes = this.getAllAttributes();
+    const allAttributes = [...this.attributes].reduce(
+      (acc, attr) => {
+        if (attr.name !== 'src' && attr.name !== 'on-screen-threshold') {
+          acc[attr.name] = attr.value;
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
     return {
       ...dimensions,
@@ -113,12 +117,41 @@ class ImgResponsive extends HTMLElement {
   private setupResizeObserver(): void {
     if (!this.parentElement) return;
 
-    this.resizeObserver = new ResizeObserver((entries) => {
+    this.resizeObserver = new ResizeObserver(() => {
       const dimensions = this.calculateDimensions();
-      this.renderer?.setSize(dimensions.width, dimensions.height);
+      if (dimensions.height === 0 || dimensions.width === 0) return;
+      this.storedDimensions = dimensions;
+      this.attemptSetSize();
     });
 
     this.resizeObserver.observe(this);
+  }
+
+  private setupIntersectionObserver(): void {
+    this.intersectionObserver?.disconnect();
+
+    const threshold = this.getAttribute('on-screen-threshold') || '50px';
+    this.intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          this.isIntersecting = entry.isIntersecting;
+          if (this.isIntersecting) {
+            this.attemptSetSize();
+          }
+        }
+      },
+      {
+        rootMargin: `${threshold} ${threshold} ${threshold} ${threshold}`,
+      }
+    );
+
+    this.intersectionObserver.observe(this);
+  }
+
+  private attemptSetSize(): void {
+    if (!this.isIntersecting || !this.storedDimensions) return;
+    this.renderer?.setSize(this.storedDimensions.width, this.storedDimensions.height);
+    this.storedDimensions = null;
   }
 }
 
