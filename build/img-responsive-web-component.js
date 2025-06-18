@@ -575,7 +575,10 @@
   var ImgResponsive = class extends HTMLElement {
     renderer = null;
     resizeObserver = null;
+    intersectionObserver = null;
     updateQueue = /* @__PURE__ */ new Set();
+    isIntersecting = false;
+    storedDimensions = null;
     constructor() {
       super();
     }
@@ -585,17 +588,21 @@
         "carving-priority",
         "max-carve-up-seam-percentage",
         "max-carve-up-scale",
-        "max-carve-down-scale"
+        "max-carve-down-scale",
+        "on-screen-threshold"
       ];
     }
     connectedCallback() {
       this.setupResizeObserver();
+      this.setupIntersectionObserver();
     }
     disconnectedCallback() {
       this.renderer?.destroy();
       this.renderer = null;
       this.resizeObserver?.disconnect();
       this.resizeObserver = null;
+      this.intersectionObserver?.disconnect();
+      this.intersectionObserver = null;
     }
     attributeChangedCallback(name, oldValue, newValue) {
       if (oldValue === newValue)
@@ -614,9 +621,17 @@
         this.initializeRenderer();
         return;
       }
+      if (changes.includes("on-screen-threshold")) {
+        this.setupIntersectionObserver();
+      }
       if (!this.renderer)
         return;
-      const otherOptions = {};
+      const otherOptions = changes.reduce((acc, key) => {
+        if (key !== "src" && key !== "on-screen-threshold") {
+          acc[key] = this.getAttribute(key);
+        }
+        return acc;
+      }, {});
       this.renderer.setOptions(otherOptions);
     };
     initializeRenderer() {
@@ -635,19 +650,14 @@
       const height = this.clientHeight ?? 0;
       return { width, height };
     }
-    getAllAttributes() {
-      const attributes = {};
-      for (let i = 0; i < this.attributes.length; i++) {
-        const attr = this.attributes[i];
-        if (!["src"].includes(attr.name)) {
-          attributes[attr.name] = attr.value;
-        }
-      }
-      return attributes;
-    }
     getCurrentOptions() {
       const dimensions = this.calculateDimensions();
-      const allAttributes = this.getAllAttributes();
+      const allAttributes = [...this.attributes].reduce((acc, attr) => {
+        if (attr.name !== "src" && attr.name !== "on-screen-threshold") {
+          acc[attr.name] = attr.value;
+        }
+        return acc;
+      }, {});
       return {
         ...dimensions,
         ...allAttributes
@@ -656,11 +666,35 @@
     setupResizeObserver() {
       if (!this.parentElement)
         return;
-      this.resizeObserver = new ResizeObserver((entries) => {
+      this.resizeObserver = new ResizeObserver(() => {
         const dimensions = this.calculateDimensions();
-        this.renderer?.setSize(dimensions.width, dimensions.height);
+        if (dimensions.height === 0 || dimensions.width === 0)
+          return;
+        this.storedDimensions = dimensions;
+        this.attemptSetSize();
       });
       this.resizeObserver.observe(this);
+    }
+    setupIntersectionObserver() {
+      this.intersectionObserver?.disconnect();
+      const threshold = this.getAttribute("on-screen-threshold") || "50px";
+      this.intersectionObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          this.isIntersecting = entry.isIntersecting;
+          if (this.isIntersecting) {
+            this.attemptSetSize();
+          }
+        }
+      }, {
+        rootMargin: `${threshold} ${threshold} ${threshold} ${threshold}`
+      });
+      this.intersectionObserver.observe(this);
+    }
+    attemptSetSize() {
+      if (!this.isIntersecting || !this.storedDimensions)
+        return;
+      this.renderer?.setSize(this.storedDimensions.width, this.storedDimensions.height);
+      this.storedDimensions = null;
     }
   };
   customElements.define("img-responsive", ImgResponsive);
