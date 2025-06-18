@@ -24462,7 +24462,7 @@
   var import_react6 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
-  // ../build/web-component.minified.js
+  // ../build/img-responsive-web-component.js
   (() => {
     var EvenWidthImage = class extends Image {
       #rotate;
