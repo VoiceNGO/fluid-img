@@ -5,6 +5,7 @@ const images = [
   'dogs-on-beach.jpg',
   'kiyomizu.jpg',
   'neuschwanstein.jpg',
+  'yosemite.jpg',
 ];
 
 function ImageSelector({ onSelect }) {
