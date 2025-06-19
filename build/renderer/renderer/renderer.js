@@ -1,8 +1,9 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
-import { toCamelCase } from '../../utils/to-camel-case/to-camel-case';
 import { FullGenerator } from '../../generator/full-generator/full-generator';
 import { CachedGenerator, } from '../../generator/cached-generator/cached-generator';
 import { RandomGenerator, } from '../../generator/random-generator/random-generator';
+import { toKebabCase } from '../../utils/to-kebab-case/to-kebab-case';
+import { Profiler } from '../../utils/profiler/profiler';
 export class Renderer {
     #canvas;
     #ctx;
@@ -12,9 +13,11 @@ export class Renderer {
     #options;
     #generator;
     #redrawQueued = false;
+    #profiler;
     constructor(config) {
         const { parentNode, src, ...options } = config;
         this.#options = this.#validateAndApplyDefaults(options);
+        this.#profiler = new Profiler(this.#options.logger);
         this.#imageLoader = new ImageLoader(src, {
             rotate: this.#options.scalingAxis === 'vertical',
         });
@@ -37,7 +40,7 @@ export class Renderer {
     }
     #validateAndApplyDefaults(options) {
         const getConstrainedNumber = (name, defaultValue, min = 0, max = 1) => {
-            const value = Number(options[toCamelCase(name)] ?? defaultValue);
+            const value = Number(options[toKebabCase(name)] ?? defaultValue);
             if (value < min || value > max) {
                 throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
             }
@@ -48,8 +51,9 @@ export class Renderer {
             carvingPriority: getConstrainedNumber('carvingPriority', 1),
             maxCarveUpSeamPercentage: getConstrainedNumber('maxCarveUpSeamPercentage', 0.6),
             maxCarveUpScale: getConstrainedNumber('maxCarveUpScale', 10, 1, 10),
-            maxCarveDownScale: getConstrainedNumber('maxCarveDownScale', 0),
+            maxCarveDownScale: getConstrainedNumber('maxCarveDownScale', 1),
             scalingAxis: options.scalingAxis ?? 'horizontal',
+            logger: options.logger ?? (() => { }),
         };
         if (!newOptions.generator) {
             newOptions.generator = 'full';
@@ -121,7 +125,7 @@ export class Renderer {
             return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
         }
         const seamsToCalculate = Math.abs(pixelDelta) * carvingPriority;
-        const maxRatio = pixelDelta > 0 ? 1 - maxCarveDownScale : maxCarveUpSeamPercentage;
+        const maxRatio = pixelDelta > 0 ? maxCarveDownScale : maxCarveUpSeamPercentage;
         const maxSeams = originalWidth * maxRatio;
         const direction = pixelDelta > 0 ? 1 : -1;
         const carveDown = pixelDelta > 0;
@@ -144,6 +148,7 @@ export class Renderer {
         }
     }
     async redraw() {
+        this.#profiler.start('redraw');
         const originalImageData = await this.#imageLoader.imageData;
         const { availableSeams, interpolationPixels, carveDown } = this.#determineCarvingParameters(originalImageData);
         let finalImageData;
@@ -151,7 +156,9 @@ export class Renderer {
             finalImageData = originalImageData;
         }
         else {
+            this.#profiler.start('generateSeamGrid', 1);
             const seamGrid = await this.#generator.generateSeamGrid(availableSeams);
+            this.#profiler.end('generateSeamGrid');
             if (carveDown) {
                 finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
             }
@@ -168,6 +175,7 @@ export class Renderer {
         styleRef.transform = isVertical ? 'rotate(-90deg) translateX(-100%)' : '';
         styleRef.width = `${isVertical ? this.#height : this.#width}px`;
         styleRef.height = `${isVertical ? this.#width : this.#height}px`;
+        this.#profiler.end('redraw');
         return this;
     }
     #interpolatePixels(originalImageData, seamGrid, seamsAvailable, totalPixelsToInsert) {
@@ -179,6 +187,7 @@ export class Renderer {
         const numPixels = originalData.length / 4;
         const basePixelsPerLocation = Math.floor(totalPixelsToInsert / seamsAvailable);
         const extraPixelsCount = totalPixelsToInsert % seamsAvailable;
+        let x = 0;
         for (let readIndex = 0; readIndex < numPixels; readIndex++) {
             const priority = seamGrid[readIndex];
             const readIndexRgba = readIndex * 4;
@@ -191,34 +200,37 @@ export class Renderer {
                 const pixelsToInterpolate = addExtraPixel
                     ? basePixelsPerLocation + 1
                     : basePixelsPerLocation;
-                for (let i = 0; i < pixelsToInterpolate; i++) {
-                    const x = readIndex % originalWidth;
-                    if (x === 0) {
-                        // First column, just duplicate the pixel
+                if (x === 0) {
+                    // First column, just duplicate the pixel
+                    for (let i = 0; i < pixelsToInterpolate; i++) {
                         newData[writeIndex] = originalData[readIndexRgba];
                         newData[writeIndex + 1] = originalData[readIndexRgba + 1];
                         newData[writeIndex + 2] = originalData[readIndexRgba + 2];
                         newData[writeIndex + 3] = originalData[readIndexRgba + 3];
+                        writeIndex += 4;
                     }
-                    else {
-                        // Interpolate with the pixel to the left
-                        const leftReadIndexRgba = (readIndex - 1) * 4;
+                }
+                else {
+                    // Interpolate with the pixel to the left
+                    const leftReadIndexRgba = (readIndex - 1) * 4;
+                    const r0 = originalData[leftReadIndexRgba];
+                    const g0 = originalData[leftReadIndexRgba + 1];
+                    const b0 = originalData[leftReadIndexRgba + 2];
+                    const a0 = originalData[leftReadIndexRgba + 3];
+                    const dr = originalData[readIndexRgba] - r0;
+                    const dg = originalData[readIndexRgba + 1] - g0;
+                    const db = originalData[readIndexRgba + 2] - b0;
+                    const da = originalData[readIndexRgba + 3] - a0;
+                    const denominator = pixelsToInterpolate + 1;
+                    for (let i = 0; i < pixelsToInterpolate; i++) {
                         // Calculate interpolation factor for the current interpolated pixel
-                        const interpolationFactor = (i + 1) / (pixelsToInterpolate + 1);
-                        newData[writeIndex] = Math.round(originalData[leftReadIndexRgba] +
-                            (originalData[readIndexRgba] - originalData[leftReadIndexRgba]) *
-                                interpolationFactor);
-                        newData[writeIndex + 1] = Math.round(originalData[leftReadIndexRgba + 1] +
-                            (originalData[readIndexRgba + 1] - originalData[leftReadIndexRgba + 1]) *
-                                interpolationFactor);
-                        newData[writeIndex + 2] = Math.round(originalData[leftReadIndexRgba + 2] +
-                            (originalData[readIndexRgba + 2] - originalData[leftReadIndexRgba + 2]) *
-                                interpolationFactor);
-                        newData[writeIndex + 3] = Math.round(originalData[leftReadIndexRgba + 3] +
-                            (originalData[readIndexRgba + 3] - originalData[leftReadIndexRgba + 3]) *
-                                interpolationFactor);
+                        const interpolationFactor = (i + 1) / denominator;
+                        newData[writeIndex] = Math.round(r0 + dr * interpolationFactor);
+                        newData[writeIndex + 1] = Math.round(g0 + dg * interpolationFactor);
+                        newData[writeIndex + 2] = Math.round(b0 + db * interpolationFactor);
+                        newData[writeIndex + 3] = Math.round(a0 + da * interpolationFactor);
+                        writeIndex += 4;
                     }
-                    writeIndex += 4;
                 }
             }
             // Always write the original pixel
@@ -227,6 +239,9 @@ export class Renderer {
             newData[writeIndex + 2] = originalData[readIndexRgba + 2];
             newData[writeIndex + 3] = originalData[readIndexRgba + 3];
             writeIndex += 4;
+            if (++x === originalWidth) {
+                x = 0;
+            }
         }
         if (writeIndex !== newSize) {
             console.error(`[Seams-1] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`);

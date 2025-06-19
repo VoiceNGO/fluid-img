@@ -20,10 +20,12 @@ import { throwGeneratorClass } from '../../utils/throw-generator-class/throw-gen
 export type RandomGeneratorOptions = {
   imageLoader: ImageLoader;
   batchPercentage?: number;
+  minBatchSize?: number;
 };
 
 const defaultOptions: Required<PickOptional<RandomGeneratorOptions>> = {
-  batchPercentage: 0.1,
+  batchPercentage: 0.05,
+  minBatchSize: 10,
 };
 
 class RandomGeneratorClass implements SeamGenerator {
@@ -63,8 +65,11 @@ class RandomGeneratorClass implements SeamGenerator {
     const seams = Array.from({ length: currentWidth }, (_, ix) => this.#getSeam(energyMap, ix));
     seams.sort((a, b) => a.energy - b.energy);
 
-    // the '>> 1 << 1' ensures that the batch size is even.
-    const batchSize = (Math.ceil(currentWidth * this.#options.batchPercentage) >> 1) << 1;
+    const batchSize = Math.max(
+      // the '>> 1 << 1' ensures that the batch size is even.
+      (Math.ceil(currentWidth * this.#options.batchPercentage) >> 1) << 1,
+      Math.min(this.#options.minBatchSize, currentWidth)
+    );
     const batchSeams = seams.slice(0, batchSize);
 
     let seamIndex = this.#generatedSeams;
