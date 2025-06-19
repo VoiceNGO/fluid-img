@@ -77,6 +77,15 @@ class ImgResponsive extends HTMLElement {
     this.renderer.setOptions(otherOptions);
   };
 
+  private dispatchLogEvent = (message: string): void => {
+    const event = new CustomEvent('log', {
+      detail: { message },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
+  };
+
   private initializeRenderer(): void {
     const src = this.getAttribute('src');
     if (!src) return;
@@ -86,6 +95,7 @@ class ImgResponsive extends HTMLElement {
       ...options,
       src,
       parentNode: this,
+      logger: this.dispatchLogEvent,
     });
   }
 

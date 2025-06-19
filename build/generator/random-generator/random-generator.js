@@ -2,7 +2,8 @@ import { deterministicBinaryRnd } from '../../utils/deterministic-binary-rnd/det
 import { EnergyMap2D } from '../energy-map/energy-map';
 import { throwGeneratorClass } from '../../utils/throw-generator-class/throw-generator-class';
 const defaultOptions = {
-    batchPercentage: 0.1,
+    batchPercentage: 0.05,
+    minBatchSize: 10,
 };
 class RandomGeneratorClass {
     #imageLoader;
@@ -32,8 +33,9 @@ class RandomGeneratorClass {
         this.#generateRandomConnections(currentWidth, currentHeight);
         const seams = Array.from({ length: currentWidth }, (_, ix) => this.#getSeam(energyMap, ix));
         seams.sort((a, b) => a.energy - b.energy);
+        const batchSize = Math.max(
         // the '>> 1 << 1' ensures that the batch size is even.
-        const batchSize = (Math.ceil(currentWidth * this.#options.batchPercentage) >> 1) << 1;
+        (Math.ceil(currentWidth * this.#options.batchPercentage) >> 1) << 1, Math.min(this.#options.minBatchSize, currentWidth));
         const batchSeams = seams.slice(0, batchSize);
         let seamIndex = this.#generatedSeams;
         for (let i = 0; i < batchSeams.length; i++) {

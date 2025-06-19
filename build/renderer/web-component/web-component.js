@@ -61,6 +61,14 @@ class ImgResponsive extends HTMLElement {
         }, {});
         this.renderer.setOptions(otherOptions);
     };
+    dispatchLogEvent = (message) => {
+        const event = new CustomEvent('log', {
+            detail: { message },
+            bubbles: true,
+            composed: true,
+        });
+        this.dispatchEvent(event);
+    };
     initializeRenderer() {
         const src = this.getAttribute('src');
         if (!src)
@@ -70,6 +78,7 @@ class ImgResponsive extends HTMLElement {
             ...options,
             src,
             parentNode: this,
+            logger: this.dispatchLogEvent,
         });
     }
     calculateDimensions() {
