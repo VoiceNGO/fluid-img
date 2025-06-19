@@ -24,15 +24,15 @@ function Controls({ config, setConfig, onImageUpload }) {
           </div>
           <div className="control-group">
             <label>
-              Max down scaling: {config.maxCarveDownScale}%
+              Max down scaling: {Math.round(config.maxCarveDownScale * 100)}%
               <HelpTooltip>Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used.</HelpTooltip>
             </label>
             <input
               type="range"
               min="0"
               max="100"
-              value={config.maxCarveDownScale}
-              onChange={(e) => handleConfigChange('maxCarveDownScale', e.target.value)}
+              value={config.maxCarveDownScale * 100}
+              onChange={(e) => handleConfigChange('maxCarveDownScale', e.target.value / 100)}
             />
           </div>
           <div className="control-group">
@@ -44,21 +44,22 @@ function Controls({ config, setConfig, onImageUpload }) {
               type="range"
               min="1"
               max="10"
+              step="0.1"
               value={config.maxCarveUpScale}
               onChange={(e) => handleConfigChange('maxCarveUpScale', e.target.value)}
             />
           </div>
           <div className="control-group">
             <label>
-              % of seams to use for enlarging: {config.maxCarveUpSeamPercentage}%
+              % of seams to use for enlarging: {Math.round(config.maxCarveUpSeamPercentage * 100)}%
               <HelpTooltip>Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used.</HelpTooltip>
             </label>
             <input
               type="range"
               min="0"
               max="100"
-              value={config.maxCarveUpSeamPercentage}
-              onChange={(e) => handleConfigChange('maxCarveUpSeamPercentage', e.target.value)}
+              value={config.maxCarveUpSeamPercentage * 100}
+              onChange={(e) => handleConfigChange('maxCarveUpSeamPercentage', e.target.value / 100)}
             />
           </div>
           <div className="control-group">
@@ -91,6 +92,7 @@ function Controls({ config, setConfig, onImageUpload }) {
               </button>
             </div>
           </div>
+          {/*
           <div className="control-group">
             <label>
               <input
@@ -115,6 +117,7 @@ function Controls({ config, setConfig, onImageUpload }) {
               <HelpTooltip>Displays a grayscale 'energy map' of the image. Darker areas have lower energy and are more likely to be carved out by seams. Lighter areas are protected.</HelpTooltip>
             </label>
           </div>
+          */}
         </div>
       )}
     </div>
