@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Responsive Image Demo</title>
-    <script src="img-responsive-web-component.js"></script>
+    <script src="responsive-img-web-component.js"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -16,7 +16,7 @@
             text-align: center;
             color: #0056b3;
         }
-        img-responsive {
+        responsive-img {
             display: block;
             border: 1px solid #CCC;
             max-width: 1000px;
@@ -49,13 +49,13 @@
         }
     </script>
 
-    <a href="https://github.com/VoiceNGO/img-responsive">Github Repo</a>
+    <a href="https://github.com/VoiceNGO/responsive-img">Github Repo</a>
 
-    <img-responsive src="./images/Broadway_tower.jpg" height="400" generator="random"></img-responsive>
-    <img-responsive src="./images/yosemite.jpg" height="400" generator="random"></img-responsive>
-    <img-responsive src="./images/kiyomizu.jpg" height="400" generator="random"></img-responsive>
-    <img-responsive src="./images/neuschwanstein.jpg" height="400" generator="random"></img-responsive>
-    <img-responsive src="./images/railay.jpg" height="400" generator="random"></img-responsive>
-    <img-responsive src="./images/great-wave.jpg" height="400" generator="random"></img-responsive>
+    <responsive-img src="./images/Broadway_tower.jpg" height="400" generator="random"></responsive-img>
+    <responsive-img src="./images/yosemite.jpg" height="400" generator="random"></responsive-img>
+    <responsive-img src="./images/kiyomizu.jpg" height="400" generator="random"></responsive-img>
+    <responsive-img src="./images/neuschwanstein.jpg" height="400" generator="random"></responsive-img>
+    <responsive-img src="./images/railay.jpg" height="400" generator="random" max-carve-up-seam-percentage="0.31"></responsive-img>
+    <responsive-img src="./images/great-wave.jpg" height="400" generator="random"></responsive-img>
 </body>
 </html>

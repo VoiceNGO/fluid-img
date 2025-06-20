@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Draggable from './Draggable';
 
 function LogWindow({ logs }) {
   const [isVisible, setIsVisible] = useState(true);
@@ -13,18 +14,20 @@ function LogWindow({ logs }) {
   if (!isVisible) return null;
 
   return (
-    <div className="log-window-container">
-      <div onClick={() => setIsVisible(false)} className="log-window-close">
-        X
+    <Draggable>
+      <div className="log-window-container">
+        <div onClick={() => setIsVisible(false)} className="log-window-close">
+          X
+        </div>
+        <div className="log-window" ref={logContainerRef}>
+          {logs.map((log, index) => (
+            <div key={index} className="log-message">
+              {log}
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="log-window" ref={logContainerRef}>
-        {logs.map((log, index) => (
-          <div key={index} className="log-message">
-            {log}
-          </div>
-        ))}
-      </div>
-    </div>
+    </Draggable>
   );
 }
 

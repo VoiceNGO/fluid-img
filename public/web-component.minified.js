@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 (() => {
   // build/utils/image-loader/image-loader.js
   var EvenWidthImage = class extends Image {
@@ -10,7 +10,7 @@
     }
     get width() {
       const originalWidth = this.#rotate ? super.height : super.width;
-      return originalWidth - originalWidth % 2;
+      return originalWidth - (originalWidth % 2);
     }
     get height() {
       return this.#rotate ? super.width : super.height;
@@ -40,7 +40,7 @@
     #loadImageData(image) {
       return new Promise((resolve) => {
         const canvas = new OffscreenCanvas(image.width, image.height);
-        const context = canvas.getContext("2d");
+        const context = canvas.getContext('2d');
         if (this.#rotate) {
           context.translate(image.width, 0);
           context.rotate(Math.PI / 2);
@@ -75,7 +75,7 @@
       return new Uint16Array();
     }
   };
-  var FullGenerator = true ? FullGeneratorClass : throwGeneratorClass("FullGenerator");
+  var FullGenerator = true ? FullGeneratorClass : throwGeneratorClass('FullGenerator');
 
   // build/generator/cached-generator/cached-generator.js
   var CachedGeneratorClass = class {
@@ -87,7 +87,7 @@
       return new Uint16Array();
     }
   };
-  var CachedGenerator = true ? CachedGeneratorClass : throwGeneratorClass("CachedGenerator");
+  var CachedGenerator = true ? CachedGeneratorClass : throwGeneratorClass('CachedGenerator');
 
   // build/utils/deterministic-binary-rnd/deterministic-binary-rnd.js
   var deterministicBinaryRnd = (seed1) => (seed2) => {
@@ -110,10 +110,10 @@
     let lastIndex = -1;
     for (const deleteIndex of uniqueSortedIndicesToRemove) {
       if (lastIndex === deleteIndex) {
-        throw new Error("[deleteArrayIndices]: Duplicate index detected");
+        throw new Error('[deleteArrayIndices]: Duplicate index detected');
       }
       if (lastIndex > deleteIndex) {
-        throw new Error("[deleteArrayIndices]: Indices are not sorted");
+        throw new Error('[deleteArrayIndices]: Indices are not sorted');
       }
       const chunkSize = deleteIndex - sourceStart;
       if (chunkSize > 0) {
@@ -184,8 +184,20 @@
         for (let x = 0; x < this.#width; x++) {
           const x1 = Math.max(0, x - 1);
           const x3 = Math.min(this.#width - 1, x + 1);
-          const gx = -prevRow[x1] + prevRow[x3] + -currentRow[x1] * 2 + currentRow[x3] * 2 + -nextRow[x1] + nextRow[x3];
-          const gy = -prevRow[x1] + -prevRow[x] * 2 + -prevRow[x3] + nextRow[x1] + nextRow[x] * 2 + nextRow[x3];
+          const gx =
+            -prevRow[x1] +
+            prevRow[x3] +
+            -currentRow[x1] * 2 +
+            currentRow[x3] * 2 +
+            -nextRow[x1] +
+            nextRow[x3];
+          const gy =
+            -prevRow[x1] +
+            -prevRow[x] * 2 +
+            -prevRow[x3] +
+            nextRow[x1] +
+            nextRow[x] * 2 +
+            nextRow[x3];
           const totalEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
           this.#data[y][x] = totalEnergy >> 3;
         }
@@ -210,7 +222,8 @@
         this.#originalIndices[y] = deleteArrayIndices(this.#originalIndices[y], [xToRemove]);
       }
       this.#width--;
-      const g = (colInNewCoord, removedOriginalIndex) => colInNewCoord < removedOriginalIndex ? colInNewCoord : colInNewCoord + 1;
+      const g = (colInNewCoord, removedOriginalIndex) =>
+        colInNewCoord < removedOriginalIndex ? colInNewCoord : colInNewCoord + 1;
       for (let y = 0; y < this.#height; y++) {
         const removedColOrigIdx = xIndices[y];
         const y1 = Math.max(0, y - 1);
@@ -229,8 +242,20 @@
           const x1 = Math.max(0, g(xCurrent - 1, removedColOrigIdx));
           const x3 = Math.min(this.#grayscaleMap[0].length - 1, g(xCurrent + 1, removedColOrigIdx));
           const xCenter = g(xCurrent, removedColOrigIdx);
-          const gx = -prevRow[x1] + prevRow[x3] + -currentRow[x1] * 2 + currentRow[x3] * 2 + -nextRow[x1] + nextRow[x3];
-          const gy = -prevRow[x1] + -prevRow[xCenter] * 2 + -prevRow[x3] + nextRow[x1] + nextRow[xCenter] * 2 + nextRow[x3];
+          const gx =
+            -prevRow[x1] +
+            prevRow[x3] +
+            -currentRow[x1] * 2 +
+            currentRow[x3] * 2 +
+            -nextRow[x1] +
+            nextRow[x3];
+          const gy =
+            -prevRow[x1] +
+            -prevRow[xCenter] * 2 +
+            -prevRow[x3] +
+            nextRow[x1] +
+            nextRow[xCenter] * 2 +
+            nextRow[x3];
           const totalEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
           this.#data[y][xCurrent] = totalEnergy >> 3;
         }
@@ -245,7 +270,10 @@
         const indicesToRemoveForRow = seams.map((seamPath) => seamPath[y]).sort((a, b) => a - b);
         this.#data[y] = deleteArrayIndices(this.#data[y], indicesToRemoveForRow);
         this.#grayscaleMap[y] = deleteArrayIndices(this.#grayscaleMap[y], indicesToRemoveForRow);
-        this.#originalIndices[y] = deleteArrayIndices(this.#originalIndices[y], indicesToRemoveForRow);
+        this.#originalIndices[y] = deleteArrayIndices(
+          this.#originalIndices[y],
+          indicesToRemoveForRow
+        );
       }
       this.#width -= numSeamsToRemove;
       this.#computeFullEnergyMap();
@@ -254,7 +282,7 @@
 
   // build/generator/random-generator/random-generator.js
   var defaultOptions = {
-    batchPercentage: 0.1
+    batchPercentage: 0.1,
   };
   var RandomGeneratorClass = class {
     #imageLoader;
@@ -284,7 +312,7 @@
       this.#generateRandomConnections(currentWidth, currentHeight);
       const seams = Array.from({ length: currentWidth }, (_, ix) => this.#getSeam(energyMap, ix));
       seams.sort((a, b) => a.energy - b.energy);
-      const batchSize = Math.ceil(currentWidth * this.#options.batchPercentage) >> 1 << 1;
+      const batchSize = (Math.ceil(currentWidth * this.#options.batchPercentage) >> 1) << 1;
       const batchSeams = seams.slice(0, batchSize);
       let seamIndex = this.#generatedSeams;
       for (let i = 0; i < batchSeams.length; i++) {
@@ -292,7 +320,7 @@
         seam.seam.forEach((x, y) => {
           const originalIndex = originalIndices[y][x];
           if (this.#seamGrid[originalIndex] !== 65535) {
-            throw new Error("Seam overlap detected");
+            throw new Error('Seam overlap detected');
           }
           this.#seamGrid[originalIndex] = seamIndex;
         });
@@ -340,7 +368,7 @@
       return this.#seamGrid;
     }
   };
-  var RandomGenerator = true ? RandomGeneratorClass : throwGeneratorClass("RandomGenerator");
+  var RandomGenerator = true ? RandomGeneratorClass : throwGeneratorClass('RandomGenerator');
 
   // build/renderer/renderer/renderer.js
   var Renderer = class {
@@ -356,7 +384,7 @@
       const { parentNode, src, ...options } = config;
       this.#options = this.#validateAndApplyDefaults(options);
       this.#imageLoader = new ImageLoader(src, {
-        rotate: this.#options.scalingAxis === "vertical"
+        rotate: this.#options.scalingAxis === 'vertical',
       });
       this.#generator = this.#createGenerator();
       this.#initializeCanvas(parentNode);
@@ -367,9 +395,9 @@
     #createGenerator() {
       const options = { ...this.#options, imageLoader: this.#imageLoader };
       switch (options.generator) {
-        case "random":
+        case 'random':
           return new RandomGenerator(options);
-        case "cached":
+        case 'cached':
           return new CachedGenerator(options);
         default:
           return new FullGenerator(options);
@@ -385,14 +413,14 @@
       };
       const newOptions = {
         ...options,
-        carvingPriority: getConstrainedNumber("carvingPriority", 1),
-        maxCarveUpSeamPercentage: getConstrainedNumber("maxCarveUpSeamPercentage", 0.6),
-        maxCarveUpScale: getConstrainedNumber("maxCarveUpScale", 10, 1, 10),
-        maxCarveDownScale: getConstrainedNumber("maxCarveDownScale", 0),
-        scalingAxis: options.scalingAxis ?? "horizontal"
+        carvingPriority: getConstrainedNumber('carvingPriority', 1),
+        maxCarveUpSeamPercentage: getConstrainedNumber('maxCarveUpSeamPercentage', 0.6),
+        maxCarveUpScale: getConstrainedNumber('maxCarveUpScale', 10, 1, 10),
+        maxCarveDownScale: getConstrainedNumber('maxCarveDownScale', 0),
+        scalingAxis: options.scalingAxis ?? 'horizontal',
       };
       if (!newOptions.generator) {
-        newOptions.generator = "full";
+        newOptions.generator = 'full';
       }
       return newOptions;
     }
@@ -407,11 +435,11 @@
     }
     #initializeCanvas(parentNode) {
       const { width, height } = this.#calculateDimensions(parentNode);
-      this.#canvas = document.createElement("canvas");
-      this.#ctx = this.#canvas.getContext("2d");
+      this.#canvas = document.createElement('canvas');
+      this.#ctx = this.#canvas.getContext('2d');
       this.#canvas.width = this.#width = width;
       this.#canvas.height = this.#height = height;
-      this.#canvas.style.display = "block";
+      this.#canvas.style.display = 'block';
       parentNode.appendChild(this.#canvas);
       this.#queueRedraw();
     }
@@ -434,7 +462,7 @@
     setOptions(options) {
       this.#options = this.#validateAndApplyDefaults({
         ...this.#options,
-        ...options
+        ...options,
       });
       this.#queueRedraw();
       return this;
@@ -451,7 +479,8 @@
     }
     // The total number of seams to add or remove.
     #determineCarvingParameters(imageData) {
-      const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } = this.#options;
+      const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } =
+        this.#options;
       const { width: originalWidth, height: originalHeight } = imageData;
       const targetAspectRatio = this.#width / this.#height;
       const targetWidth = Math.round(originalHeight * targetAspectRatio);
@@ -468,7 +497,9 @@
       if (carveDown) {
         return { availableSeams, interpolationPixels: 0, carveDown };
       } else {
-        const targetEffectiveWidthByRatio = Math.round(originalHeight / this.#height * this.#width);
+        const targetEffectiveWidthByRatio = Math.round(
+          (originalHeight / this.#height) * this.#width
+        );
         const targetPixelsNeeded = targetEffectiveWidthByRatio - originalWidth;
         const maxCarveUpImageDataWidth = Math.floor(originalWidth * maxCarveUpScale);
         const maxPixelsByScale = maxCarveUpImageDataWidth - originalWidth;
@@ -479,7 +510,8 @@
     }
     async redraw() {
       const originalImageData = await this.#imageLoader.imageData;
-      const { availableSeams, interpolationPixels, carveDown } = this.#determineCarvingParameters(originalImageData);
+      const { availableSeams, interpolationPixels, carveDown } =
+        this.#determineCarvingParameters(originalImageData);
       let finalImageData;
       if (availableSeams === 0) {
         finalImageData = originalImageData;
@@ -488,16 +520,21 @@
         if (carveDown) {
           finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
         } else {
-          finalImageData = this.#interpolatePixels(originalImageData, seamGrid, availableSeams, interpolationPixels);
+          finalImageData = this.#interpolatePixels(
+            originalImageData,
+            seamGrid,
+            availableSeams,
+            interpolationPixels
+          );
         }
       }
       this.#canvas.width = finalImageData.width;
       this.#canvas.height = finalImageData.height;
       this.#ctx.putImageData(finalImageData, 0, 0);
       const styleRef = this.#canvas.style;
-      const isVertical = this.#options.scalingAxis === "vertical";
-      styleRef.transformOrigin = "0 0";
-      styleRef.transform = isVertical ? "rotate(-90deg) translateX(-100%)" : "";
+      const isVertical = this.#options.scalingAxis === 'vertical';
+      styleRef.transformOrigin = '0 0';
+      styleRef.transform = isVertical ? 'rotate(-90deg) translateX(-100%)' : '';
       styleRef.width = `${isVertical ? this.#height : this.#width}px`;
       styleRef.height = `${isVertical ? this.#width : this.#height}px`;
       return this;
@@ -515,8 +552,12 @@
         const priority = seamGrid[readIndex];
         const readIndexRgba = readIndex * 4;
         if (priority < seamsAvailable) {
-          const addExtraPixel = extraPixelsCount > 0 && priority * extraPixelsCount % seamsAvailable < extraPixelsCount;
-          const pixelsToInterpolate = addExtraPixel ? basePixelsPerLocation + 1 : basePixelsPerLocation;
+          const addExtraPixel =
+            extraPixelsCount > 0 &&
+            (priority * extraPixelsCount) % seamsAvailable < extraPixelsCount;
+          const pixelsToInterpolate = addExtraPixel
+            ? basePixelsPerLocation + 1
+            : basePixelsPerLocation;
           for (let i = 0; i < pixelsToInterpolate; i++) {
             const x = readIndex % originalWidth;
             if (x === 0) {
@@ -527,10 +568,26 @@
             } else {
               const leftReadIndexRgba = (readIndex - 1) * 4;
               const interpolationFactor = (i + 1) / (pixelsToInterpolate + 1);
-              newData[writeIndex] = Math.round(originalData[leftReadIndexRgba] + (originalData[readIndexRgba] - originalData[leftReadIndexRgba]) * interpolationFactor);
-              newData[writeIndex + 1] = Math.round(originalData[leftReadIndexRgba + 1] + (originalData[readIndexRgba + 1] - originalData[leftReadIndexRgba + 1]) * interpolationFactor);
-              newData[writeIndex + 2] = Math.round(originalData[leftReadIndexRgba + 2] + (originalData[readIndexRgba + 2] - originalData[leftReadIndexRgba + 2]) * interpolationFactor);
-              newData[writeIndex + 3] = Math.round(originalData[leftReadIndexRgba + 3] + (originalData[readIndexRgba + 3] - originalData[leftReadIndexRgba + 3]) * interpolationFactor);
+              newData[writeIndex] = Math.round(
+                originalData[leftReadIndexRgba] +
+                  (originalData[readIndexRgba] - originalData[leftReadIndexRgba]) *
+                    interpolationFactor
+              );
+              newData[writeIndex + 1] = Math.round(
+                originalData[leftReadIndexRgba + 1] +
+                  (originalData[readIndexRgba + 1] - originalData[leftReadIndexRgba + 1]) *
+                    interpolationFactor
+              );
+              newData[writeIndex + 2] = Math.round(
+                originalData[leftReadIndexRgba + 2] +
+                  (originalData[readIndexRgba + 2] - originalData[leftReadIndexRgba + 2]) *
+                    interpolationFactor
+              );
+              newData[writeIndex + 3] = Math.round(
+                originalData[leftReadIndexRgba + 3] +
+                  (originalData[readIndexRgba + 3] - originalData[leftReadIndexRgba + 3]) *
+                    interpolationFactor
+              );
             }
             writeIndex += 4;
           }
@@ -542,7 +599,9 @@
         writeIndex += 4;
       }
       if (writeIndex !== newSize) {
-        console.error(`[Seams-1] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`);
+        console.error(
+          `[Seams-1] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`
+        );
       }
       return new ImageData(newData, newWidth, height);
     }
@@ -565,7 +624,9 @@
         }
       }
       if (writeIndex !== newSize) {
-        console.error(`[Seams-2] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`);
+        console.error(
+          `[Seams-2] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`
+        );
       }
       return new ImageData(newData, newWidth, height);
     }
@@ -581,11 +642,11 @@
     }
     static get observedAttributes() {
       return [
-        "src",
-        "carving-priority",
-        "max-carve-up-seam-percentage",
-        "max-carve-up-scale",
-        "max-carve-down-scale"
+        'src',
+        'carving-priority',
+        'max-carve-up-seam-percentage',
+        'max-carve-up-scale',
+        'max-carve-down-scale',
       ];
     }
     connectedCallback() {
@@ -598,8 +659,7 @@
       this.resizeObserver = null;
     }
     attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue)
-        return;
+      if (oldValue === newValue) return;
       if (!this.updateQueue.size) {
         setTimeout(this.processUpdates);
       }
@@ -608,26 +668,24 @@
     processUpdates = () => {
       const changes = Array.from(this.updateQueue);
       this.updateQueue.clear();
-      if (changes.includes("src")) {
+      if (changes.includes('src')) {
         this.renderer?.destroy();
         this.renderer = null;
         this.initializeRenderer();
         return;
       }
-      if (!this.renderer)
-        return;
+      if (!this.renderer) return;
       const otherOptions = {};
       this.renderer.setOptions(otherOptions);
     };
     initializeRenderer() {
-      const src = this.getAttribute("src");
-      if (!src)
-        return;
+      const src = this.getAttribute('src');
+      if (!src) return;
       const options = this.getCurrentOptions();
       this.renderer = new Renderer({
         ...options,
         src,
-        parentNode: this
+        parentNode: this,
       });
     }
     calculateDimensions() {
@@ -639,7 +697,7 @@
       const attributes = {};
       for (let i = 0; i < this.attributes.length; i++) {
         const attr = this.attributes[i];
-        if (!["src"].includes(attr.name)) {
+        if (!['src'].includes(attr.name)) {
           attributes[attr.name] = attr.value;
         }
       }
@@ -650,12 +708,11 @@
       const allAttributes = this.getAllAttributes();
       return {
         ...dimensions,
-        ...allAttributes
+        ...allAttributes,
       };
     }
     setupResizeObserver() {
-      if (!this.parentElement)
-        return;
+      if (!this.parentElement) return;
       this.resizeObserver = new ResizeObserver((entries) => {
         const dimensions = this.calculateDimensions();
         this.renderer?.setSize(dimensions.width, dimensions.height);
@@ -663,5 +720,5 @@
       this.resizeObserver.observe(this);
     }
   };
-  customElements.define("img-responsive", ImgResponsive);
+  customElements.define('responsive-img', ImgResponsive);
 })();

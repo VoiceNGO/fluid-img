@@ -21,9 +21,11 @@
     #imgPromise;
     #imageDataPromise;
     #rotate;
-    constructor(src, options = {}) {
+    #profiler;
+    constructor(src, options) {
       this.#src = src;
-      this.#rotate = options.rotate ?? false;
+      this.#rotate = options.rotate;
+      this.#profiler = options.profiler;
       this.#imgPromise = this.#loadImage();
       this.#imageDataPromise = this.#imgPromise.then((img) => this.#loadImageData(img));
     }
@@ -38,7 +40,9 @@
       });
     }
     #loadImageData(image) {
+      const profiler = this.#profiler;
       return new Promise((resolve) => {
+        profiler.start("loadImageData");
         const canvas = new OffscreenCanvas(image.width, image.height);
         const context = canvas.getContext("2d");
         if (this.#rotate) {
@@ -46,7 +50,9 @@
           context.rotate(Math.PI / 2);
         }
         context.drawImage(image, 0, 0);
-        resolve(context.getImageData(0, 0, image.width, image.height));
+        const imageData = context.getImageData(0, 0, image.width, image.height);
+        profiler.end("loadImageData");
+        resolve(imageData);
       });
     }
     get src() {
@@ -351,18 +357,35 @@
   var Profiler = class {
     #log;
     #times = /* @__PURE__ */ new Map();
+    #activeStack = [];
     constructor(log) {
       this.#log = log;
     }
     start(name, minLoggingTime = 0) {
-      this.#times.set(name, { startTime: performance.now(), minLoggingTime });
+      this.#times.set(name, {
+        startTime: performance.now(),
+        minLoggingTime,
+        totalNestedTime: 0
+      });
+      this.#activeStack.push(name);
     }
     end(name) {
-      const { startTime, minLoggingTime } = this.#times.get(name);
+      const { startTime, minLoggingTime, totalNestedTime } = this.#times.get(name);
       const elapsedTime = performance.now() - startTime;
-      if (startTime === void 0 || elapsedTime < minLoggingTime)
+      if (elapsedTime < minLoggingTime)
         return;
-      this.#log(`${name}: ${elapsedTime.toFixed(2)}ms`);
+      const stackSize = this.#activeStack.length;
+      if (stackSize > 1) {
+        const parentName = this.#activeStack[stackSize - 2];
+        const parentData = this.#times.get(parentName);
+        parentData.totalNestedTime += elapsedTime;
+      }
+      if (totalNestedTime > 0) {
+        this.#log(`${name}: ${(elapsedTime - totalNestedTime).toFixed(2)}ms (${elapsedTime.toFixed(2)}ms)`);
+      } else {
+        this.#log(`${name}: ${(elapsedTime - totalNestedTime).toFixed(2)}ms`);
+      }
+      this.#activeStack.pop();
       this.#times.delete(name);
     }
   };
@@ -383,7 +406,8 @@
       this.#options = this.#validateAndApplyDefaults(options);
       this.#profiler = new Profiler(this.#options.logger);
       this.#imageLoader = new ImageLoader(src, {
-        rotate: this.#options.scalingAxis === "vertical"
+        rotate: this.#options.scalingAxis === "vertical",
+        profiler: this.#profiler
       });
       this.#generator = this.#createGenerator();
       this.#initializeCanvas(parentNode);

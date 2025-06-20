@@ -1085,7 +1085,7 @@
             }
             return dispatcher.useContext(Context);
           }
-          function useState4(initialState) {
+          function useState5(initialState) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useState(initialState);
           }
@@ -1093,7 +1093,7 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useReducer(reducer, initialArg, init);
           }
-          function useRef4(initialValue) {
+          function useRef5(initialValue) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useRef(initialValue);
           }
@@ -1887,8 +1887,8 @@
           exports.useLayoutEffect = useLayoutEffect2;
           exports.useMemo = useMemo;
           exports.useReducer = useReducer;
-          exports.useRef = useRef4;
-          exports.useState = useState4;
+          exports.useRef = useRef5;
+          exports.useState = useState5;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
           exports.version = ReactVersion;
@@ -2384,9 +2384,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React9 = require_react();
+          var React10 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React10.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3991,7 +3991,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React9.Children.forEach(props.children, function(child) {
+                  React10.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23560,7 +23560,7 @@
       if (true) {
         (function() {
           "use strict";
-          var React9 = require_react();
+          var React10 = require_react();
           var REACT_ELEMENT_TYPE = Symbol.for("react.element");
           var REACT_PORTAL_TYPE = Symbol.for("react.portal");
           var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23586,7 +23586,7 @@
             }
             return null;
           }
-          var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React10.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           function error(format) {
             {
               {
@@ -24436,10 +24436,10 @@
               return jsxWithValidation(type, props, key, false);
             }
           }
-          var jsx9 = jsxWithValidationDynamic;
+          var jsx10 = jsxWithValidationDynamic;
           var jsxs6 = jsxWithValidationStatic;
           exports.Fragment = REACT_FRAGMENT_TYPE;
-          exports.jsx = jsx9;
+          exports.jsx = jsx10;
           exports.jsxs = jsxs6;
         })();
       }
@@ -24459,10 +24459,10 @@
   });
 
   // src/index.jsx
-  var import_react8 = __toESM(require_react());
+  var import_react9 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
-  // ../build/img-responsive-web-component.js
+  // ../build/responsive-img-web-component.js
   (() => {
     var EvenWidthImage = class extends Image {
       #rotate;
@@ -24484,9 +24484,11 @@
       #imgPromise;
       #imageDataPromise;
       #rotate;
-      constructor(src, options = {}) {
+      #profiler;
+      constructor(src, options) {
         this.#src = src;
-        this.#rotate = options.rotate ?? false;
+        this.#rotate = options.rotate;
+        this.#profiler = options.profiler;
         this.#imgPromise = this.#loadImage();
         this.#imageDataPromise = this.#imgPromise.then((img) => this.#loadImageData(img));
       }
@@ -24501,7 +24503,9 @@
         });
       }
       #loadImageData(image) {
+        const profiler = this.#profiler;
         return new Promise((resolve) => {
+          profiler.start("loadImageData");
           const canvas = new OffscreenCanvas(image.width, image.height);
           const context = canvas.getContext("2d");
           if (this.#rotate) {
@@ -24509,7 +24513,9 @@
             context.rotate(Math.PI / 2);
           }
           context.drawImage(image, 0, 0);
-          resolve(context.getImageData(0, 0, image.width, image.height));
+          const imageData = context.getImageData(0, 0, image.width, image.height);
+          profiler.end("loadImageData");
+          resolve(imageData);
         });
       }
       get src() {
@@ -24798,18 +24804,35 @@
     var Profiler = class {
       #log;
       #times = /* @__PURE__ */ new Map();
+      #activeStack = [];
       constructor(log) {
         this.#log = log;
       }
       start(name, minLoggingTime = 0) {
-        this.#times.set(name, { startTime: performance.now(), minLoggingTime });
+        this.#times.set(name, {
+          startTime: performance.now(),
+          minLoggingTime,
+          totalNestedTime: 0
+        });
+        this.#activeStack.push(name);
       }
       end(name) {
-        const { startTime, minLoggingTime } = this.#times.get(name);
+        const { startTime, minLoggingTime, totalNestedTime } = this.#times.get(name);
         const elapsedTime = performance.now() - startTime;
-        if (startTime === void 0 || elapsedTime < minLoggingTime)
+        if (elapsedTime < minLoggingTime)
           return;
-        this.#log(`${name}: ${elapsedTime.toFixed(2)}ms`);
+        const stackSize = this.#activeStack.length;
+        if (stackSize > 1) {
+          const parentName = this.#activeStack[stackSize - 2];
+          const parentData = this.#times.get(parentName);
+          parentData.totalNestedTime += elapsedTime;
+        }
+        if (totalNestedTime > 0) {
+          this.#log(`${name}: ${(elapsedTime - totalNestedTime).toFixed(2)}ms (${elapsedTime.toFixed(2)}ms)`);
+        } else {
+          this.#log(`${name}: ${(elapsedTime - totalNestedTime).toFixed(2)}ms`);
+        }
+        this.#activeStack.pop();
         this.#times.delete(name);
       }
     };
@@ -24828,7 +24851,8 @@
         this.#options = this.#validateAndApplyDefaults(options);
         this.#profiler = new Profiler(this.#options.logger);
         this.#imageLoader = new ImageLoader(src, {
-          rotate: this.#options.scalingAxis === "vertical"
+          rotate: this.#options.scalingAxis === "vertical",
+          profiler: this.#profiler
         });
         this.#generator = this.#createGenerator();
         this.#initializeCanvas(parentNode);
@@ -24866,7 +24890,7 @@
           })
         };
         if (!newOptions.generator) {
-          newOptions.generator = "full";
+          newOptions.generator = "random";
         }
         return newOptions;
       }
@@ -25197,11 +25221,11 @@
         this.storedDimensions = null;
       }
     };
-    customElements.define("img-responsive", ImgResponsive);
+    customElements.define("responsive-img", ImgResponsive);
   })();
 
   // src/App.jsx
-  var import_react7 = __toESM(require_react());
+  var import_react8 = __toESM(require_react());
 
   // src/components/ImageSelector.jsx
   var import_react = __toESM(require_react());
@@ -25358,10 +25382,12 @@
           /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
             "Seam generation:",
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: `Fast: Picks the best from randomly generated seams.
+
+              Fast+: Uses an energy map to pick the best seams.  Slightly slower than Fast.
               
-              Accurate: Precise seam calculation.  Much slower.
+              Full: Precise seam calculation.  Much slower.
               
-              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download.` })
+              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download and server side processing.` })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "toggle-switch", children: [
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
@@ -25375,9 +25401,17 @@
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
               "button",
               {
+                className: config.generator === "random-plus" ? "active" : "",
+                onClick: () => handleConfigChange("generator", "random-plus"),
+                children: "Fast+"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+              "button",
+              {
                 className: config.generator === "full" ? "active" : "",
                 onClick: () => handleConfigChange("generator", "full"),
-                children: "Accurate"
+                children: "Full"
               }
             ),
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
@@ -25422,32 +25456,84 @@
   var ResizableContainer_default = ResizableContainer;
 
   // src/components/LogWindow.jsx
+  var import_react7 = __toESM(require_react());
+
+  // src/components/Draggable.jsx
   var import_react6 = __toESM(require_react());
   var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+  function Draggable({ children }) {
+    const [position, setPosition] = (0, import_react6.useState)({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = (0, import_react6.useState)(false);
+    const dragStartRef = (0, import_react6.useRef)(null);
+    const handleMouseDown = (e) => {
+      e.preventDefault();
+      setIsDragging(true);
+      dragStartRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        initialX: position.x,
+        initialY: position.y
+      };
+      const handleMouseMove = (moveEvent) => {
+        moveEvent.preventDefault();
+        if (!dragStartRef.current)
+          return;
+        const dx = moveEvent.clientX - dragStartRef.current.startX;
+        const dy = moveEvent.clientY - dragStartRef.current.startY;
+        setPosition({
+          x: dragStartRef.current.initialX + dx,
+          y: dragStartRef.current.initialY + dy
+        });
+      };
+      const handleMouseUp = () => {
+        setIsDragging(false);
+        dragStartRef.current = null;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      "div",
+      {
+        style: {
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          cursor: isDragging ? "grabbing" : "grab"
+        },
+        onMouseDown: handleMouseDown,
+        children
+      }
+    );
+  }
+  var Draggable_default = Draggable;
+
+  // src/components/LogWindow.jsx
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime());
   function LogWindow({ logs }) {
-    const [isVisible, setIsVisible] = (0, import_react6.useState)(true);
-    const logContainerRef = (0, import_react6.useRef)(null);
-    (0, import_react6.useEffect)(() => {
+    const [isVisible, setIsVisible] = (0, import_react7.useState)(true);
+    const logContainerRef = (0, import_react7.useRef)(null);
+    (0, import_react7.useEffect)(() => {
       if (logContainerRef.current) {
         logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
       }
     }, [logs]);
     if (!isVisible)
       return null;
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "log-window-container", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { onClick: () => setIsVisible(false), className: "log-window-close", children: "X" }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "log-window", ref: logContainerRef, children: logs.map((log, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "log-message", children: log }, index)) })
-    ] });
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Draggable_default, { children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "log-window-container", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { onClick: () => setIsVisible(false), className: "log-window-close", children: "X" }),
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "log-window", ref: logContainerRef, children: logs.map((log, index) => /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("div", { className: "log-message", children: log }, index)) })
+    ] }) });
   }
   var LogWindow_default = LogWindow;
 
   // src/App.jsx
-  var import_jsx_runtime7 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime());
   function App() {
-    const [selectedImage, setSelectedImage] = (0, import_react7.useState)("Broadway_tower.jpg");
-    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react7.useState)(null);
-    const [logs, setLogs] = (0, import_react7.useState)([]);
-    const [config, setConfig] = (0, import_react7.useState)({
+    const [selectedImage, setSelectedImage] = (0, import_react8.useState)("Broadway_tower.jpg");
+    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react8.useState)(null);
+    const [logs, setLogs] = (0, import_react8.useState)([]);
+    const [config, setConfig] = (0, import_react8.useState)({
       showSeams: false,
       showEnergyMap: false,
       maxCarveUpSeamPercentage: 0.6,
@@ -25455,12 +25541,12 @@
       maxCarveDownScale: 1,
       generator: "random"
     });
-    const imgResponsiveRef = (0, import_react7.useRef)(null);
+    const imgResponsiveRef = (0, import_react8.useRef)(null);
     const log = (message) => {
       setLogs((prevLogs) => [...prevLogs, message]);
     };
     const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : "");
-    (0, import_react7.useEffect)(() => {
+    (0, import_react8.useEffect)(() => {
       const currentRef = imgResponsiveRef.current;
       const handleLog = (event) => {
         log(event.detail.message);
@@ -25484,12 +25570,12 @@
       setUploadedImageSrc(imageSrc);
       setSelectedImage(null);
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "App", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("header", { className: "App-header", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h1", { children: "Live Seam Carving Demo" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("main", { className: "App-main", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "left-panel", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ImageSelector_default, { onSelect: handleImageSelect }),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "App", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("header", { className: "App-header", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("h1", { children: "Live Seam Carving Demo" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("main", { className: "App-main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "left-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(ImageSelector_default, { onSelect: handleImageSelect }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             Controls_default,
             {
               config,
@@ -25498,10 +25584,10 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "main-content", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(LogWindow_default, { logs }),
-          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ResizableContainer_default, { children: imageToDisplay && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
-            "img-responsive",
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)("div", { className: "main-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(LogWindow_default, { logs }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(ResizableContainer_default, { children: imageToDisplay && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+            "responsive-img",
             {
               ref: imgResponsiveRef,
               src: imageToDisplay,
@@ -25520,10 +25606,10 @@
   var App_default = App;
 
   // src/index.jsx
-  var import_jsx_runtime8 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime9 = __toESM(require_jsx_runtime());
   var root = import_client.default.createRoot(document.getElementById("root"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(import_react8.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(App_default, {}) })
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(import_react9.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(App_default, {}) })
   );
 })();
 /*! Bundled license information:
