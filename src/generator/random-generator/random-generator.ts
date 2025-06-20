@@ -138,6 +138,7 @@ class RandomGeneratorClass implements SeamGenerator {
   }
 }
 
-export const RandomGenerator = USE_RANDOM_GENERATOR
-  ? RandomGeneratorClass
-  : throwGeneratorClass('RandomGenerator');
+export const RandomGenerator =
+  typeof USE_RANDOM_GENERATOR === 'boolean' && USE_RANDOM_GENERATOR
+    ? RandomGeneratorClass
+    : throwGeneratorClass('RandomGenerator');

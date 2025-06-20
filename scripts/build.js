@@ -9,11 +9,11 @@ const configs = {
 
 const variant = process.argv[2];
 const config = configs[variant];
-const inputFile = process.argv[3] || 'build/renderer/renderer/renderer.js';
+const inputFile = process.argv[3] || 'src/renderer/renderer/renderer.ts';
 
 // Determine output file based on input file
 let outputFile;
-if (inputFile.includes('web-component.js')) {
+if (inputFile.includes('web-component')) {
   outputFile = 'build/responsive-img-web-component.js';
 } else {
   outputFile = `build/renderer-${variant}.minified.js`;
@@ -25,11 +25,14 @@ esbuild
     external: [],
     bundle: true,
     outfile: outputFile,
+    target: 'es2020',
+    watch: process.argv.includes('--watch'),
     define: {
       USE_FULL_GENERATOR: config.full.toString(),
       USE_RANDOM_GENERATOR: config.random.toString(),
       USE_CACHED_GENERATOR: config.cached.toString(),
     },
+    tsconfig: 'tsconfig.json',
     // minify: true,
   })
   .catch(() => process.exit(1));

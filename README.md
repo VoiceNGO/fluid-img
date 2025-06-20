@@ -23,6 +23,32 @@ Or, if you want to play with it with your own images, [here is a playground](htt
 
 ## Installation
 
+There are two pieces to this. The web components, with various generators, and the server-side seam generator. The seam generator is not necessary, but produces better results than any of the client-friendly generators.
+
+### Client Library
+
+```sh
+npm install responsive-image
+```
+
+Then import `responsive-image` in your project, which provides and registers the web-component:
+
+```ts
+import 'responsive-image';
+```
+
+Or include the script from jsdelivr or unpkg:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/package@version/file" />
+
+<!-- or -->
+
+<script src="https://unpkg.com/:package@:version/:file" />
+```
+
+### Seam Generator
+
 To use the generator you need to have cairo installed (this is a
 dependency of [node-canvas](https://github.com/Automattic/node-canvas)).
 
@@ -39,7 +65,7 @@ dependency of [node-canvas](https://github.com/Automattic/node-canvas)).
 After cairo is installed, install both canvas and this package via npm:
 
 ```sh
-npm install seams
+npm install responsive-image
 ```
 
 If you only need the renderer for some reason (e.g. you are building seams in another service), then you do not need cairo or canvas and can just install seams via npm
