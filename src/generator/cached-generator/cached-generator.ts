@@ -19,6 +19,7 @@ class CachedGeneratorClass implements SeamGenerator {
   }
 }
 
-export const CachedGenerator = USE_CACHED_GENERATOR
-  ? CachedGeneratorClass
-  : throwGeneratorClass('CachedGenerator');
+export const CachedGenerator =
+  typeof USE_CACHED_GENERATOR === 'boolean' && USE_CACHED_GENERATOR
+    ? CachedGeneratorClass
+    : throwGeneratorClass('CachedGenerator');

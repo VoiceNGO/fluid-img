@@ -18,6 +18,7 @@ class FullGeneratorClass implements SeamGenerator {
   }
 }
 
-export const FullGenerator = USE_FULL_GENERATOR
-  ? FullGeneratorClass
-  : throwGeneratorClass('FullGenerator');
+export const FullGenerator =
+  typeof USE_FULL_GENERATOR === 'boolean' && USE_FULL_GENERATOR
+    ? FullGeneratorClass
+    : throwGeneratorClass('FullGenerator');

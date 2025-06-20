@@ -147,32 +147,10 @@
   }
 
   // src/generator/full-generator/full-generator.ts
-  var _imageLoader;
-  var FullGeneratorClass = class {
-    constructor(options) {
-      __privateAdd(this, _imageLoader);
-      __privateSet(this, _imageLoader, options.imageLoader);
-    }
-    async generateSeamGrid(minSeams) {
-      return new Uint16Array();
-    }
-  };
-  _imageLoader = new WeakMap();
-  var FullGenerator = typeof USE_FULL_GENERATOR === "boolean" && USE_FULL_GENERATOR ? FullGeneratorClass : throwGeneratorClass("FullGenerator");
+  var FullGenerator = false ? FullGeneratorClass : throwGeneratorClass("FullGenerator");
 
   // src/generator/cached-generator/cached-generator.ts
-  var _imageLoader2;
-  var CachedGeneratorClass = class {
-    constructor(options) {
-      __privateAdd(this, _imageLoader2);
-      __privateSet(this, _imageLoader2, options.imageLoader);
-    }
-    async generateSeamGrid(minSeams) {
-      return new Uint16Array();
-    }
-  };
-  _imageLoader2 = new WeakMap();
-  var CachedGenerator = typeof USE_CACHED_GENERATOR === "boolean" && USE_CACHED_GENERATOR ? CachedGeneratorClass : throwGeneratorClass("CachedGenerator");
+  var CachedGenerator = false ? CachedGeneratorClass : throwGeneratorClass("CachedGenerator");
 
   // src/utils/deterministic-binary-rnd/deterministic-binary-rnd.ts
   var deterministicBinaryRnd = (seed1) => (seed2) => {
@@ -353,25 +331,25 @@
     batchPercentage: 0.05,
     minBatchSize: 10
   };
-  var _imageLoader3, _energyMapPromise, _seamGrid, _connections, _generatedSeams, _options, _RandomGeneratorClass_instances, createEnergyMap_fn, generateSeamBatch_fn, generateRandomConnections_fn, getSeam_fn;
+  var _imageLoader, _energyMapPromise, _seamGrid, _connections, _generatedSeams, _options, _RandomGeneratorClass_instances, createEnergyMap_fn, generateSeamBatch_fn, generateRandomConnections_fn, getSeam_fn;
   var RandomGeneratorClass = class {
     constructor(options) {
       __privateAdd(this, _RandomGeneratorClass_instances);
-      __privateAdd(this, _imageLoader3);
+      __privateAdd(this, _imageLoader);
       __privateAdd(this, _energyMapPromise);
       __privateAdd(this, _seamGrid, new Uint16Array());
       __privateAdd(this, _connections, []);
       __privateAdd(this, _generatedSeams, 0);
       __privateAdd(this, _options);
       __privateSet(this, _options, { ...defaultOptions, ...options });
-      __privateSet(this, _imageLoader3, options.imageLoader);
+      __privateSet(this, _imageLoader, options.imageLoader);
       __privateSet(this, _energyMapPromise, __privateMethod(this, _RandomGeneratorClass_instances, createEnergyMap_fn).call(this));
     }
     setBatchPercentage(percentage) {
       __privateGet(this, _options).batchPercentage = percentage;
     }
     async generateSeamGrid(minSeams) {
-      const { width } = await __privateGet(this, _imageLoader3).image;
+      const { width } = await __privateGet(this, _imageLoader).image;
       if (width < minSeams) {
         throw new Error(`Cannot generate ${minSeams} seams for image with width ${width}`);
       }
@@ -381,7 +359,7 @@
       return __privateGet(this, _seamGrid);
     }
   };
-  _imageLoader3 = new WeakMap();
+  _imageLoader = new WeakMap();
   _energyMapPromise = new WeakMap();
   _seamGrid = new WeakMap();
   _connections = new WeakMap();
@@ -389,7 +367,7 @@
   _options = new WeakMap();
   _RandomGeneratorClass_instances = new WeakSet();
   createEnergyMap_fn = async function() {
-    const imageData = await __privateGet(this, _imageLoader3).imageData;
+    const imageData = await __privateGet(this, _imageLoader).imageData;
     __privateSet(this, _seamGrid, new Uint16Array(imageData.width * imageData.height).fill(
       65535
     ));
@@ -794,11 +772,10 @@
       if (this.canvas) {
         this.canvas.remove();
       }
-      const { width, height } = this.options;
       const img = document.createElement("img");
       img.src = this.src;
-      img.style.width = `${width}px`;
-      img.style.height = `${height}px`;
+      img.style.width = "100%";
+      img.style.height = "auto";
       img.style.display = "block";
       this.parentNode.appendChild(img);
     }
@@ -807,144 +784,4 @@
   __decorateElement(_init, 1, "setOptions", _setOptions_dec, Renderer);
   __decorateElement(_init, 1, "redraw", _redraw_dec, Renderer);
   __decoratorMetadata(_init, Renderer);
-
-  // src/renderer/web-component/web-component.ts
-  var ImgResponsive = class extends HTMLElement {
-    constructor() {
-      super();
-      __publicField(this, "renderer", null);
-      __publicField(this, "resizeObserver", null);
-      __publicField(this, "intersectionObserver", null);
-      __publicField(this, "updateQueue", /* @__PURE__ */ new Set());
-      __publicField(this, "isIntersecting", false);
-      __publicField(this, "storedDimensions", null);
-      __publicField(this, "processUpdates", () => {
-        const changes = Array.from(this.updateQueue);
-        this.updateQueue.clear();
-        if (changes.includes("src")) {
-          this.renderer?.destroy();
-          this.renderer = null;
-          this.initializeRenderer();
-          return;
-        }
-        if (changes.includes("on-screen-threshold")) {
-          this.setupIntersectionObserver();
-        }
-        if (!this.renderer) return;
-        const otherOptions = changes.reduce(
-          (acc, key) => {
-            if (key !== "src" && key !== "on-screen-threshold") {
-              acc[key] = this.getAttribute(key);
-            }
-            return acc;
-          },
-          {}
-        );
-        this.renderer.setOptions(otherOptions);
-      });
-      __publicField(this, "dispatchLogEvent", (message) => {
-        const event = new CustomEvent("log", {
-          detail: { message },
-          bubbles: true,
-          composed: true
-        });
-        this.dispatchEvent(event);
-      });
-    }
-    static get observedAttributes() {
-      return [
-        "src",
-        "carving-priority",
-        "max-carve-up-seam-percentage",
-        "max-carve-up-scale",
-        "max-carve-down-scale",
-        "on-screen-threshold"
-      ];
-    }
-    connectedCallback() {
-      this.setupResizeObserver();
-      this.setupIntersectionObserver();
-    }
-    disconnectedCallback() {
-      this.renderer?.destroy();
-      this.renderer = null;
-      this.resizeObserver?.disconnect();
-      this.resizeObserver = null;
-      this.intersectionObserver?.disconnect();
-      this.intersectionObserver = null;
-    }
-    attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
-      if (!this.updateQueue.size) {
-        setTimeout(this.processUpdates);
-      }
-      this.updateQueue.add(name);
-    }
-    initializeRenderer() {
-      const src = this.getAttribute("src");
-      if (!src) return;
-      const options = this.getCurrentOptions();
-      this.renderer = new Renderer({
-        ...options,
-        src,
-        parentNode: this,
-        logger: this.dispatchLogEvent
-      });
-    }
-    calculateDimensions() {
-      const width = this.clientWidth ?? 0;
-      const height = this.clientHeight ?? 0;
-      return { width, height };
-    }
-    getCurrentOptions() {
-      const dimensions = this.calculateDimensions();
-      const allAttributes = [...this.attributes].reduce(
-        (acc, attr) => {
-          if (attr.name !== "src" && attr.name !== "on-screen-threshold") {
-            acc[attr.name] = attr.value;
-          }
-          return acc;
-        },
-        {}
-      );
-      return {
-        ...dimensions,
-        ...allAttributes
-      };
-    }
-    setupResizeObserver() {
-      if (!this.parentElement) return;
-      this.resizeObserver = new ResizeObserver(() => {
-        const dimensions = this.calculateDimensions();
-        if (dimensions.height === 0 || dimensions.width === 0) return;
-        this.storedDimensions = dimensions;
-        this.attemptSetSize();
-      });
-      this.resizeObserver.observe(this);
-    }
-    setupIntersectionObserver() {
-      this.intersectionObserver?.disconnect();
-      const threshold = this.getAttribute("on-screen-threshold") || "50px";
-      this.intersectionObserver = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            this.isIntersecting = entry.isIntersecting;
-            if (this.isIntersecting) {
-              this.attemptSetSize();
-            }
-          }
-        },
-        {
-          rootMargin: `${threshold} ${threshold} ${threshold} ${threshold}`
-        }
-      );
-      this.intersectionObserver.observe(this);
-    }
-    attemptSetSize() {
-      if (!this.isIntersecting || !this.storedDimensions) return;
-      this.renderer?.setSize(this.storedDimensions.width, this.storedDimensions.height);
-      this.storedDimensions = null;
-    }
-  };
-  customElements.define("responsive-img", ImgResponsive);
 })();

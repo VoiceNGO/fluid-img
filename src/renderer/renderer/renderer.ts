@@ -13,6 +13,31 @@ import { ConditionalKeys } from 'type-fest';
 import { toKebabCase } from '../../utils/to-kebab-case/to-kebab-case';
 import { Profiler } from '../../utils/profiler/profiler';
 
+function errorBoundary(
+  originalMethod: (...args: any[]) => any,
+  _context: ClassMethodDecoratorContext
+): (...args: any[]) => any {
+  function replacementMethod(this: any, ...args: any[]): any {
+    if (this.hasFailed) {
+      return;
+    }
+
+    try {
+      const result = originalMethod.apply(this, args);
+      if (result && typeof result.catch === 'function') {
+        return result.catch((error: unknown) => {
+          this.handleFailure(error);
+        });
+      }
+      return result;
+    } catch (error) {
+      this.handleFailure(error);
+    }
+  }
+
+  return replacementMethod;
+}
+
 export interface SeamGenerator {
   generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid>;
 }
@@ -46,36 +71,45 @@ export type RendererConfig = {
 } & SeamOptions;
 
 export class Renderer {
-  #canvas!: HTMLCanvasElement;
-  #ctx!: CanvasRenderingContext2D;
-  #height: number = 0;
-  #width: number = 0;
-  #imageLoader: ImageLoader;
-  #options: ProcessedSeamOptions;
-  #generator: SeamGenerator;
-  #redrawQueued = false;
-  #profiler: Profiler;
+  private canvas!: HTMLCanvasElement;
+  private ctx!: CanvasRenderingContext2D;
+  private height = 0;
+  private width = 0;
+  private imageLoader!: ImageLoader;
+  private options!: ProcessedSeamOptions;
+  private generator!: SeamGenerator;
+  private redrawQueued = false;
+  private profiler!: Profiler;
+  private hasFailed = false;
+  private parentNode: HTMLElement;
+  private src: string;
 
   constructor(config: RendererConfig) {
     const { parentNode, src, ...options } = config;
+    this.parentNode = parentNode;
+    this.src = src;
 
-    this.#options = this.#validateAndApplyDefaults(options);
-    this.#profiler = new Profiler(this.#options.logger);
-    this.#imageLoader = new ImageLoader(src, {
-      rotate: this.#options.scalingAxis === 'vertical',
-      profiler: this.#profiler,
-    });
-    this.#generator = this.#createGenerator();
+    try {
+      this.options = this.validateAndApplyDefaults(options);
+      this.profiler = new Profiler(this.options.logger);
+      this.imageLoader = new ImageLoader(src, {
+        rotate: this.options.scalingAxis === 'vertical',
+        profiler: this.profiler,
+      });
+      this.generator = this.createGenerator();
 
-    this.#initializeCanvas(parentNode);
+      this.initializeCanvas(parentNode);
+    } catch (e) {
+      this.handleFailure(e);
+    }
   }
 
   destroy(): void {
-    this.#canvas.remove();
+    this.canvas.remove();
   }
 
-  #createGenerator(): SeamGenerator {
-    const options = { ...this.#options, imageLoader: this.#imageLoader };
+  private createGenerator(): SeamGenerator {
+    const options = { ...this.options, imageLoader: this.imageLoader };
 
     switch (options.generator) {
       case 'random':
@@ -87,7 +121,7 @@ export class Renderer {
     }
   }
 
-  #validateAndApplyDefaults(options: SeamOptions): ProcessedSeamOptions {
+  private validateAndApplyDefaults(options: SeamOptions): ProcessedSeamOptions {
     const getConstrainedNumber = (
       name: ConditionalKeys<SeamOptions, number | undefined>,
       defaultValue: number,
@@ -118,8 +152,8 @@ export class Renderer {
     return newOptions as ProcessedSeamOptions;
   }
 
-  #calculateDimensions(parentNode: HTMLElement): { width: number; height: number } {
-    let { width, height } = this.#options;
+  private calculateDimensions(parentNode: HTMLElement): { width: number; height: number } {
+    let { width, height } = this.options;
     if (width === undefined || height === undefined) {
       const parentNodeSize = parentNode.getBoundingClientRect();
       width = width ?? parentNodeSize.width;
@@ -129,76 +163,69 @@ export class Renderer {
     return { width, height };
   }
 
-  #initializeCanvas(parentNode: HTMLElement): void {
-    const { width, height } = this.#calculateDimensions(parentNode);
+  private initializeCanvas(parentNode: HTMLElement): void {
+    const { width, height } = this.calculateDimensions(parentNode);
 
-    this.#canvas = document.createElement('canvas');
-    this.#ctx = this.#canvas.getContext('2d')!;
-    this.#canvas.width = this.#width = width;
-    this.#canvas.height = this.#height = height;
-    this.#canvas.style.display = 'block';
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d')!;
+    this.canvas.width = this.width = width;
+    this.canvas.height = this.height = height;
+    this.canvas.style.display = 'block';
 
-    parentNode.appendChild(this.#canvas);
+    parentNode.appendChild(this.canvas);
 
-    this.#queueRedraw();
+    this.queueRedraw();
   }
 
-  setSize(width: number, height: number): this {
-    this.#width = width;
-    this.#height = height;
-    this.#queueRedraw();
-
-    return this;
+  setSize(width: number, height: number): void {
+    this.width = width;
+    this.height = height;
+    this.queueRedraw();
   }
 
-  setWidth(width: number): this {
-    this.#width = width;
-    this.#queueRedraw();
-
-    return this;
+  setWidth(width: number): void {
+    this.width = width;
+    this.queueRedraw();
   }
 
-  setHeight(height: number): this {
-    this.#height = height;
-    this.#queueRedraw();
-
-    return this;
+  setHeight(height: number): void {
+    this.height = height;
+    this.queueRedraw();
   }
 
-  setOptions(options: Partial<SeamOptions>): this {
-    this.#options = this.#validateAndApplyDefaults({
-      ...this.#options,
+  @errorBoundary
+  setOptions(options: Partial<SeamOptions>): void {
+    this.options = this.validateAndApplyDefaults({
+      ...this.options,
       ...options,
     } as SeamOptions);
 
-    this.#queueRedraw();
-
-    return this;
+    this.queueRedraw();
   }
 
-  #queueRedraw(): void {
-    if (this.#redrawQueued) {
+  private queueRedraw(): void {
+    if (this.redrawQueued) {
       return;
     }
-    this.#redrawQueued = true;
+    this.redrawQueued = true;
 
     Promise.resolve().then(async () => {
       await this.redraw();
-      this.#redrawQueued = false;
+      this.redrawQueued = false;
     });
   }
 
   // The total number of seams to add or remove.
-  #determineCarvingParameters(imageData: ImageData): {
+  private determineCarvingParameters(imageData: ImageData): {
     availableSeams: number;
     interpolationPixels: number;
     carveDown: boolean;
   } {
     const { carvingPriority, maxCarveUpSeamPercentage, maxCarveUpScale, maxCarveDownScale } =
-      this.#options;
+      this.options;
     const { width: originalWidth, height: originalHeight } = imageData;
 
-    const targetAspectRatio = this.#width / this.#height;
+    const targetAspectRatio = this.width / this.height;
     const targetWidth = Math.round(originalHeight * targetAspectRatio);
     const pixelDelta = originalWidth - targetWidth;
 
@@ -221,7 +248,7 @@ export class Renderer {
     } else {
       // Calculate totalPixelsToInsert based on the effective target width driven by aspect ratio and canvas dimensions,
       // capped by maxCarveUpScale.
-      const targetEffectiveWidthByRatio = Math.round((originalHeight / this.#height) * this.#width);
+      const targetEffectiveWidthByRatio = Math.round((originalHeight / this.height) * this.width);
       const targetPixelsNeeded = targetEffectiveWidthByRatio - originalWidth;
 
       const maxCarveUpImageDataWidth = Math.floor(originalWidth * maxCarveUpScale);
@@ -236,26 +263,27 @@ export class Renderer {
     }
   }
 
-  async redraw(): Promise<this> {
-    this.#profiler.start('redraw');
-    const originalImageData = await this.#imageLoader.imageData;
+  @errorBoundary
+  private async redraw(): Promise<void> {
+    this.profiler.start('redraw');
+    const originalImageData = await this.imageLoader.imageData;
 
     const { availableSeams, interpolationPixels, carveDown } =
-      this.#determineCarvingParameters(originalImageData);
+      this.determineCarvingParameters(originalImageData);
 
     let finalImageData: ImageData;
 
     if (availableSeams === 0) {
       finalImageData = originalImageData;
     } else {
-      this.#profiler.start('generateSeamGrid', 1);
-      const seamGrid = await this.#generator.generateSeamGrid(availableSeams);
-      this.#profiler.end('generateSeamGrid');
+      this.profiler.start('generateSeamGrid', 1);
+      const seamGrid = await this.generator.generateSeamGrid(availableSeams);
+      this.profiler.end('generateSeamGrid');
 
       if (carveDown) {
-        finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
+        finalImageData = this.filterPixels(originalImageData, seamGrid, availableSeams);
       } else {
-        finalImageData = this.#interpolatePixels(
+        finalImageData = this.interpolatePixels(
           originalImageData,
           seamGrid,
           availableSeams,
@@ -264,25 +292,23 @@ export class Renderer {
       }
     }
 
-    this.#canvas.width = finalImageData.width;
-    this.#canvas.height = finalImageData.height;
-    this.#ctx.putImageData(finalImageData, 0, 0);
+    this.canvas.width = finalImageData.width;
+    this.canvas.height = finalImageData.height;
+    this.ctx.putImageData(finalImageData, 0, 0);
 
-    const styleRef = this.#canvas.style;
-    const isVertical = this.#options.scalingAxis === 'vertical';
+    const styleRef = this.canvas.style;
+    const isVertical = this.options.scalingAxis === 'vertical';
 
     styleRef.transformOrigin = '0 0';
     styleRef.transform = isVertical ? 'rotate(-90deg) translateX(-100%)' : '';
 
-    styleRef.width = `${isVertical ? this.#height : this.#width}px`;
-    styleRef.height = `${isVertical ? this.#width : this.#height}px`;
+    styleRef.width = `${isVertical ? this.height : this.width}px`;
+    styleRef.height = `${isVertical ? this.width : this.height}px`;
 
-    this.#profiler.end('redraw');
-
-    return this;
+    this.profiler.end('redraw');
   }
 
-  #interpolatePixels(
+  private interpolatePixels(
     originalImageData: ImageData,
     seamGrid: SeamPixelPriorityGrid,
     seamsAvailable: number,
@@ -366,14 +392,14 @@ export class Renderer {
 
     if (writeIndex !== newSize) {
       console.error(
-        `[Seams-1] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`
+        `[Seams] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`
       );
     }
 
     return new ImageData(newData, newWidth, height);
   }
 
-  #filterPixels(
+  private filterPixels(
     originalImageData: ImageData,
     seamGrid: SeamPixelPriorityGrid,
     seamsToRemove: number
@@ -402,10 +428,32 @@ export class Renderer {
 
     if (writeIndex !== newSize) {
       console.error(
-        `[Seams-2] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`
+        `[Seams] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`
       );
     }
 
     return new ImageData(newData, newWidth, height);
+  }
+
+  private handleFailure(error: unknown): void {
+    if (this.hasFailed) {
+      return;
+    }
+    this.hasFailed = true;
+
+    console.error('[Seams] A critical error occurred. Falling back to <img>.', error);
+
+    if (this.canvas) {
+      this.canvas.remove();
+    }
+
+    const { width, height } = this.options;
+
+    const img = document.createElement('img');
+    img.src = this.src;
+    img.style.width = `${width}px`;
+    img.style.height = `${height}px`;
+    img.style.display = 'block';
+    this.parentNode.appendChild(img);
   }
 }
