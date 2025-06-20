@@ -1085,7 +1085,7 @@
             }
             return dispatcher.useContext(Context);
           }
-          function useState3(initialState) {
+          function useState4(initialState) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useState(initialState);
           }
@@ -1093,11 +1093,11 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useReducer(reducer, initialArg, init);
           }
-          function useRef(initialValue) {
+          function useRef4(initialValue) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useRef(initialValue);
           }
-          function useEffect(create, deps) {
+          function useEffect3(create, deps) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useEffect(create, deps);
           }
@@ -1105,7 +1105,7 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useInsertionEffect(create, deps);
           }
-          function useLayoutEffect(create, deps) {
+          function useLayoutEffect2(create, deps) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useLayoutEffect(create, deps);
           }
@@ -1880,15 +1880,15 @@
           exports.useContext = useContext;
           exports.useDebugValue = useDebugValue;
           exports.useDeferredValue = useDeferredValue;
-          exports.useEffect = useEffect;
+          exports.useEffect = useEffect3;
           exports.useId = useId;
           exports.useImperativeHandle = useImperativeHandle;
           exports.useInsertionEffect = useInsertionEffect;
-          exports.useLayoutEffect = useLayoutEffect;
+          exports.useLayoutEffect = useLayoutEffect2;
           exports.useMemo = useMemo;
           exports.useReducer = useReducer;
-          exports.useRef = useRef;
-          exports.useState = useState3;
+          exports.useRef = useRef4;
+          exports.useState = useState4;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
           exports.version = ReactVersion;
@@ -2384,9 +2384,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React7 = require_react();
+          var React9 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3991,7 +3991,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React7.Children.forEach(props.children, function(child) {
+                  React9.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23560,7 +23560,7 @@
       if (true) {
         (function() {
           "use strict";
-          var React7 = require_react();
+          var React9 = require_react();
           var REACT_ELEMENT_TYPE = Symbol.for("react.element");
           var REACT_PORTAL_TYPE = Symbol.for("react.portal");
           var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23586,7 +23586,7 @@
             }
             return null;
           }
-          var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React9.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           function error(format) {
             {
               {
@@ -24436,11 +24436,11 @@
               return jsxWithValidation(type, props, key, false);
             }
           }
-          var jsx7 = jsxWithValidationDynamic;
-          var jsxs5 = jsxWithValidationStatic;
+          var jsx9 = jsxWithValidationDynamic;
+          var jsxs6 = jsxWithValidationStatic;
           exports.Fragment = REACT_FRAGMENT_TYPE;
-          exports.jsx = jsx7;
-          exports.jsxs = jsxs5;
+          exports.jsx = jsx9;
+          exports.jsxs = jsxs6;
         })();
       }
     }
@@ -24459,7 +24459,7 @@
   });
 
   // src/index.jsx
-  var import_react6 = __toESM(require_react());
+  var import_react8 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // ../build/img-responsive-web-component.js
@@ -24522,9 +24522,6 @@
         return this.#imageDataPromise;
       }
     };
-    function toCamelCase(str) {
-      return str.replace(/-(\w)/g, (_, c) => c.toUpperCase());
-    }
     var FullGeneratorClass = class {
       #imageLoader;
       constructor(options) {
@@ -24703,7 +24700,8 @@
       }
     };
     var defaultOptions = {
-      batchPercentage: 0.1
+      batchPercentage: 0.05,
+      minBatchSize: 10
     };
     var RandomGeneratorClass = class {
       #imageLoader;
@@ -24733,7 +24731,11 @@
         this.#generateRandomConnections(currentWidth, currentHeight);
         const seams = Array.from({ length: currentWidth }, (_, ix) => this.#getSeam(energyMap, ix));
         seams.sort((a, b) => a.energy - b.energy);
-        const batchSize = Math.ceil(currentWidth * this.#options.batchPercentage) >> 1 << 1;
+        const batchSize = Math.max(
+          // the '>> 1 << 1' ensures that the batch size is even.
+          Math.ceil(currentWidth * this.#options.batchPercentage) >> 1 << 1,
+          Math.min(this.#options.minBatchSize, currentWidth)
+        );
         const batchSeams = seams.slice(0, batchSize);
         let seamIndex = this.#generatedSeams;
         for (let i = 0; i < batchSeams.length; i++) {
@@ -24790,6 +24792,27 @@
       }
     };
     var RandomGenerator = true ? RandomGeneratorClass : throwGeneratorClass("RandomGenerator");
+    function toKebabCase(str) {
+      return str.replace(/([A-Z])/g, "-$1").toLowerCase();
+    }
+    var Profiler = class {
+      #log;
+      #times = /* @__PURE__ */ new Map();
+      constructor(log) {
+        this.#log = log;
+      }
+      start(name, minLoggingTime = 0) {
+        this.#times.set(name, { startTime: performance.now(), minLoggingTime });
+      }
+      end(name) {
+        const { startTime, minLoggingTime } = this.#times.get(name);
+        const elapsedTime = performance.now() - startTime;
+        if (startTime === void 0 || elapsedTime < minLoggingTime)
+          return;
+        this.#log(`${name}: ${elapsedTime.toFixed(2)}ms`);
+        this.#times.delete(name);
+      }
+    };
     var Renderer = class {
       #canvas;
       #ctx;
@@ -24799,9 +24822,11 @@
       #options;
       #generator;
       #redrawQueued = false;
+      #profiler;
       constructor(config) {
         const { parentNode, src, ...options } = config;
         this.#options = this.#validateAndApplyDefaults(options);
+        this.#profiler = new Profiler(this.#options.logger);
         this.#imageLoader = new ImageLoader(src, {
           rotate: this.#options.scalingAxis === "vertical"
         });
@@ -24824,7 +24849,7 @@
       }
       #validateAndApplyDefaults(options) {
         const getConstrainedNumber = (name, defaultValue, min = 0, max = 1) => {
-          const value = Number(options[toCamelCase(name)] ?? defaultValue);
+          const value = Number(options[toKebabCase(name)] ?? defaultValue);
           if (value < min || value > max) {
             throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
           }
@@ -24835,8 +24860,10 @@
           carvingPriority: getConstrainedNumber("carvingPriority", 1),
           maxCarveUpSeamPercentage: getConstrainedNumber("maxCarveUpSeamPercentage", 0.6),
           maxCarveUpScale: getConstrainedNumber("maxCarveUpScale", 10, 1, 10),
-          maxCarveDownScale: getConstrainedNumber("maxCarveDownScale", 0),
-          scalingAxis: options.scalingAxis ?? "horizontal"
+          maxCarveDownScale: getConstrainedNumber("maxCarveDownScale", 1),
+          scalingAxis: options.scalingAxis ?? "horizontal",
+          logger: options.logger ?? (() => {
+          })
         };
         if (!newOptions.generator) {
           newOptions.generator = "full";
@@ -24907,7 +24934,7 @@
           return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
         }
         const seamsToCalculate = Math.abs(pixelDelta) * carvingPriority;
-        const maxRatio = pixelDelta > 0 ? 1 - maxCarveDownScale : maxCarveUpSeamPercentage;
+        const maxRatio = pixelDelta > 0 ? maxCarveDownScale : maxCarveUpSeamPercentage;
         const maxSeams = originalWidth * maxRatio;
         const direction = pixelDelta > 0 ? 1 : -1;
         const carveDown = pixelDelta > 0;
@@ -24925,13 +24952,16 @@
         }
       }
       async redraw() {
+        this.#profiler.start("redraw");
         const originalImageData = await this.#imageLoader.imageData;
         const { availableSeams, interpolationPixels, carveDown } = this.#determineCarvingParameters(originalImageData);
         let finalImageData;
         if (availableSeams === 0) {
           finalImageData = originalImageData;
         } else {
+          this.#profiler.start("generateSeamGrid", 1);
           const seamGrid = await this.#generator.generateSeamGrid(availableSeams);
+          this.#profiler.end("generateSeamGrid");
           if (carveDown) {
             finalImageData = this.#filterPixels(originalImageData, seamGrid, availableSeams);
           } else {
@@ -24947,6 +24977,7 @@
         styleRef.transform = isVertical ? "rotate(-90deg) translateX(-100%)" : "";
         styleRef.width = `${isVertical ? this.#height : this.#width}px`;
         styleRef.height = `${isVertical ? this.#width : this.#height}px`;
+        this.#profiler.end("redraw");
         return this;
       }
       #interpolatePixels(originalImageData, seamGrid, seamsAvailable, totalPixelsToInsert) {
@@ -24958,28 +24989,40 @@
         const numPixels = originalData.length / 4;
         const basePixelsPerLocation = Math.floor(totalPixelsToInsert / seamsAvailable);
         const extraPixelsCount = totalPixelsToInsert % seamsAvailable;
+        let x = 0;
         for (let readIndex = 0; readIndex < numPixels; readIndex++) {
           const priority = seamGrid[readIndex];
           const readIndexRgba = readIndex * 4;
           if (priority < seamsAvailable) {
             const addExtraPixel = extraPixelsCount > 0 && priority * extraPixelsCount % seamsAvailable < extraPixelsCount;
             const pixelsToInterpolate = addExtraPixel ? basePixelsPerLocation + 1 : basePixelsPerLocation;
-            for (let i = 0; i < pixelsToInterpolate; i++) {
-              const x = readIndex % originalWidth;
-              if (x === 0) {
+            if (x === 0) {
+              for (let i = 0; i < pixelsToInterpolate; i++) {
                 newData[writeIndex] = originalData[readIndexRgba];
                 newData[writeIndex + 1] = originalData[readIndexRgba + 1];
                 newData[writeIndex + 2] = originalData[readIndexRgba + 2];
                 newData[writeIndex + 3] = originalData[readIndexRgba + 3];
-              } else {
-                const leftReadIndexRgba = (readIndex - 1) * 4;
-                const interpolationFactor = (i + 1) / (pixelsToInterpolate + 1);
-                newData[writeIndex] = Math.round(originalData[leftReadIndexRgba] + (originalData[readIndexRgba] - originalData[leftReadIndexRgba]) * interpolationFactor);
-                newData[writeIndex + 1] = Math.round(originalData[leftReadIndexRgba + 1] + (originalData[readIndexRgba + 1] - originalData[leftReadIndexRgba + 1]) * interpolationFactor);
-                newData[writeIndex + 2] = Math.round(originalData[leftReadIndexRgba + 2] + (originalData[readIndexRgba + 2] - originalData[leftReadIndexRgba + 2]) * interpolationFactor);
-                newData[writeIndex + 3] = Math.round(originalData[leftReadIndexRgba + 3] + (originalData[readIndexRgba + 3] - originalData[leftReadIndexRgba + 3]) * interpolationFactor);
+                writeIndex += 4;
               }
-              writeIndex += 4;
+            } else {
+              const leftReadIndexRgba = (readIndex - 1) * 4;
+              const r0 = originalData[leftReadIndexRgba];
+              const g0 = originalData[leftReadIndexRgba + 1];
+              const b0 = originalData[leftReadIndexRgba + 2];
+              const a0 = originalData[leftReadIndexRgba + 3];
+              const dr = originalData[readIndexRgba] - r0;
+              const dg = originalData[readIndexRgba + 1] - g0;
+              const db = originalData[readIndexRgba + 2] - b0;
+              const da = originalData[readIndexRgba + 3] - a0;
+              const denominator = pixelsToInterpolate + 1;
+              for (let i = 0; i < pixelsToInterpolate; i++) {
+                const interpolationFactor = (i + 1) / denominator;
+                newData[writeIndex] = Math.round(r0 + dr * interpolationFactor);
+                newData[writeIndex + 1] = Math.round(g0 + dg * interpolationFactor);
+                newData[writeIndex + 2] = Math.round(b0 + db * interpolationFactor);
+                newData[writeIndex + 3] = Math.round(a0 + da * interpolationFactor);
+                writeIndex += 4;
+              }
             }
           }
           newData[writeIndex] = originalData[readIndexRgba];
@@ -24987,6 +25030,9 @@
           newData[writeIndex + 2] = originalData[readIndexRgba + 2];
           newData[writeIndex + 3] = originalData[readIndexRgba + 3];
           writeIndex += 4;
+          if (++x === originalWidth) {
+            x = 0;
+          }
         }
         if (writeIndex !== newSize) {
           console.error(`[Seams-1] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`);
@@ -25020,7 +25066,10 @@
     var ImgResponsive = class extends HTMLElement {
       renderer = null;
       resizeObserver = null;
+      intersectionObserver = null;
       updateQueue = /* @__PURE__ */ new Set();
+      isIntersecting = false;
+      storedDimensions = null;
       constructor() {
         super();
       }
@@ -25030,17 +25079,21 @@
           "carving-priority",
           "max-carve-up-seam-percentage",
           "max-carve-up-scale",
-          "max-carve-down-scale"
+          "max-carve-down-scale",
+          "on-screen-threshold"
         ];
       }
       connectedCallback() {
         this.setupResizeObserver();
+        this.setupIntersectionObserver();
       }
       disconnectedCallback() {
         this.renderer?.destroy();
         this.renderer = null;
         this.resizeObserver?.disconnect();
         this.resizeObserver = null;
+        this.intersectionObserver?.disconnect();
+        this.intersectionObserver = null;
       }
       attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue)
@@ -25059,10 +25112,26 @@
           this.initializeRenderer();
           return;
         }
+        if (changes.includes("on-screen-threshold")) {
+          this.setupIntersectionObserver();
+        }
         if (!this.renderer)
           return;
-        const otherOptions = {};
+        const otherOptions = changes.reduce((acc, key) => {
+          if (key !== "src" && key !== "on-screen-threshold") {
+            acc[key] = this.getAttribute(key);
+          }
+          return acc;
+        }, {});
         this.renderer.setOptions(otherOptions);
+      };
+      dispatchLogEvent = (message) => {
+        const event = new CustomEvent("log", {
+          detail: { message },
+          bubbles: true,
+          composed: true
+        });
+        this.dispatchEvent(event);
       };
       initializeRenderer() {
         const src = this.getAttribute("src");
@@ -25072,7 +25141,8 @@
         this.renderer = new Renderer({
           ...options,
           src,
-          parentNode: this
+          parentNode: this,
+          logger: this.dispatchLogEvent
         });
       }
       calculateDimensions() {
@@ -25080,19 +25150,14 @@
         const height = this.clientHeight ?? 0;
         return { width, height };
       }
-      getAllAttributes() {
-        const attributes = {};
-        for (let i = 0; i < this.attributes.length; i++) {
-          const attr = this.attributes[i];
-          if (!["src"].includes(attr.name)) {
-            attributes[attr.name] = attr.value;
-          }
-        }
-        return attributes;
-      }
       getCurrentOptions() {
         const dimensions = this.calculateDimensions();
-        const allAttributes = this.getAllAttributes();
+        const allAttributes = [...this.attributes].reduce((acc, attr) => {
+          if (attr.name !== "src" && attr.name !== "on-screen-threshold") {
+            acc[attr.name] = attr.value;
+          }
+          return acc;
+        }, {});
         return {
           ...dimensions,
           ...allAttributes
@@ -25101,18 +25166,42 @@
       setupResizeObserver() {
         if (!this.parentElement)
           return;
-        this.resizeObserver = new ResizeObserver((entries) => {
+        this.resizeObserver = new ResizeObserver(() => {
           const dimensions = this.calculateDimensions();
-          this.renderer?.setSize(dimensions.width, dimensions.height);
+          if (dimensions.height === 0 || dimensions.width === 0)
+            return;
+          this.storedDimensions = dimensions;
+          this.attemptSetSize();
         });
         this.resizeObserver.observe(this);
+      }
+      setupIntersectionObserver() {
+        this.intersectionObserver?.disconnect();
+        const threshold = this.getAttribute("on-screen-threshold") || "50px";
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            this.isIntersecting = entry.isIntersecting;
+            if (this.isIntersecting) {
+              this.attemptSetSize();
+            }
+          }
+        }, {
+          rootMargin: `${threshold} ${threshold} ${threshold} ${threshold}`
+        });
+        this.intersectionObserver.observe(this);
+      }
+      attemptSetSize() {
+        if (!this.isIntersecting || !this.storedDimensions)
+          return;
+        this.renderer?.setSize(this.storedDimensions.width, this.storedDimensions.height);
+        this.storedDimensions = null;
       }
     };
     customElements.define("img-responsive", ImgResponsive);
   })();
 
   // src/App.jsx
-  var import_react5 = __toESM(require_react());
+  var import_react7 = __toESM(require_react());
 
   // src/components/ImageSelector.jsx
   var import_react = __toESM(require_react());
@@ -25122,7 +25211,9 @@
     "dogs-on-beach.jpg",
     "kiyomizu.jpg",
     "neuschwanstein.jpg",
-    "yosemite.jpg"
+    "yosemite.jpg",
+    "great-wave.jpg",
+    "railay.jpg"
   ];
   function ImageSelector({ onSelect }) {
     return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "image-selector", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "thumbnails", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
@@ -25211,7 +25302,7 @@
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "control-group", children: [
           /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
             "Max down scaling: ",
-            config.maxCarveDownScale,
+            Math.round(config.maxCarveDownScale * 100),
             "%",
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: "Only use seam carving to shrink down to this percentage of original width. After that, normal image scaling is used." })
           ] }),
@@ -25221,8 +25312,8 @@
               type: "range",
               min: "0",
               max: "100",
-              value: config.maxCarveDownScale,
-              onChange: (e) => handleConfigChange("maxCarveDownScale", e.target.value)
+              value: config.maxCarveDownScale * 100,
+              onChange: (e) => handleConfigChange("maxCarveDownScale", e.target.value / 100)
             }
           )
         ] }),
@@ -25239,6 +25330,7 @@
               type: "range",
               min: "1",
               max: "10",
+              step: "0.1",
               value: config.maxCarveUpScale,
               onChange: (e) => handleConfigChange("maxCarveUpScale", e.target.value)
             }
@@ -25247,7 +25339,7 @@
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "control-group", children: [
           /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
             "% of seams to use for enlarging: ",
-            config.maxCarveUpSeamPercentage,
+            Math.round(config.maxCarveUpSeamPercentage * 100),
             "%",
             /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: "Only use seam carving to enlarge up to this percentage past the original width. After that, normal image scaling is used." })
           ] }),
@@ -25257,8 +25349,8 @@
               type: "range",
               min: "0",
               max: "100",
-              value: config.maxCarveUpSeamPercentage,
-              onChange: (e) => handleConfigChange("maxCarveUpSeamPercentage", e.target.value)
+              value: config.maxCarveUpSeamPercentage * 100,
+              onChange: (e) => handleConfigChange("maxCarveUpSeamPercentage", e.target.value / 100)
             }
           )
         ] }),
@@ -25297,64 +25389,107 @@
               }
             )
           ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "control-group", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-            "input",
-            {
-              type: "checkbox",
-              checked: config.showSeams,
-              onChange: (e) => handleConfigChange("showSeams", e.target.checked)
-            }
-          ),
-          "Animate Seam Carving",
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("img", { src: "images/fight.gif", alt: "Animation" }) })
-        ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "control-group", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("label", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-            "input",
-            {
-              type: "checkbox",
-              checked: config.showEnergyMap,
-              onChange: (e) => handleConfigChange("showEnergyMap", e.target.checked)
-            }
-          ),
-          "Show Energy Map",
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(HelpTooltip_default, { children: "Displays a grayscale 'energy map' of the image. Darker areas have lower energy and are more likely to be carved out by seams. Lighter areas are protected." })
-        ] }) })
+        ] })
       ] })
     ] });
   }
   var Controls_default = Controls;
 
-  // src/App.jsx
+  // src/components/ResizableContainer.jsx
+  var import_react5 = __toESM(require_react());
   var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+  var ResizableContainer = ({ children }) => {
+    const containerRef = (0, import_react5.useRef)(null);
+    (0, import_react5.useLayoutEffect)(() => {
+      const updateMaxSize = () => {
+        const container = containerRef.current;
+        if (container && container.parentElement) {
+          const parent = container.parentElement;
+          const maxWidth = parent.clientWidth - 20;
+          const maxHeight = parent.clientHeight - 20;
+          container.style.maxWidth = `${maxWidth}px`;
+          container.style.maxHeight = `${maxHeight}px`;
+        }
+      };
+      updateMaxSize();
+      window.addEventListener("resize", updateMaxSize);
+      return () => {
+        window.removeEventListener("resize", updateMaxSize);
+      };
+    }, []);
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { ref: containerRef, className: "seam-container-resizable", children });
+  };
+  var ResizableContainer_default = ResizableContainer;
+
+  // src/components/LogWindow.jsx
+  var import_react6 = __toESM(require_react());
+  var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+  function LogWindow({ logs }) {
+    const [isVisible, setIsVisible] = (0, import_react6.useState)(true);
+    const logContainerRef = (0, import_react6.useRef)(null);
+    (0, import_react6.useEffect)(() => {
+      if (logContainerRef.current) {
+        logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+      }
+    }, [logs]);
+    if (!isVisible)
+      return null;
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "log-window-container", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { onClick: () => setIsVisible(false), className: "log-window-close", children: "X" }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "log-window", ref: logContainerRef, children: logs.map((log, index) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "log-message", children: log }, index)) })
+    ] });
+  }
+  var LogWindow_default = LogWindow;
+
+  // src/App.jsx
+  var import_jsx_runtime7 = __toESM(require_jsx_runtime());
   function App() {
-    const [selectedImage, setSelectedImage] = (0, import_react5.useState)("Broadway_tower.jpg");
-    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react5.useState)(null);
-    const [config, setConfig] = (0, import_react5.useState)({
+    const [selectedImage, setSelectedImage] = (0, import_react7.useState)("Broadway_tower.jpg");
+    const [uploadedImageSrc, setUploadedImageSrc] = (0, import_react7.useState)(null);
+    const [logs, setLogs] = (0, import_react7.useState)([]);
+    const [config, setConfig] = (0, import_react7.useState)({
       showSeams: false,
       showEnergyMap: false,
       maxCarveUpSeamPercentage: 0.6,
       maxCarveUpScale: 3,
-      maxCarveDownScale: 0.5,
+      maxCarveDownScale: 1,
       generator: "random"
     });
+    const imgResponsiveRef = (0, import_react7.useRef)(null);
+    const log = (message) => {
+      setLogs((prevLogs) => [...prevLogs, message]);
+    };
+    const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : "");
+    (0, import_react7.useEffect)(() => {
+      const currentRef = imgResponsiveRef.current;
+      const handleLog = (event) => {
+        log(event.detail.message);
+      };
+      if (currentRef) {
+        currentRef.addEventListener("log", handleLog);
+      }
+      return () => {
+        if (currentRef) {
+          currentRef.removeEventListener("log", handleLog);
+        }
+      };
+    }, [imageToDisplay]);
     const handleImageSelect = (imageName) => {
+      setLogs([]);
       setSelectedImage(imageName);
       setUploadedImageSrc(null);
     };
     const handleImageUpload = (imageSrc) => {
+      setLogs([]);
       setUploadedImageSrc(imageSrc);
       setSelectedImage(null);
     };
-    const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : "");
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "App", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("header", { className: "App-header", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { children: "Live Seam Carving Demo" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("main", { className: "App-main", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "left-panel", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ImageSelector_default, { onSelect: handleImageSelect }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "App", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("header", { className: "App-header", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("h1", { children: "Live Seam Carving Demo" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("main", { className: "App-main", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "left-panel", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ImageSelector_default, { onSelect: handleImageSelect }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
             Controls_default,
             {
               config,
@@ -25363,28 +25498,32 @@
             }
           )
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "main-content", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "seam-container-resizable", children: imageToDisplay && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          "img-responsive",
-          {
-            src: imageToDisplay,
-            showSeams: config.showSeams,
-            showEnergyMap: config.showEnergyMap,
-            maxCarveUpSeamPercentage: config.maxCarveUpSeamPercentage,
-            maxCarveUpScale: config.maxCarveUpScale,
-            maxCarveDownScale: config.maxCarveDownScale,
-            generator: config.generator
-          }
-        ) }) })
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)("div", { className: "main-content", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(LogWindow_default, { logs }),
+          /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ResizableContainer_default, { children: imageToDisplay && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+            "img-responsive",
+            {
+              ref: imgResponsiveRef,
+              src: imageToDisplay,
+              "show-seams": config.showSeams,
+              "show-energy-map": config.showEnergyMap,
+              "max-carve-up-seam-percentage": config.maxCarveUpSeamPercentage,
+              "max-carve-up-scale": config.maxCarveUpScale,
+              "max-carve-down-scale": config.maxCarveDownScale,
+              generator: config.generator
+            }
+          ) })
+        ] })
       ] })
     ] });
   }
   var App_default = App;
 
   // src/index.jsx
-  var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime8 = __toESM(require_jsx_runtime());
   var root = import_client.default.createRoot(document.getElementById("root"));
   root.render(
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(import_react6.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(App_default, {}) })
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(import_react8.default.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(App_default, {}) })
   );
 })();
 /*! Bundled license information:

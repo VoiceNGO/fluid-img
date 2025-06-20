@@ -20,6 +20,7 @@ export class Renderer {
         this.#profiler = new Profiler(this.#options.logger);
         this.#imageLoader = new ImageLoader(src, {
             rotate: this.#options.scalingAxis === 'vertical',
+            profiler: this.#profiler,
         });
         this.#generator = this.#createGenerator();
         this.#initializeCanvas(parentNode);
@@ -56,7 +57,7 @@ export class Renderer {
             logger: options.logger ?? (() => { }),
         };
         if (!newOptions.generator) {
-            newOptions.generator = 'full';
+            newOptions.generator = 'random';
         }
         return newOptions;
     }

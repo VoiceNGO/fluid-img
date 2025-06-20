@@ -1,31 +1,58 @@
 import '../../build/img-responsive-web-component.js';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
 import Controls from './components/Controls.jsx';
+import ResizableContainer from './components/ResizableContainer.jsx';
+import LogWindow from './components/LogWindow.jsx';
 
 function App() {
   const [selectedImage, setSelectedImage] = useState('Broadway_tower.jpg');
   const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
+  const [logs, setLogs] = useState([]);
   const [config, setConfig] = useState({
     showSeams: false,
     showEnergyMap: false,
     maxCarveUpSeamPercentage: 0.6,
     maxCarveUpScale: 3,
-    maxCarveDownScale: 0.5,
+    maxCarveDownScale: 1,
     generator: 'random',
   });
+  const imgResponsiveRef = useRef(null);
+
+  const log = (message) => {
+    setLogs((prevLogs) => [...prevLogs, message]);
+  };
+
+  const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : '');
+
+  useEffect(() => {
+    const currentRef = imgResponsiveRef.current;
+    const handleLog = (event) => {
+      log(event.detail.message);
+    };
+
+    if (currentRef) {
+      currentRef.addEventListener('log', handleLog);
+    }
+
+    return () => {
+      if (currentRef) {
+        currentRef.removeEventListener('log', handleLog);
+      }
+    };
+  }, [imageToDisplay]);
 
   const handleImageSelect = (imageName) => {
+    setLogs([]);
     setSelectedImage(imageName);
     setUploadedImageSrc(null);
   };
 
   const handleImageUpload = (imageSrc) => {
+    setLogs([]);
     setUploadedImageSrc(imageSrc);
     setSelectedImage(null);
   };
-
-  const imageToDisplay = uploadedImageSrc || (selectedImage ? `images/${selectedImage}` : '');
 
   return (
     <div className="App">
@@ -42,19 +69,21 @@ function App() {
           />
         </div>
         <div className="main-content">
-          <div className="seam-container-resizable">
+          <LogWindow logs={logs} />
+          <ResizableContainer>
             {imageToDisplay && (
               <img-responsive
+                ref={imgResponsiveRef}
                 src={imageToDisplay}
-                showSeams={config.showSeams}
-                showEnergyMap={config.showEnergyMap}
-                maxCarveUpSeamPercentage={config.maxCarveUpSeamPercentage}
-                maxCarveUpScale={config.maxCarveUpScale}
-                maxCarveDownScale={config.maxCarveDownScale}
+                show-seams={config.showSeams}
+                show-energy-map={config.showEnergyMap}
+                max-carve-up-seam-percentage={config.maxCarveUpSeamPercentage}
+                max-carve-up-scale={config.maxCarveUpScale}
+                max-carve-down-scale={config.maxCarveDownScale}
                 generator={config.generator}
               />
             )}
-          </div>
+          </ResizableContainer>
         </div>
       </main>
     </div>
