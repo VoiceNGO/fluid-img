@@ -1,4 +1,4 @@
-import '../../build/img-responsive-web-component.js';
+import '../../build/responsive-img-web-component.js';
 import React, { useState, useEffect, useRef } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
 import Controls from './components/Controls.jsx';
@@ -72,7 +72,7 @@ function App() {
           <LogWindow logs={logs} />
           <ResizableContainer>
             {imageToDisplay && (
-              <img-responsive
+              <responsive-img
                 ref={imgResponsiveRef}
                 src={imageToDisplay}
                 show-seams={config.showSeams}

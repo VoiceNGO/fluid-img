@@ -66,10 +66,12 @@ function Controls({ config, setConfig, onImageUpload }) {
             <label>
               Seam generation:
               <HelpTooltip>{`Fast: Picks the best from randomly generated seams.
+
+              Fast+: Uses an energy map to pick the best seams.  Slightly slower than Fast.
               
-              Accurate: Precise seam calculation.  Much slower.
+              Full: Precise seam calculation.  Much slower.
               
-              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download.`}</HelpTooltip>
+              Cached: Uses pre-computed seams for the best speed and quality, but requires an extra download and server side processing.`}</HelpTooltip>
             </label>
             <div className="toggle-switch">
               <button
@@ -79,10 +81,16 @@ function Controls({ config, setConfig, onImageUpload }) {
                 Fast
               </button>
               <button
+                className={config.generator === 'random-plus' ? 'active' : ''}
+                onClick={() => handleConfigChange('generator', 'random-plus')}
+              >
+                Fast+
+              </button>
+              <button
                 className={config.generator === 'full' ? 'active' : ''}
                 onClick={() => handleConfigChange('generator', 'full')}
               >
-                Accurate
+                Full
               </button>
               <button
                 className={config.generator === 'cached' ? 'active' : ''}
