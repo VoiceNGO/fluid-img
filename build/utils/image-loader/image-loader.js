@@ -18,9 +18,11 @@ export class ImageLoader {
     #imgPromise;
     #imageDataPromise;
     #rotate;
-    constructor(src, options = {}) {
+    #profiler;
+    constructor(src, options) {
         this.#src = src;
-        this.#rotate = options.rotate ?? false;
+        this.#rotate = options.rotate;
+        this.#profiler = options.profiler;
         this.#imgPromise = this.#loadImage();
         this.#imageDataPromise = this.#imgPromise.then((img) => this.#loadImageData(img));
     }
@@ -35,7 +37,9 @@ export class ImageLoader {
         });
     }
     #loadImageData(image) {
+        const profiler = this.#profiler;
         return new Promise((resolve) => {
+            profiler.start('loadImageData');
             const canvas = new OffscreenCanvas(image.width, image.height);
             const context = canvas.getContext('2d');
             if (this.#rotate) {
@@ -43,7 +47,9 @@ export class ImageLoader {
                 context.rotate(Math.PI / 2);
             }
             context.drawImage(image, 0, 0);
-            resolve(context.getImageData(0, 0, image.width, image.height));
+            const imageData = context.getImageData(0, 0, image.width, image.height);
+            profiler.end('loadImageData');
+            resolve(imageData);
         });
     }
     get src() {

@@ -165,4 +165,4 @@ class ImgResponsive extends HTMLElement {
   }
 }
 
-customElements.define('img-responsive', ImgResponsive);
+customElements.define('responsive-img', ImgResponsive);

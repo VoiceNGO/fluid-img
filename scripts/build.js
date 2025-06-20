@@ -14,7 +14,7 @@ const inputFile = process.argv[3] || 'build/renderer/renderer/renderer.js';
 // Determine output file based on input file
 let outputFile;
 if (inputFile.includes('web-component.js')) {
-  outputFile = 'build/img-responsive-web-component.js';
+  outputFile = 'build/responsive-img-web-component.js';
 } else {
   outputFile = `build/renderer-${variant}.minified.js`;
 }
