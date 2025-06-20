@@ -133,4 +133,4 @@ class ImgResponsive extends HTMLElement {
         this.storedDimensions = null;
     }
 }
-customElements.define('img-responsive', ImgResponsive);
+customElements.define('responsive-img', ImgResponsive);

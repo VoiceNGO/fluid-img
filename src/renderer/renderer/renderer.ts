@@ -32,9 +32,9 @@ type GeneralOptions = {
 type FilterGeneratorOptions<T> = Omit<T, 'imageLoader'>;
 
 type TypedGeneratorOptions =
-  | (FilterGeneratorOptions<FullGeneratorOptions> & { generator?: 'full' })
+  | (FilterGeneratorOptions<FullGeneratorOptions> & { generator: 'full' })
   | (FilterGeneratorOptions<CachedGeneratorOptions> & { generator: 'cached' })
-  | (FilterGeneratorOptions<RandomGeneratorOptions> & { generator: 'random' });
+  | (FilterGeneratorOptions<RandomGeneratorOptions> & { generator?: 'random' });
 
 type SeamOptions = GeneralOptions & TypedGeneratorOptions;
 
@@ -58,10 +58,12 @@ export class Renderer {
 
   constructor(config: RendererConfig) {
     const { parentNode, src, ...options } = config;
+
     this.#options = this.#validateAndApplyDefaults(options);
     this.#profiler = new Profiler(this.#options.logger);
     this.#imageLoader = new ImageLoader(src, {
       rotate: this.#options.scalingAxis === 'vertical',
+      profiler: this.#profiler,
     });
     this.#generator = this.#createGenerator();
 
@@ -110,7 +112,7 @@ export class Renderer {
     };
 
     if (!newOptions.generator) {
-      newOptions.generator = 'full';
+      newOptions.generator = 'random';
     }
 
     return newOptions as ProcessedSeamOptions;

@@ -1,3 +1,5 @@
+import { Profiler } from '../../utils/profiler/profiler';
+
 class EvenWidthImage extends Image {
   #rotate: boolean;
 
@@ -22,10 +24,12 @@ export class ImageLoader {
   #imgPromise: Promise<HTMLImageElement>;
   #imageDataPromise: Promise<ImageData>;
   #rotate: boolean;
+  #profiler: Profiler;
 
-  constructor(src: string, options: { rotate?: boolean } = {}) {
+  constructor(src: string, options: { rotate: boolean; profiler: Profiler }) {
     this.#src = src;
-    this.#rotate = options.rotate ?? false;
+    this.#rotate = options.rotate;
+    this.#profiler = options.profiler;
     this.#imgPromise = this.#loadImage();
     this.#imageDataPromise = this.#imgPromise.then((img) => this.#loadImageData(img));
   }
@@ -42,7 +46,10 @@ export class ImageLoader {
   }
 
   #loadImageData(image: HTMLImageElement): Promise<ImageData> {
+    const profiler = this.#profiler;
+
     return new Promise((resolve) => {
+      profiler.start('loadImageData');
       const canvas = new OffscreenCanvas(image.width, image.height);
       const context = canvas.getContext('2d')!;
 
@@ -53,7 +60,11 @@ export class ImageLoader {
 
       context.drawImage(image, 0, 0);
 
-      resolve(context.getImageData(0, 0, image.width, image.height));
+      const imageData = context.getImageData(0, 0, image.width, image.height);
+
+      profiler.end('loadImageData');
+
+      resolve(imageData);
     });
   }
 

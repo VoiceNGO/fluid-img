@@ -445,7 +445,7 @@
         })
       };
       if (!newOptions.generator) {
-        newOptions.generator = "full";
+        newOptions.generator = "random";
       }
       return newOptions;
     }
@@ -778,5 +778,5 @@
       this.storedDimensions = null;
     }
   };
-  customElements.define("img-responsive", ImgResponsive);
+  customElements.define("responsive-img", ImgResponsive);
 })();
