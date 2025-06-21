@@ -1,16 +1,19 @@
-import { ImageLoader } from '../../utils/image-loader/image-loader';
 import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
 
-export type CachedGeneratorOptions = BaseGeneratorOptions & {
+type CachedSpecificOptions = {
   cacheSpecificOption?: string;
 };
 
-const defaultOptions: Required<PickOptional<CachedGeneratorOptions>> = {
+export type CachedGeneratorOptions = BaseGeneratorOptions & CachedSpecificOptions;
+
+type CachedInstanceOptions = BaseGeneratorOptions & Required<CachedSpecificOptions>;
+
+const defaultOptions: Required<CachedSpecificOptions> = {
   cacheSpecificOption: '',
 };
 
 export class CachedGenerator extends BaseGenerator {
-  protected options: Required<CachedGeneratorOptions>;
+  protected options: CachedInstanceOptions;
 
   constructor(options: CachedGeneratorOptions) {
     super(options);

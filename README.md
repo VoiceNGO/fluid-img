@@ -1,7 +1,5 @@
 # Responsive Image Web Component
 
-## **_This is not quite production ready. It should be in a few days_**
-
 Images that just scale, intelligently, to whatever size you want them to be (within reasonable limits)
 
 ![Responsive Images](./resources/images/responsive-images.jpg)
@@ -28,9 +26,9 @@ There are 4 different components, explained below in detail, but summarized here
 
 ## Demo
 
-[Demo Here](https://voicengo.github.io/responsive-img/public/responsive-demo.html)
+[Demo Here](https://voicengo.github.io/img-responsive/public/responsive-demo.html)
 
-Or, if you want to play with it with your own images, [here is a playground](https://voicengo.github.io/responsive-img/public)
+Or, if you want to play with it with your own images, [here is a playground](https://voicengo.github.io/img-responsive/public)
 
 ## Installation
 
@@ -200,6 +198,12 @@ The general algorithm is: calculate the energy at every pixel in an image. Then 
 
 Cached carving uses the full carving method above, but instead of doing it on the fly, which is slow, it pre-calculates seams on a server. Those seams get compressed into a custom `.seam` file, which is then decoded on the client. The result is optimal seams with minimal client-side processing.
 
+## Erm...
+
+I just implemented the Predictive generator. It is, algorithmically, identical to the full generator when set to a batch size of 1, it's just really slow. So I tried that.
+
+Giant MEH. The random generator is literally better in many cases. So I need to re-think the core algorithms. I was playing with a slinding window in the seam generation with decent results, but not sure what I'll end up with yet.
+
 ## TODO
 
 ### High Priority
@@ -208,7 +212,7 @@ Cached carving uses the full carving method above, but instead of doing it on th
 - [x] Renderer that takes data from generators and scales to any size
 - [x] Random generator
 - [ ] Vertical carving
-- [ ] predictive generator (see whitepaper linked above)
+- [x] Predictive generator
 - [ ] Finish full generator
 - [ ] Finish cached generator
 - [ ] Web workers for all generators

@@ -1,18 +1,22 @@
 import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
 import { MinimalCumulativeEnergyMap } from '../minimal-cumulative-energy-map/minimal-cumulative-energy-map';
 
-export type PredictiveGeneratorOptions = BaseGeneratorOptions & {
+type PredictiveSpecificOptions = {
   batchPercentage?: number;
   minBatchSize?: number;
 };
 
-const defaultOptions: Required<PickOptional<PredictiveGeneratorOptions>> = {
-  batchPercentage: 0.05,
+export type PredictiveGeneratorOptions = BaseGeneratorOptions & PredictiveSpecificOptions;
+
+type PredictiveInstanceOptions = BaseGeneratorOptions & Required<PredictiveSpecificOptions>;
+
+const defaultOptions: Required<PredictiveSpecificOptions> = {
+  batchPercentage: 0.02,
   minBatchSize: 10,
 };
 
 export class PredictiveGenerator extends BaseGenerator {
-  protected options: Required<PredictiveGeneratorOptions>;
+  protected options: PredictiveInstanceOptions;
 
   constructor(options: PredictiveGeneratorOptions) {
     super(options);
@@ -40,34 +44,15 @@ export class PredictiveGenerator extends BaseGenerator {
     type Seam = {
       path: Uint16Array;
       energy: number;
-      topEnergies: number[]; // Track top 10 highest energy pixels
     };
     const seams: Seam[] = [];
     const energyMapData = energyMap.energyMap;
-    const topEnergyCount = 10; // Track top 10 highest energies
-    const energyPenaltyMultiplier = 50; // Multiply top energies by this for penalty
-
-    // Helper function to add energy and track top energies
-    const addEnergyWithTopTracking = (seam: Seam, pixelEnergy: number): void => {
-      // Add to regular energy
-      seam.energy += pixelEnergy;
-
-      // Add to top energies list
-      seam.topEnergies.push(pixelEnergy);
-
-      // Keep only top N energies (sort descending and take first N)
-      seam.topEnergies.sort((a, b) => b - a);
-      if (seam.topEnergies.length > topEnergyCount) {
-        seam.topEnergies.length = topEnergyCount;
-      }
-    };
 
     for (let x = 0; x < currentWidth; x++) {
       const initialEnergy = energyMapData[0]![x]!;
       seams.push({
         path: new Uint16Array(currentHeight),
         energy: initialEnergy,
-        topEnergies: [initialEnergy],
       });
       seams[x]!.path[0] = x;
     }
@@ -85,7 +70,7 @@ export class PredictiveGenerator extends BaseGenerator {
         // Last column must go straight
         if (x === currentWidth - 1) {
           currentSeam.path[y] = x;
-          addEnergyWithTopTracking(currentSeam, energyMapData[y]![x]!);
+          currentSeam.energy += energyMapData[y]![x]!;
           nextSeamsAtIndex[x] = currentSeam;
           continue;
         }
@@ -102,16 +87,16 @@ export class PredictiveGenerator extends BaseGenerator {
         if (currentSeamLower === currentPathLower) {
           // Go straight
           currentSeam.path[y] = x;
-          addEnergyWithTopTracking(currentSeam, energyMapData[y]![x]!);
+          currentSeam.energy += energyMapData[y]![x]!;
           nextSeamsAtIndex[x] = currentSeam;
         } else {
           // Swap
           currentSeam.path[y] = x + 1;
-          addEnergyWithTopTracking(currentSeam, energyMapData[y]![x + 1]!);
+          currentSeam.energy += energyMapData[y]![x + 1]!;
           nextSeamsAtIndex[x + 1] = currentSeam;
 
           nextSeam.path[y] = x;
-          addEnergyWithTopTracking(nextSeam, energyMapData[y]![x]!);
+          nextSeam.energy += energyMapData[y]![x]!;
           nextSeamsAtIndex[x] = nextSeam;
 
           // Skip the next position since we processed both seams
@@ -120,12 +105,6 @@ export class PredictiveGenerator extends BaseGenerator {
       }
 
       currentSeamsAtIndex = nextSeamsAtIndex;
-    }
-
-    // Add penalty based on top energies
-    for (const seam of seams) {
-      const topEnergySum = seam.topEnergies.reduce((sum, energy) => sum + energy, 0);
-      seam.energy += topEnergySum * energyPenaltyMultiplier;
     }
 
     // Sort seams by energy
