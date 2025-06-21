@@ -1,25 +1,24 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
-import { SeamGenerator, SeamPixelPriorityGrid } from '../../utils/seam-spec/seam-spec';
-import { throwGeneratorClass } from '../../utils/throw-generator-class/throw-generator-class';
+import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
 
-export type CachedGeneratorOptions = {
-  imageLoader: ImageLoader;
-  cacheSpecificOption: string;
+export type CachedGeneratorOptions = BaseGeneratorOptions & {
+  cacheSpecificOption?: string;
 };
 
-class CachedGeneratorClass implements SeamGenerator {
-  #imageLoader: ImageLoader;
+const defaultOptions: Required<PickOptional<CachedGeneratorOptions>> = {
+  cacheSpecificOption: '',
+};
+
+export class CachedGenerator extends BaseGenerator {
+  protected options: Required<CachedGeneratorOptions>;
 
   constructor(options: CachedGeneratorOptions) {
-    this.#imageLoader = options.imageLoader;
+    super(options);
+    this.options = { ...defaultOptions, ...options };
   }
 
-  async generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid> {
-    return new Uint16Array() as SeamPixelPriorityGrid;
+  async generateSeamBatch(): Promise<void> {
+    // Shell implementation
+    // This would be where the cached generator implementation goes
   }
 }
-
-export const CachedGenerator =
-  typeof USE_CACHED_GENERATOR === 'boolean' && USE_CACHED_GENERATOR
-    ? CachedGeneratorClass
-    : throwGeneratorClass('CachedGenerator');

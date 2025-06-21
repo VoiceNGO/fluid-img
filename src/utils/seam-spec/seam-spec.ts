@@ -16,7 +16,7 @@ export type Seams = Tagged<Uint16Array[], 'seams'>;
 export type SeamPixelPriorityGrid = Tagged<Uint16Array, 'seamGrid'>;
 
 // Pixel energy
-export type EnergyMap2D = Tagged<Uint16Array, 'energyMap2D'>;
+export type EnergyMap = Tagged<Uint16Array, 'EnergyMap'>;
 
 // Stored seam data
 export type SeamData = {
@@ -36,4 +36,5 @@ export type GeneratorType = 'random' | 'precise' | 'cached';
 
 export interface SeamGenerator {
   generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid>;
+  generateSeamBatch(): Promise<void>;
 }

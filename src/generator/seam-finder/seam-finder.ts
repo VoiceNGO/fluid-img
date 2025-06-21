@@ -1,4 +1,4 @@
-import { EnergyMap2D } from '../energy-map/energy-map';
+import { EnergyMap } from '../energy-map/energy-map';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
 
 /**
@@ -7,7 +7,7 @@ import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-arr
 export type Seam = Uint16Array;
 
 export class SeamFinder {
-  #energyMap: EnergyMap2D;
+  #energyMap: EnergyMap;
   #width: number;
   #height: number;
   #midPointRow1: number;
@@ -22,7 +22,7 @@ export class SeamFinder {
     this.#width = width;
     this.#height = height;
     const imgData = { data: imageDataRaw, width, height, colorSpace: 'srgb' as const };
-    this.#energyMap = new EnergyMap2D(imgData);
+    this.#energyMap = new EnergyMap(imgData);
 
     this.#midPointRow1 = Math.floor((this.#height - 1) / 2);
     this.#initializeDPArrays();

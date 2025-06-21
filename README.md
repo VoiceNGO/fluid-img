@@ -9,11 +9,22 @@ Images that just scale, intelligently, to whatever size you want them to be (wit
 ## Usage
 
 ```html
-<script src="responsive-img-web-component.js"></script>
+<script src="responsive-img.js"></script>
 <responsive-img src="image.jpg"></responsive-img>
 ```
 
 That's it. Scale the images however you like, they'll just do their thing.
+
+## Versions
+
+There are 4 different components, explained below in detail, but summarized here for people that don't want to read everything:
+
+| Component                     | Speed | Quality | Notes                                            |
+| ----------------------------- | ----- | ------- | ------------------------------------------------ |
+| `<responsive-img>`            | ★★★★★ | ★☆☆☆☆   |                                                  |
+| `<responsive-img-predictive>` | ★★★★☆ | ★★★☆☆   |                                                  |
+| `<responsive-img-cached>`     | ★★★★★ | ★★★★★   | Requires one-off server-side generation of seams |
+| `<responsive-img-full>`       | ☆☆☆☆☆ | ★★★★★   | Strongly recommend against using in production   |
 
 ## Demo
 
@@ -90,21 +101,20 @@ Usage: `<responsive-img src="image.jpg" generator="random" max-carve-up-scale="5
 
 The random generator is used by default as it is the fastest. If a `seam` attribute is provided, however, the default will switch to `cached`, e.g. `<responsive-img src="image.jpg" seam>` or `<responsive-img src="image.jpg" seam="seamsDir/image.seam">`
 
-| Option                         | Values                                   | Default                                                  | Description                                                                                                                                                                                   |
-| ------------------------------ | ---------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src`                          | URL                                      |                                                          | The URL of the image to be processed.                                                                                                                                                         |
-| `generator`                    | `random`, `predictive`, `full`, `cached` | `random` or `cached` depending on the presence of `seam` | Specifies the seam carving algorithm to use. `random`, `predictive`, or `cached` are recommended, `cached` requires pre-computing seams                                                       |
-| `seam-priority`                | Number (0-1, e.g. `0.5`)                 | `1`                                                      | If set to any value under `1`, the renderer will mix seam carving and traditional image scaling together                                                                                      |
-| `max-carve-up-seam-percentage` | Number (0-1, e.g. `0.5`)                 | `0.6`                                                    | The maximum percentage of seams to remove when scaling the image up.                                                                                                                          |
-| `max-carve-up-scale`           | Number (e.g. `3`)                        | `10`                                                     | The maximum scale factor for carving the image up.                                                                                                                                            |
-| `max-carve-down-scale`         | Number (e.g. `0.5`)                      | `1`                                                      | The maximum scale factor for carving the image down.                                                                                                                                          |
-| `prepare`                      | Boolean                                  | false                                                    | If set, generators will generate full sets of seams immediately upon load. This prevents a stuttering effect if images are being fluidly resized, but adds potentially unnecessary processing |
+| Option                         | Values                   | Default | Description                                                                                                                                                                                   |
+| ------------------------------ | ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src`                          | URL                      |         | The URL of the image to be processed.                                                                                                                                                         |
+| `seam-priority`                | Number (0-1, e.g. `0.5`) | `1`     | If set to any value under `1`, the renderer will mix seam carving and traditional image scaling together                                                                                      |
+| `max-carve-up-seam-percentage` | Number (0-1, e.g. `0.5`) | `0.6`   | The maximum percentage of seams to remove when scaling the image up.                                                                                                                          |
+| `max-carve-up-scale`           | Number (e.g. `3`)        | `10`    | The maximum scale factor for carving the image up.                                                                                                                                            |
+| `max-carve-down-scale`         | Number (e.g. `0.5`)      | `1`     | The maximum scale factor for carving the image down.                                                                                                                                          |
+| `prepare`                      | Boolean                  | false   | If set, generators will generate full sets of seams immediately upon load. This prevents a stuttering effect if images are being fluidly resized, but adds potentially unnecessary processing |
 
 ### Generator specific options
 
 Generator specific options just get added to the `<responsive-img>` component, but are only valid with the appropriate `generator` attribute also set
 
-#### Random & predictive Generator Options
+#### Random & Predictive Generator Options
 
 | Option             | Values                | Default | Description                                       |
 | ------------------ | --------------------- | ------- | ------------------------------------------------- |

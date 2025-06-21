@@ -1,42 +1,11 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
 import { SeamPixelPriorityGrid } from '../../utils/seam-spec/seam-spec';
-import { FullGenerator, FullGeneratorOptions } from '../../generator/full-generator/full-generator';
-import {
-  CachedGenerator,
-  CachedGeneratorOptions,
-} from '../../generator/cached-generator/cached-generator';
-import {
-  RandomGenerator,
-  RandomGeneratorOptions,
-} from '../../generator/random-generator/random-generator';
-import { ConditionalKeys } from 'type-fest';
-import { toKebabCase } from '../../utils/to-kebab-case/to-kebab-case';
+import { Generator, GeneratorOptions } from '../../generator/generator/generator';
 import { Profiler } from '../../utils/profiler/profiler';
-
-function errorBoundary(
-  originalMethod: (...args: any[]) => any,
-  _context: ClassMethodDecoratorContext
-): (...args: any[]) => any {
-  function replacementMethod(this: any, ...args: any[]): any {
-    if (this.hasFailed) {
-      return;
-    }
-
-    try {
-      const result = originalMethod.apply(this, args);
-      if (result && typeof result.catch === 'function') {
-        return result.catch((error: unknown) => {
-          this.handleFailure(error);
-        });
-      }
-      return result;
-    } catch (error) {
-      this.handleFailure(error);
-    }
-  }
-
-  return replacementMethod;
-}
+import { errorBoundary } from '../../utils/error-boundary/error-boundary';
+import { EnergyMap } from '../../generator/energy-map/energy-map';
+import { createOptionGetters } from '../../utils/option-helpers/option-helpers';
+import { ScalingAxis } from '../../utils/enums/enums';
 
 export interface SeamGenerator {
   generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid>;
@@ -47,22 +16,17 @@ type GeneralOptions = {
   maxCarveUpSeamPercentage?: number;
   maxCarveUpScale?: number;
   maxCarveDownScale?: number;
-  scalingAxis?: 'horizontal' | 'vertical';
+  scalingAxis?: ScalingAxis;
   width?: number;
   height?: number;
   logger?: (message: string) => void;
+  showEnergyMap?: boolean;
 };
 
 // filter out options that the renderer provides internally
 type FilterGeneratorOptions<T> = Omit<T, 'imageLoader'>;
-
-type TypedGeneratorOptions =
-  | (FilterGeneratorOptions<FullGeneratorOptions> & { generator: 'full' })
-  | (FilterGeneratorOptions<CachedGeneratorOptions> & { generator: 'cached' })
-  | (FilterGeneratorOptions<RandomGeneratorOptions> & { generator?: 'random' });
-
+type TypedGeneratorOptions = FilterGeneratorOptions<GeneratorOptions>;
 type SeamOptions = GeneralOptions & TypedGeneratorOptions;
-
 type ProcessedSeamOptions = Required<GeneralOptions> & TypedGeneratorOptions;
 
 export type RendererConfig = {
@@ -83,6 +47,10 @@ export class Renderer {
   private hasFailed = false;
   private parentNode: HTMLElement;
   private src: string;
+  private cachedEnergyMapImageData: ImageData | null = null;
+
+  setOptions = errorBoundary(this._setOptions).bind(this);
+  private redraw = errorBoundary(this._redraw).bind(this);
 
   constructor(config: RendererConfig) {
     const { parentNode, src, ...options } = config;
@@ -111,29 +79,11 @@ export class Renderer {
   private createGenerator(): SeamGenerator {
     const options = { ...this.options, imageLoader: this.imageLoader };
 
-    switch (options.generator) {
-      case 'random':
-        return new RandomGenerator(options);
-      case 'cached':
-        return new CachedGenerator(options);
-      default:
-        return new FullGenerator(options);
-    }
+    return new Generator(options as any);
   }
 
   private validateAndApplyDefaults(options: SeamOptions): ProcessedSeamOptions {
-    const getConstrainedNumber = (
-      name: ConditionalKeys<SeamOptions, number | undefined>,
-      defaultValue: number,
-      min: number = 0,
-      max: number = 1
-    ): number => {
-      const value = Number(options[toKebabCase(name) as keyof SeamOptions] ?? defaultValue);
-      if (value < min || value > max) {
-        throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
-      }
-      return value;
-    };
+    const { getBoolean, getConstrainedNumber, getEnumValue } = createOptionGetters(options);
 
     const newOptions: SeamOptions = {
       ...options,
@@ -141,13 +91,10 @@ export class Renderer {
       maxCarveUpSeamPercentage: getConstrainedNumber('maxCarveUpSeamPercentage', 0.6),
       maxCarveUpScale: getConstrainedNumber('maxCarveUpScale', 10, 1, 10),
       maxCarveDownScale: getConstrainedNumber('maxCarveDownScale', 1),
-      scalingAxis: options.scalingAxis ?? 'horizontal',
+      scalingAxis: getEnumValue('scalingAxis', ScalingAxis, ScalingAxis.Horizontal),
       logger: options.logger ?? (() => {}),
+      showEnergyMap: getBoolean('showEnergyMap', false),
     };
-
-    if (!newOptions.generator) {
-      newOptions.generator = 'random';
-    }
 
     return newOptions as ProcessedSeamOptions;
   }
@@ -193,12 +140,18 @@ export class Renderer {
     this.queueRedraw();
   }
 
-  @errorBoundary
-  setOptions(options: Partial<SeamOptions>): void {
+  private _setOptions(options: Partial<SeamOptions>): void {
+    const oldShowEnergyMap = this.options.showEnergyMap;
+
     this.options = this.validateAndApplyDefaults({
       ...this.options,
       ...options,
     } as SeamOptions);
+
+    // Invalidate energy map cache if showEnergyMap option changed
+    if (this.options.showEnergyMap !== oldShowEnergyMap) {
+      this.cachedEnergyMapImageData = null;
+    }
 
     this.queueRedraw();
   }
@@ -263,10 +216,29 @@ export class Renderer {
     }
   }
 
-  @errorBoundary
-  private async redraw(): Promise<void> {
-    this.profiler.start('redraw');
+  private async getEnergyMapImageData(): Promise<ImageData> {
+    if (this.cachedEnergyMapImageData) {
+      return this.cachedEnergyMapImageData;
+    }
+
     const originalImageData = await this.imageLoader.imageData;
+    const energyMap = new EnergyMap(originalImageData);
+    this.cachedEnergyMapImageData = energyMap.getEnergyMapAsImageData();
+
+    return this.cachedEnergyMapImageData;
+  }
+
+  private async getSourceImageData(): Promise<ImageData> {
+    if (this.options.showEnergyMap) {
+      return await this.getEnergyMapImageData();
+    } else {
+      return await this.imageLoader.imageData;
+    }
+  }
+
+  private async _redraw(): Promise<void> {
+    this.profiler.start('redraw');
+    const originalImageData = await this.getSourceImageData();
 
     const { availableSeams, interpolationPixels, carveDown } =
       this.determineCarvingParameters(originalImageData);
