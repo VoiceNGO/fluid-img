@@ -1,6 +1,6 @@
 # Responsive Image Web Component
 
-Images that just scale, intelligently, to whatever size you want them to be (within reasonable limits)
+Images that scale intelligently to any desired size (within reasonable limits).
 
 ![Responsive Images](./resources/images/responsive-images.jpg)
 
@@ -11,28 +11,28 @@ Images that just scale, intelligently, to whatever size you want them to be (wit
 <responsive-img src="image.jpg"></responsive-img>
 ```
 
-That's it. Scale the images however you like, they'll just do their thing.
+That's it. Scale the images as you wish, and they will just do their thing.
 
 ## Versions
 
-There are 4 different components, explained below in detail, but summarized here for people that don't want to read everything:
+There are 4 different components, explained below in detail, but summarized here for those who don't like reading long readme files:
 
 | Component                     | Speed | Quality | Notes                                            |
 | ----------------------------- | ----- | ------- | ------------------------------------------------ |
 | `<responsive-img>`            | ★★★★★ | ★☆☆☆☆   |                                                  |
 | `<responsive-img-predictive>` | ★★★★☆ | ★★★☆☆   |                                                  |
 | `<responsive-img-cached>`     | ★★★★★ | ★★★★★   | Requires one-off server-side generation of seams |
-| `<responsive-img-full>`       | ☆☆☆☆☆ | ★★★★★   | Strongly recommend against using in production   |
+| `<responsive-img-full>`       | ☆☆☆☆☆ | ★★★★★   | Not recommended for production use.              |
 
 ## Demo
 
 [Demo Here](https://voicengo.github.io/img-responsive/public/responsive-demo.html)
 
-Or, if you want to play with it with your own images, [here is a playground](https://voicengo.github.io/img-responsive/public)
+A playground is also available for [experimenting with your own images](https://voicengo.github.io/img-responsive/public).
 
 ## Installation
 
-There are two pieces to this. The web components, with various generators, and the server-side seam generator. The seam generator is not necessary, but produces better results than any of the client-friendly generators.
+There are two pieces to this: the web components with various generators and the server-side seam generator. While not required, the server-side seam generator produces higher quality results than the client-side generators.
 
 ### Client Library
 
@@ -58,8 +58,7 @@ Or include the script from jsdelivr or unpkg:
 
 ### Seam Generator
 
-To use the generator you need to have cairo installed (this is a
-dependency of [node-canvas](https://github.com/Automattic/node-canvas)).
+To use the generator, [Cairo](https://github.com/Automattic/node-canvas) must be installed (this is a dependency of [node-canvas](https://github.com/Automattic/node-canvas)).
 
 | OS      | Command                                                                                                   |
 | :------ | :-------------------------------------------------------------------------------------------------------- |
@@ -77,11 +76,11 @@ After cairo is installed, install both canvas and this package via npm:
 npm install responsive-image
 ```
 
-If you only need the renderer for some reason (e.g. you are building seams in another service), then you do not need cairo or canvas and can just install seams via npm
+If you are not compiling seams on a server you can skip the Cairo install.
 
 ### Caveats
 
-The responsive image component works best for horizontally or vertically scaling images within a range of approximately 0.5x to 1.5x their original size. While it can handle larger or smaller scales, the visual quality may start to quickly degrade. It is generally not recommended for images where precise pixel integrity is critical, such as tight portraits, graphs, or highly detailed technical drawings, as seam carving will introduce distortions. It is highly recommended to test your images at various sizes to ensure they meet your visual expectations.
+The responsive image component works best for horizontally or vertically scaling images within a range of approximately 0.5x to 1.5x their original size. While it can handle larger or smaller scales, visual quality may degrade quickly. It is not recommended for images where precise pixel integrity is critical, such as portraits, graphs, or detailed technical drawings, as seam carving introduces distortions. It is highly recommended to test your images at various sizes to ensure they meet your visual expectations.
 
 #### CORS
 
@@ -97,20 +96,20 @@ If the component fails to load or process the image, or throws an internal error
 
 Usage: `<responsive-img src="image.jpg" generator="random" max-carve-up-scale="5"></responsive-img>`
 
-The random generator is used by default as it is the fastest. If a `seam` attribute is provided, however, the default will switch to `cached`, e.g. `<responsive-img src="image.jpg" seam>` or `<responsive-img src="image.jpg" seam="seamsDir/image.seam">`
+By default, the `random` generator is used as it is the fastest. However, if a `seam` attribute is provided, the generator will default to `cached`, e.g. `<responsive-img src="image.jpg" seam>` or `<responsive-img src="image.jpg" seam="seamsDir/image.seam">`
 
-| Option                         | Values                   | Default | Description                                                                                                                                                                                   |
-| ------------------------------ | ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src`                          | URL                      |         | The URL of the image to be processed.                                                                                                                                                         |
-| `seam-priority`                | Number (0-1, e.g. `0.5`) | `1`     | If set to any value under `1`, the renderer will mix seam carving and traditional image scaling together                                                                                      |
-| `max-carve-up-seam-percentage` | Number (0-1, e.g. `0.5`) | `0.6`   | The maximum percentage of seams to remove when scaling the image up.                                                                                                                          |
-| `max-carve-up-scale`           | Number (e.g. `3`)        | `10`    | The maximum scale factor for carving the image up.                                                                                                                                            |
-| `max-carve-down-scale`         | Number (e.g. `0.5`)      | `1`     | The maximum scale factor for carving the image down.                                                                                                                                          |
-| `prepare`                      | Boolean                  | false   | If set, generators will generate full sets of seams immediately upon load. This prevents a stuttering effect if images are being fluidly resized, but adds potentially unnecessary processing |
+| Option                         | Values                   | Default | Description                                                                                                                                                                    |
+| ------------------------------ | ------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src`                          | URL                      |         | The URL of the image to be processed.                                                                                                                                          |
+| `seam-priority`                | Number (0-1, e.g. `0.5`) | `1`     | If set to any value under `1`, the renderer will mix seam carving and traditional image scaling together                                                                       |
+| `max-carve-up-seam-percentage` | Number (0-1, e.g. `0.5`) | `0.6`   | The maximum percentage of seams to remove when scaling the image up.                                                                                                           |
+| `max-carve-up-scale`           | Number (e.g. `3`)        | `10`    | The maximum scale factor for carving the image up.                                                                                                                             |
+| `max-carve-down-scale`         | Number (e.g. `0.5`)      | `1`     | The maximum scale factor for carving the image down.                                                                                                                           |
+| `prepare`                      | Boolean                  | false   | If set, generators will create a full set of seams immediately upon load. This prevents a stuttering effect when images are resized fluidly but may add unnecessary processing |
 
 ### Generator specific options
 
-Generator specific options just get added to the `<responsive-img>` component, but are only valid with the appropriate `generator` attribute also set
+Generator-specific options are added to the `<responsive-img>` component but are only valid when the corresponding `generator` attribute is also set
 
 #### Random & Predictive Generator Options
 
@@ -131,7 +130,7 @@ None for now
 
 ## Seam Generator
 
-To pre-calculate seams for use with the `cached` generator, you can use the command-line tool provided by this package via `npx`. This tool processes an image and generates a `.seam` file containing the pre-computed seam data. By default `.seam` files will be generated in the same folder as the processed images.
+To pre-calculate seams for the `cached` generator, use the `npx` command-line tool provided by this package. This tool processes an image and generates a `.seam` file containing the pre-computed seam data. By default, `.seam` files are generated in the same folder as the processed images.
 
 Example usage:
 
@@ -157,52 +156,52 @@ npx seams process image.jpg --percent-seams 50 --vertical
 
 ### Seam Generator Options
 
-| Option                   | Values         | Default       | Description                                                                                                                                                                                                                                                                               |
-| ------------------------ | -------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--output-dir`, `-o`     | Directory path | Same as input | Directory where .seam files will be saved                                                                                                                                                                                                                                                 |
-| `--vertical`, `-v`       | Boolean flag   | `false`       | Calculate vertical seams in addition to horizontal ones                                                                                                                                                                                                                                   |
-| `--allow-straight`, `-a` | Boolean flag   | `false`       | Allow straight seams (negligible quality impact but reduces file size by ≈50%)                                                                                                                                                                                                            |
-| `--step-size`, `-s`      | Number         | `1`           | Seams skip by N pixels allowing for significantly smaller, but less accurate seams. Makes seams N<sup>2</sup> times smaller (e.g. a value of 2 results in seams that are 1/4th the size). 2 is usually not very noticeable, values of 4+ start to cause a noticeable number of artifacts. |
-| `--max-seams`            | Number         | `-1`          | Maximum number of seams to calculate (-1 for unlimited)                                                                                                                                                                                                                                   |
-| `--percent-seams`, `-p`  | Number (1-100) | `100`         | Percentage of possible seams to calculate                                                                                                                                                                                                                                                 |
+| Option                   | Values         | Default       | Description                                                                                                                                                                                                                                                                                            |
+| ------------------------ | -------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--output-dir`, `-o`     | Directory path | Same as input | Directory where .seam files will be saved                                                                                                                                                                                                                                                              |
+| `--vertical`, `-v`       | Boolean flag   | `false`       | Calculate vertical seams in addition to horizontal ones                                                                                                                                                                                                                                                |
+| `--allow-straight`, `-a` | Boolean flag   | `false`       | Allows straight seams. This has a negligible impact on quality but reduces the file size by approximately 50%.                                                                                                                                                                                         |
+| `--step-size`, `-s`      | Number         | `1`           | Seams skip by N pixels, allowing for significantly smaller but less accurate seam files. This makes seam files N<sup>2</sup> times smaller (e.g., a value of 2 results in a file 1/4th the size). A step size of 2 is often not noticeable, but values of 4 or higher can introduce visible artifacts. |
+| `--max-seams`            | Number         | `-1`          | Maximum number of seams to calculate (-1 for unlimited)                                                                                                                                                                                                                                                |
+| `--percent-seams`, `-p`  | Number (1-100) | `100`         | Percentage of possible seams to calculate                                                                                                                                                                                                                                                              |
 
 ## How it works
 
-Seam carving is a content-aware image resizing technique. It intelligently removes or adds pixels to an image, allowing it to be resized without distorting important content. [Wikedia article](https://en.wikipedia.org/wiki/Seam_carving) on the topic if you want to read more.
+Seam carving is a content-aware image resizing technique that intelligently removes or adds pixels, allowing an image to be resized without distorting important content. For more information, see the [Wikipedia article](https://en.wikipedia.org/wiki/Seam_carving) on the topic.
 
-Historically, performing seam carving directly within a web browser was impractical due to its computationally intensive nature, requiring significant processing power for real-time image manipulation. However, we can either pre-calculate seams on a server, or cheat and throw away the entire algorithm for ones that work decently well in many scenarios.
+Historically, seam carving was too computationally intensive for real-time use in web browsers. However, this limitation can be overcome by pre-calculating seams on a server or by using alternative algorithms that are less demanding and work well in many scenarios.
 
-There are four implementations of the seam carving generator, although the full implementation is not practical except for demos:
+There are four implementations of the seam carving generator, though the `full` implementation is generally not practical for production environments and is best used for demonstration purposes:
 
 ### Random Carving
 
-The random seam carving is done by throwing away the seam carving algorithm entirely as it is too slow to run in real-time.
+The random seam carving approach abandons the traditional seam carving algorithm, which is too slow for real-time browser execution.
 
-Instead, I'm generating a set of random seams with 100% image coverage by randomly connecting every pixel in one row to a neighboring pixel in the next. I then walk each seam, calculate its energy, and discard a batch of the lowest energy seams. Repeat until we have the desired number of seams. It generates surprisingly decent results for many images.
+Instead, it generates a set of random seams that provide 100% image coverage by connecting each pixel in a row to a neighboring pixel in the next. It then iterates through each seam, calculates its energy, and discards a batch of the lowest-energy seams. This process repeats until the desired number of seams is achieved. This method produces surprisingly good results for many images.
 
 ### Predictive Carving
 
-Similar to random carving, I'm generating the energy map, and creating seams in batches, but then also generating a minimal energy map for each batch. The idea here is then simple -- We want "good seams" and "bad seams". Good seams are those with low energy and will be included in our batch. Bad seams "consume" energy by including the highest energy pixels so that we can filter out entire seams of high energy pixels later.
+Similar to random carving, this method generates an energy map and creates seams in batches. It also generates a minimal energy map for each batch. The core idea is to create both "good" and "bad" seams. Good seams have low energy and are kept. Bad seams incorporate high-energy pixels, allowing them to be filtered out later.
 
-Starting from the first row of pixels, we look at a pair of pixels and try to connect it to the same pair in the next row, and what we do is simple -- The lower energy seam from above (running calculation) gets connected to the lower energy seam from below (from our minimal energy map).
+Starting from the first row, it connects pairs of pixels to corresponding pairs in the next row. The lower-energy seam from the running calculation is connected to the lower-energy seam from the minimal energy map.
 
-The result is 1 truly optimal seam, many "very good" seams, many "very bad" seams, and a bunch of mediocre ones. We then pick a batch of good ones, discard the rest, and repeat.
+The result is one truly optimal seam, many "very good" seams, many "very bad" seams, and a lot of mediocre ones. We select a batch of the "good" seams, discard the rest, and repeat the process.
 
 ### Full Carving
 
-Fully calculates optimum seams in the browser. Useful in a demo to see what an image will look like when scaled, but should not be used in production as it is very slow.
+This method fully calculates optimal seams in the browser. It is useful for demos to preview scaling effects but is too slow for production use.
 
-The general algorithm is: calculate the energy at every pixel in an image. Then calculate an optimal seam through the image using dynamic programming to build an energy sum table. Remove this optimal seam, re-calculate the two tables, and repeat.
+The algorithm calculates the energy of every pixel, then finds an optimal seam using dynamic programming to build an energy sum table. This optimal seam is removed, both tables are recalculated, and the process repeats.
 
 ### Cached Carving
 
-Cached carving uses the full carving method above, but instead of doing it on the fly, which is slow, it pre-calculates seams on a server. Those seams get compressed into a custom `.seam` file, which is then decoded on the client. The result is optimal seams with minimal client-side processing.
+This method uses the `full` carving algorithm but pre-calculates seams on a server to avoid slow, on-the-fly processing in the browser. The pre-calculated seams are compressed into a custom `.seam` file, which is then decoded on the client, providing optimal seams with minimal client-side processing.
 
 ## Erm...
 
 I just implemented the Predictive generator. It is, algorithmically, identical to the full generator when set to a batch size of 1, it's just really slow. So I tried that.
 
-Giant MEH. The random generator is literally better in many cases. So I need to re-think the core algorithms. I was playing with a slinding window in the seam generation with decent results, but not sure what I'll end up with yet.
+Giant MEH. The random generator is literally better in many cases. So I need to re-think the core algorithms. I was playing with a sliding window in the seam generation with decent results, but not sure what I'll end up with yet.
 
 ## TODO
 
@@ -219,7 +218,7 @@ Giant MEH. The random generator is literally better in many cases. So I need to 
 
 ### Low Priority
 
-- [ ] Masking
+- [x] Masking
 - [ ] Facial recognition
 
 ### Pipe Dream
