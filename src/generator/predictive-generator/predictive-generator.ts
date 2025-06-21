@@ -11,7 +11,7 @@ export type PredictiveGeneratorOptions = BaseGeneratorOptions & PredictiveSpecif
 type PredictiveInstanceOptions = BaseGeneratorOptions & Required<PredictiveSpecificOptions>;
 
 const defaultOptions: Required<PredictiveSpecificOptions> = {
-  batchPercentage: 0.02,
+  batchPercentage: 0.1,
   minBatchSize: 10,
 };
 
