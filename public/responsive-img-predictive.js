@@ -1005,7 +1005,7 @@
 
   // src/generator/predictive-generator/predictive-generator.ts
   var defaultOptions2 = {
-    batchPercentage: 0.02,
+    batchPercentage: 0.1,
     minBatchSize: 10
   };
   var PredictiveGenerator = class extends BaseGenerator {

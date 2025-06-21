@@ -25454,7 +25454,7 @@
       }
     };
     var defaultOptions2 = {
-      batchPercentage: 0.02,
+      batchPercentage: 0.1,
       minBatchSize: 10
     };
     var PredictiveGenerator2 = class extends BaseGenerator {
@@ -27147,7 +27147,7 @@
       }
     };
     var defaultOptions2 = {
-      batchPercentage: 0.02,
+      batchPercentage: 0.1,
       minBatchSize: 10
     };
     var PredictiveGenerator2 = class extends BaseGenerator {
@@ -30806,7 +30806,8 @@
             {
               options: ScalingAxis,
               selectedValue: config.scalingAxis,
-              onSelect: handleScalingAxisChange
+              onSelect: handleScalingAxisChange,
+              disabledOptions: [ScalingAxis.Vertical, ScalingAxis.Auto, ScalingAxis.Dual]
             }
           )
         ] }),
@@ -30825,7 +30826,8 @@
             {
               options: DisplayMode,
               selectedValue: config.displayMode,
-              onSelect: handleDisplayModeChange
+              onSelect: handleDisplayModeChange,
+              disabledOptions: [DisplayMode["B/W"], DisplayMode.Mask]
             }
           )
         ] }),
@@ -31046,7 +31048,7 @@
       maxCarveUpSeamPercentage: 0.6,
       maxCarveUpScale: 3,
       maxCarveDownScale: 0.7,
-      generator: "random",
+      generator: "predictive",
       scalingAxis: ScalingAxis.Horizontal
     }
   };
