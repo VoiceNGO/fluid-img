@@ -1,21 +1,28 @@
-import '../../build/responsive-img-web-component.js';
+import '../../build/responsive-img.js';
+import '../../build/responsive-img-predictive.js';
+import '../../build/responsive-img-full.js';
+import '../../build/responsive-img-cached.js';
 import React, { useState, useEffect, useRef } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
 import Controls from './components/Controls.jsx';
 import ResizableContainer from './components/ResizableContainer.jsx';
 import LogWindow from './components/LogWindow.jsx';
+import { ScalingAxis } from '../../src/utils/enums/enums';
 
 function App() {
   const [selectedImage, setSelectedImage] = useState('Broadway_tower.jpg');
   const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
   const [logs, setLogs] = useState([]);
   const [config, setConfig] = useState({
+    displayMode: '',
     showSeams: false,
     showEnergyMap: false,
+    carvingPriority: 1,
     maxCarveUpSeamPercentage: 0.6,
     maxCarveUpScale: 3,
-    maxCarveDownScale: 1,
+    maxCarveDownScale: 0.7,
     generator: 'random',
+    scalingAxis: ScalingAxis.Horizontal,
   });
   const imgResponsiveRef = useRef(null);
 
@@ -40,7 +47,7 @@ function App() {
         currentRef.removeEventListener('log', handleLog);
       }
     };
-  }, [imageToDisplay]);
+  }, [imageToDisplay, config.generator]);
 
   const handleImageSelect = (imageName) => {
     setLogs([]);
@@ -53,6 +60,23 @@ function App() {
     setUploadedImageSrc(imageSrc);
     setSelectedImage(null);
   };
+
+  // Get the appropriate component tag name
+  const getComponentTagName = () => {
+    switch (config.generator) {
+      case 'predictive':
+        return 'responsive-img-predictive';
+      case 'full':
+        return 'responsive-img-full';
+      case 'cached':
+        return 'responsive-img-cached';
+      case 'random':
+      default:
+        return 'responsive-img';
+    }
+  };
+
+  const ComponentTag = getComponentTagName();
 
   return (
     <div className="App">
@@ -72,15 +96,16 @@ function App() {
           <LogWindow logs={logs} />
           <ResizableContainer>
             {imageToDisplay && (
-              <responsive-img
+              <ComponentTag
                 ref={imgResponsiveRef}
                 src={imageToDisplay}
                 show-seams={config.showSeams}
-                show-energy-map={config.showEnergyMap}
+                {...(config.displayMode === 'energy' ? { 'show-energy-map': '' } : {})}
+                carving-priority={config.carvingPriority}
                 max-carve-up-seam-percentage={config.maxCarveUpSeamPercentage}
                 max-carve-up-scale={config.maxCarveUpScale}
                 max-carve-down-scale={config.maxCarveDownScale}
-                generator={config.generator}
+                scaling-axis={config.scalingAxis}
               />
             )}
           </ResizableContainer>

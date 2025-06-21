@@ -10,7 +10,6 @@ function ImageUploader({ onImageUpload }) {
 
   return (
     <div className="image-uploader">
-      <label htmlFor="file-upload">Upload an Image:</label>
       <input id="file-upload" type="file" accept="image/*" onChange={handleFileChange} />
     </div>
   );
