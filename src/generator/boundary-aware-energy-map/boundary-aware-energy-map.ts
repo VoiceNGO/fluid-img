@@ -1,5 +1,6 @@
 import type { Tagged } from 'type-fest';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
+import { GrayscalePixelArray } from '../../utils/types/types';
 
 function getPixelIndex(x: number, y: number, width: number): number {
   return (y * width + x) * 4;
@@ -95,7 +96,8 @@ export class BoundaryAwareEnergyMap {
     imageData: ImageData,
     boundaryPenaltyWeight: number = 5.0,
     uniformityThreshold: number = 10.0,
-    edgeThreshold: number = 20.0
+    edgeThreshold: number = 20.0,
+    maskData?: GrayscalePixelArray
   ) {
     this.#width = imageData.width;
     this.#height = imageData.height;

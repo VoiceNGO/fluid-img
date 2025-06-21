@@ -1,10 +1,12 @@
 import { Renderer, RendererConfig } from '../renderer/renderer';
 import { ScalingAxis } from '../../utils/enums/enums';
 import { toKebabCase } from '../../utils/to-kebab-case/to-kebab-case';
+import { GeneratorType } from '../../utils/types/types';
 
 type SeamAttributes = Omit<RendererConfig, 'parentNode' | 'src' | 'width' | 'height' | 'logger'>;
 
-class ImgResponsive extends HTMLElement {
+export class ImgResponsive extends HTMLElement {
+  protected GENERATOR!: GeneratorType;
   private renderer: Renderer | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private intersectionObserver: IntersectionObserver | null = null;
@@ -17,7 +19,9 @@ class ImgResponsive extends HTMLElement {
     super();
   }
 
-  static get observedAttributes(): Array<keyof SeamAttributes | 'src' | 'on-screen-threshold'> {
+  static get observedAttributes(): Array<
+    keyof SeamAttributes | 'src' | 'mask' | 'on-screen-threshold'
+  > {
     const seamAttributes: Array<keyof SeamAttributes> = [
       'carvingPriority',
       'maxCarveUpSeamPercentage',
@@ -25,11 +29,12 @@ class ImgResponsive extends HTMLElement {
       'maxCarveDownScale',
       'scalingAxis',
       'showEnergyMap',
+      'demoMode',
     ];
 
     const kebabCaseAttributes = seamAttributes.map(toKebabCase);
 
-    return ['src', 'on-screen-threshold', ...kebabCaseAttributes] as any;
+    return ['src', 'mask', 'on-screen-threshold', ...kebabCaseAttributes] as any;
   }
 
   connectedCallback(): void {
@@ -60,7 +65,7 @@ class ImgResponsive extends HTMLElement {
     const changes = Array.from(this.updateQueue);
     this.updateQueue.clear();
 
-    if (changes.includes('src')) {
+    if (changes.includes('src') || changes.includes('scaling-axis') || changes.includes('mask')) {
       this.renderer?.destroy();
       this.renderer = null;
       this.initializeRenderer();
@@ -110,6 +115,8 @@ class ImgResponsive extends HTMLElement {
     const options = this.getOptions();
     this.renderer = new Renderer({
       parentNode: this,
+      logger: this.dispatchLogEvent,
+      generator: this.GENERATOR,
       ...options,
     });
   }
@@ -208,7 +215,3 @@ class ImgResponsive extends HTMLElement {
     return parseInt(threshold.replace('px', ''), 10);
   }
 }
-
-const componentName = 'responsive-img' + (GENERATOR === 'random' ? '' : `-${GENERATOR}`);
-
-customElements.define(componentName, ImgResponsive);

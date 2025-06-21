@@ -15,19 +15,23 @@ import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-gene
  * So the entire algorithm is O(n) where n is the number of pixels in the image.
  */
 
-export type RandomGeneratorOptions = BaseGeneratorOptions & {
+type RandomSpecificOptions = {
   batchPercentage?: number;
   minBatchSize?: number;
 };
 
-const defaultOptions: Required<PickOptional<RandomGeneratorOptions>> = {
+export type RandomGeneratorOptions = BaseGeneratorOptions & RandomSpecificOptions;
+
+type RandomInstanceOptions = BaseGeneratorOptions & Required<RandomSpecificOptions>;
+
+const defaultOptions: Required<RandomSpecificOptions> = {
   batchPercentage: 0.05,
   minBatchSize: 10,
 };
 
 export class RandomGenerator extends BaseGenerator {
   protected connections: Int8Array[] = [];
-  protected options: Required<RandomGeneratorOptions>;
+  protected options: RandomInstanceOptions;
 
   constructor(options: RandomGeneratorOptions) {
     super(options);

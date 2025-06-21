@@ -2,21 +2,10 @@
 // Current method uses abs(Gx) + abs(Gy).
 import type { Tagged } from 'type-fest';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
+import { getGrayscaleImageData } from '../grayscale/grayscale';
+import { GrayscalePixelArray } from '../../utils/types/types';
 
-function getPixelIndex(x: number, y: number, width: number): number {
-  return (y * width + x) * 4;
-}
-
-function getGrayscale(x: number, y: number, width: number, data: Uint8ClampedArray): number {
-  if (x < 0 || x >= width || y < 0 || y >= Math.floor(data.length / (width * 4))) {
-    return 0;
-  }
-  const i = getPixelIndex(x, y, width);
-
-  return 0.299 * data[i]! + 0.587 * data[i + 1]! + (0.114 * data[i + 2]! * data[i + 3]!) / 255;
-}
-
-type EnergyMapData = Tagged<Uint32Array, 'energyMapData'>;
+type EnergyMapData = Tagged<Uint16Array, 'energyMapData'>;
 type EnergyMapIndices = Tagged<Uint32Array, 'energyMapIndices'>;
 
 export class SobelEnergyMap {
@@ -25,17 +14,26 @@ export class SobelEnergyMap {
   #height: number;
   #grayscaleMap: Uint8Array[];
   #originalIndices: EnergyMapIndices[];
+  #maskData: GrayscalePixelArray | undefined;
 
-  constructor(imageData: ImageData) {
+  constructor(imageData: ImageData, maskData?: GrayscalePixelArray) {
     this.#width = imageData.width;
     this.#height = imageData.height;
     this.#data = new Array(this.#height);
-    this.#grayscaleMap = new Array(this.#height);
     this.#originalIndices = new Array(this.#height);
+    this.#maskData = maskData;
 
+    this.#grayscaleMap = getGrayscaleImageData(imageData, true);
     this.#fillOriginalIndices();
-    this.#computeGrayscaleMap(imageData);
     this.#data = this.#computeFullEnergyMap();
+  }
+
+  #getMaskEnergy(y: number, x: number): number {
+    if (!this.#maskData) {
+      return 255;
+    }
+    const originalIndex = this.#originalIndices[y]![x]!;
+    return this.#maskData[originalIndex]!;
   }
 
   #fillOriginalIndices(): void {
@@ -47,23 +45,14 @@ export class SobelEnergyMap {
     }
   }
 
-  #computeGrayscaleMap(imageData: ImageData): void {
-    for (let y = 0; y < this.#height; y++) {
-      this.#grayscaleMap[y] = new Uint8Array(this.#width);
-      for (let x = 0; x < this.#width; x++) {
-        this.#grayscaleMap[y]![x] = getGrayscale(x, y, this.#width, imageData.data);
-      }
-    }
-  }
-
   #computeFullEnergyMap(
     width: number = this.#width,
     height: number = this.#height
   ): EnergyMapData[] {
-    const energyMapData = new Array(height);
+    const energyMapData: EnergyMapData[] = new Array(height);
 
     for (let y = 0; y < height; y++) {
-      energyMapData[y] = new Uint32Array(width) as EnergyMapData;
+      energyMapData[y] = new Uint16Array(width) as EnergyMapData;
 
       const y1 = Math.max(0, y - 1);
       const y3 = Math.min(height - 1, y + 1);
@@ -91,8 +80,9 @@ export class SobelEnergyMap {
           nextRow[x]! * 2 +
           nextRow[x3]!;
 
-        const totalEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
-        energyMapData[y]![x] = totalEnergy;
+        const sobelEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
+        const maskEnergy = this.#getMaskEnergy(y, x);
+        energyMapData[y]![x] = sobelEnergy * (maskEnergy / 255);
       }
     }
 
@@ -165,8 +155,9 @@ export class SobelEnergyMap {
           nextRow[xCenter]! * 2 +
           nextRow[x3]!;
 
-        const totalEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
-        this.#data[y]![xCurrent] = totalEnergy;
+        const sobelEnergy = (gx < 0 ? -gx : gx) + (gy < 0 ? -gy : gy);
+        const maskEnergy = this.#getMaskEnergy(y, xCurrent);
+        this.#data[y]![xCurrent] = sobelEnergy + maskEnergy;
       }
     }
   }

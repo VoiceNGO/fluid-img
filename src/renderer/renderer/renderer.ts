@@ -1,6 +1,6 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
-import { SeamPixelPriorityGrid } from '../../utils/seam-spec/seam-spec';
-import { Generator, GeneratorOptions } from '../../generator/generator/generator';
+import { GeneratorType, SeamPixelPriorityGrid } from '../../utils/types/types';
+import { GeneratorOptions, createGenerator } from '../../generator/generator/generator';
 import { Profiler } from '../../utils/profiler/profiler';
 import { errorBoundary } from '../../utils/error-boundary/error-boundary';
 import { EnergyMap } from '../../generator/energy-map/energy-map';
@@ -12,6 +12,7 @@ export interface SeamGenerator {
 }
 
 type GeneralOptions = {
+  generator?: GeneratorType;
   carvingPriority?: number;
   maxCarveUpSeamPercentage?: number;
   maxCarveUpScale?: number;
@@ -21,6 +22,7 @@ type GeneralOptions = {
   height?: number;
   logger?: (message: string) => void;
   showEnergyMap?: boolean;
+  demoMode?: boolean;
 };
 
 // filter out options that the renderer provides internally
@@ -32,6 +34,7 @@ type ProcessedSeamOptions = Required<GeneralOptions> & TypedGeneratorOptions;
 export type RendererConfig = {
   parentNode: HTMLElement;
   src: string;
+  mask?: string;
 } & SeamOptions;
 
 export class Renderer {
@@ -40,6 +43,7 @@ export class Renderer {
   private height = 0;
   private width = 0;
   private imageLoader!: ImageLoader;
+  private maskLoader: ImageLoader | undefined;
   private options!: ProcessedSeamOptions;
   private generator!: SeamGenerator;
   private redrawQueued = false;
@@ -47,15 +51,17 @@ export class Renderer {
   private hasFailed = false;
   private parentNode: HTMLElement;
   private src: string;
+  private mask: string | undefined;
   private cachedEnergyMapImageData: ImageData | null = null;
 
   setOptions = errorBoundary(this._setOptions).bind(this);
   private redraw = errorBoundary(this._redraw).bind(this);
 
   constructor(config: RendererConfig) {
-    const { parentNode, src, ...options } = config;
+    const { parentNode, src, mask, ...options } = config;
     this.parentNode = parentNode;
     this.src = src;
+    this.mask = mask;
 
     try {
       this.options = this.validateAndApplyDefaults(options);
@@ -64,6 +70,12 @@ export class Renderer {
         rotate: this.options.scalingAxis === 'vertical',
         profiler: this.profiler,
       });
+      if (this.mask) {
+        this.maskLoader = new ImageLoader(this.mask, {
+          rotate: false,
+          profiler: this.profiler,
+        });
+      }
       this.generator = this.createGenerator();
 
       this.initializeCanvas(parentNode);
@@ -77,9 +89,13 @@ export class Renderer {
   }
 
   private createGenerator(): SeamGenerator {
-    const options = { ...this.options, imageLoader: this.imageLoader };
+    const options = {
+      ...this.options,
+      imageLoader: this.imageLoader,
+      maskLoader: this.maskLoader,
+    };
 
-    return new Generator(options as any);
+    return createGenerator(this.options.generator, options);
   }
 
   private validateAndApplyDefaults(options: SeamOptions): ProcessedSeamOptions {
@@ -94,6 +110,7 @@ export class Renderer {
       scalingAxis: getEnumValue('scalingAxis', ScalingAxis, ScalingAxis.Horizontal),
       logger: options.logger ?? (() => {}),
       showEnergyMap: getBoolean('showEnergyMap', false),
+      demoMode: getBoolean('demoMode', false),
     };
 
     return newOptions as ProcessedSeamOptions;

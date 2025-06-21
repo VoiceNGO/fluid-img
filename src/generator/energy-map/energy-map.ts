@@ -1,16 +1,10 @@
 import { SobelEnergyMap } from '../sobel-energy-map/sobel-energy-map';
 import { DualEnergyMap } from '../dual-energy-map/dual-energy-map';
 import { BoundaryAwareEnergyMap } from '../boundary-aware-energy-map/boundary-aware-energy-map';
+import { GrayscalePixelArray } from '../../utils/types/types';
 
 // Energy map algorithm types
-export type EnergyMapAlgorithm =
-  | 'sobel'
-  | 'dual'
-  | 'boundary-aware'
-  | 'scharr'
-  | 'entropy'
-  | 'laplacian'
-  | 'saliency';
+export type EnergyMapAlgorithm = 'sobel' | 'dual' | 'boundary-aware';
 
 // Configuration: change this to switch energy map implementations
 const ENERGY_ALGORITHM: EnergyMapAlgorithm = 'sobel';
@@ -26,50 +20,29 @@ const CONFIG = {
     edgeThreshold: 20.0,
   },
   sobel: {},
-  scharr: {},
-  entropy: {
-    windowSize: 5,
-  },
-  laplacian: {
-    sigma: 1.0,
-  },
-  saliency: {
-    model: 'frequency-tuned' as const,
-  },
 } as const;
 
 // Factory function to create energy maps
-function createEnergyMap(algorithm: EnergyMapAlgorithm, imageData: ImageData) {
+function createEnergyMap(
+  algorithm: EnergyMapAlgorithm,
+  imageData: ImageData,
+  maskData?: GrayscalePixelArray
+) {
   switch (algorithm) {
     case 'sobel':
-      return new SobelEnergyMap(imageData);
+      return new SobelEnergyMap(imageData, maskData);
 
     case 'dual':
-      return new DualEnergyMap(imageData, CONFIG.dual.forwardEnergyWeight);
+      return new DualEnergyMap(imageData, CONFIG.dual.forwardEnergyWeight, maskData);
 
     case 'boundary-aware':
       return new BoundaryAwareEnergyMap(
         imageData,
         CONFIG['boundary-aware'].boundaryPenaltyWeight,
         CONFIG['boundary-aware'].uniformityThreshold,
-        CONFIG['boundary-aware'].edgeThreshold
+        CONFIG['boundary-aware'].edgeThreshold,
+        maskData
       );
-
-    case 'scharr':
-      // TODO: Implement ScharrEnergyMap
-      throw new Error('Scharr energy map not implemented yet');
-
-    case 'entropy':
-      // TODO: Implement EntropyEnergyMap
-      throw new Error('Entropy energy map not implemented yet');
-
-    case 'laplacian':
-      // TODO: Implement LaplacianEnergyMap
-      throw new Error('Laplacian energy map not implemented yet');
-
-    case 'saliency':
-      // TODO: Implement SaliencyEnergyMap
-      throw new Error('Saliency energy map not implemented yet');
 
     default:
       const _exhaustive: never = algorithm;
@@ -81,8 +54,8 @@ function createEnergyMap(algorithm: EnergyMapAlgorithm, imageData: ImageData) {
 export const EnergyMap = class EnergyMap {
   private impl: SobelEnergyMap | DualEnergyMap | BoundaryAwareEnergyMap;
 
-  constructor(imageData: ImageData) {
-    this.impl = createEnergyMap(ENERGY_ALGORITHM, imageData);
+  constructor(imageData: ImageData, maskData?: GrayscalePixelArray) {
+    this.impl = createEnergyMap(ENERGY_ALGORITHM, imageData, maskData);
   }
 
   get width() {
@@ -108,6 +81,8 @@ export const EnergyMap = class EnergyMap {
     return this.impl.getEnergyMapAsImageData(width, height);
   }
 };
+
+export type EnergyMap = InstanceType<typeof EnergyMap>;
 
 // Export the original classes and factory for direct access
 export { SobelEnergyMap, DualEnergyMap, BoundaryAwareEnergyMap, createEnergyMap };
