@@ -21,7 +21,7 @@ const defaultState = {
     maxCarveUpSeamPercentage: 0.6,
     maxCarveUpScale: 3,
     maxCarveDownScale: 0.7,
-    generator: 'random',
+    generator: 'predictive',
     scalingAxis: ScalingAxis.Horizontal,
   },
 };
