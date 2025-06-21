@@ -1,7 +1,5 @@
 declare global {
-  const USE_RANDOM_GENERATOR: boolean;
-  const USE_FULL_GENERATOR: boolean;
-  const USE_CACHED_GENERATOR: boolean;
+  const GENERATOR: 'random' | 'full' | 'cached' | 'predictive';
 
   type PickOptional<T> = {
     [K in keyof T as {} extends Pick<T, K> ? K : never]: T[K];

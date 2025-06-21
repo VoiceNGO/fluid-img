@@ -1,24 +1,15 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
-import { SeamGenerator, SeamPixelPriorityGrid } from '../../utils/seam-spec/seam-spec';
-import { throwGeneratorClass } from '../../utils/throw-generator-class/throw-generator-class';
+import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
 
-export type FullGeneratorOptions = {
-  imageLoader: ImageLoader;
-};
+export type FullGeneratorOptions = BaseGeneratorOptions;
 
-class FullGeneratorClass implements SeamGenerator {
-  #imageLoader: ImageLoader;
-
+export class FullGenerator extends BaseGenerator {
   constructor(options: FullGeneratorOptions) {
-    this.#imageLoader = options.imageLoader;
+    super(options);
   }
 
-  async generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid> {
-    return new Uint16Array() as SeamPixelPriorityGrid;
+  async generateSeamBatch(): Promise<void> {
+    // Shell implementation
+    // This would be where the full generator implementation goes
   }
 }
-
-export const FullGenerator =
-  typeof USE_FULL_GENERATOR === 'boolean' && USE_FULL_GENERATOR
-    ? FullGeneratorClass
-    : throwGeneratorClass('FullGenerator');

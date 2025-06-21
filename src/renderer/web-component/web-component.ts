@@ -1,4 +1,8 @@
-import { Renderer } from '../renderer/renderer';
+import { Renderer, RendererConfig } from '../renderer/renderer';
+import { ScalingAxis } from '../../utils/enums/enums';
+import { toKebabCase } from '../../utils/to-kebab-case/to-kebab-case';
+
+type SeamAttributes = Omit<RendererConfig, 'parentNode' | 'src' | 'width' | 'height' | 'logger'>;
 
 class ImgResponsive extends HTMLElement {
   private renderer: Renderer | null = null;
@@ -7,20 +11,25 @@ class ImgResponsive extends HTMLElement {
   private updateQueue = new Set<string>();
   private isIntersecting = false;
   private storedDimensions: { width: number; height: number } | null = null;
+  private options: Record<string, string | number | boolean> = {};
 
   constructor() {
     super();
   }
 
-  static get observedAttributes(): string[] {
-    return [
-      'src',
-      'carving-priority',
-      'max-carve-up-seam-percentage',
-      'max-carve-up-scale',
-      'max-carve-down-scale',
-      'on-screen-threshold',
+  static get observedAttributes(): Array<keyof SeamAttributes | 'src' | 'on-screen-threshold'> {
+    const seamAttributes: Array<keyof SeamAttributes> = [
+      'carvingPriority',
+      'maxCarveUpSeamPercentage',
+      'maxCarveUpScale',
+      'maxCarveDownScale',
+      'scalingAxis',
+      'showEnergyMap',
     ];
+
+    const kebabCaseAttributes = seamAttributes.map(toKebabCase);
+
+    return ['src', 'on-screen-threshold', ...kebabCaseAttributes] as any;
   }
 
   connectedCallback(): void {
@@ -67,7 +76,14 @@ class ImgResponsive extends HTMLElement {
     const otherOptions = changes.reduce(
       (acc, key) => {
         if (key !== 'src' && key !== 'on-screen-threshold') {
-          acc[key] = this.getAttribute(key);
+          const value = this.getAttribute(key);
+          // For boolean attributes, null (removed) should be explicitly passed
+          // For other attributes, null means keep the existing value
+          if (key === 'show-energy-map') {
+            acc[key] = value; // Pass null explicitly for boolean attributes
+          } else if (value !== null) {
+            acc[key] = value; // Only pass non-null values for other attributes
+          }
         }
         return acc;
       },
@@ -87,41 +103,40 @@ class ImgResponsive extends HTMLElement {
   };
 
   private initializeRenderer(): void {
-    const src = this.getAttribute('src');
-    if (!src) return;
+    if (this.renderer) {
+      return;
+    }
 
-    const options = this.getCurrentOptions();
+    const options = this.getOptions();
     this.renderer = new Renderer({
-      ...options,
-      src,
       parentNode: this,
-      logger: this.dispatchLogEvent,
+      ...options,
     });
   }
 
   private calculateDimensions() {
-    const width = this.clientWidth ?? 0;
-    const height = this.clientHeight ?? 0;
+    const width = this.clientWidth ?? 100;
+    const height = this.clientHeight ?? 100;
 
     return { width, height };
   }
 
-  private getCurrentOptions(): Record<string, string | number> {
-    const dimensions = this.calculateDimensions();
-    const allAttributes = [...this.attributes].reduce(
-      (acc, attr) => {
-        if (attr.name !== 'src' && attr.name !== 'on-screen-threshold') {
-          acc[attr.name] = attr.value;
+  private getOptions(): any {
+    const options: Record<string, any> = {};
+    for (const attr of ImgResponsive.observedAttributes) {
+      const kebabCaseAttr = toKebabCase(attr);
+      if (this.hasAttribute(kebabCaseAttr)) {
+        const value = this.getAttribute(kebabCaseAttr);
+        if (value === '' || value === 'true') {
+          options[attr] = true;
+        } else if (value === 'false') {
+          options[attr] = false;
+        } else {
+          options[attr] = this.getAttribute(kebabCaseAttr);
         }
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-
-    return {
-      ...dimensions,
-      ...allAttributes,
-    };
+      }
+    }
+    return options;
   }
 
   private setupResizeObserver(): void {
@@ -129,7 +144,7 @@ class ImgResponsive extends HTMLElement {
 
     this.resizeObserver = new ResizeObserver(() => {
       const dimensions = this.calculateDimensions();
-      if (dimensions.height === 0 || dimensions.width === 0) return;
+
       this.storedDimensions = dimensions;
       this.attemptSetSize();
     });
@@ -163,6 +178,37 @@ class ImgResponsive extends HTMLElement {
     this.renderer?.setSize(this.storedDimensions.width, this.storedDimensions.height);
     this.storedDimensions = null;
   }
+
+  get maxCarveUpScale(): number {
+    return this.options['max-carve-up-scale'] as number;
+  }
+  set maxCarveUpScale(value: number) {
+    this.options['max-carve-up-scale'] = value;
+    this.renderer?.setOptions({ maxCarveUpScale: value });
+  }
+
+  get scalingAxis(): ScalingAxis {
+    return this.options['scaling-axis'] as ScalingAxis;
+  }
+  set scalingAxis(value: ScalingAxis) {
+    this.options['scaling-axis'] = value;
+    this.renderer?.setOptions({ scalingAxis: value });
+  }
+
+  get showEnergyMap(): boolean {
+    return this.options['show-energy-map'] as boolean;
+  }
+  set showEnergyMap(value: boolean) {
+    this.options['show-energy-map'] = value;
+    this.renderer?.setOptions({ showEnergyMap: value });
+  }
+
+  get onScreenThreshold(): number {
+    const threshold = this.getAttribute('on-screen-threshold') || '50px';
+    return parseInt(threshold.replace('px', ''), 10);
+  }
 }
 
-customElements.define('responsive-img', ImgResponsive);
+const componentName = 'responsive-img' + (GENERATOR === 'random' ? '' : `-${GENERATOR}`);
+
+customElements.define(componentName, ImgResponsive);
