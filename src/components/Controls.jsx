@@ -96,6 +96,7 @@ function Controls({ config, setConfig, onImageUpload }) {
               options={ScalingAxis}
               selectedValue={config.scalingAxis}
               onSelect={handleScalingAxisChange}
+              disabledOptions={[ScalingAxis.Vertical, ScalingAxis.Auto, ScalingAxis.Dual]}
             />
           </div>
           <div className="control-group">
@@ -113,6 +114,7 @@ function Controls({ config, setConfig, onImageUpload }) {
               options={DisplayMode}
               selectedValue={config.displayMode}
               onSelect={handleDisplayModeChange}
+              disabledOptions={[DisplayMode['B/W'], DisplayMode.Mask]}
             />
           </div>
           <div className="control-group">

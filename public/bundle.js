@@ -30806,7 +30806,8 @@
             {
               options: ScalingAxis,
               selectedValue: config.scalingAxis,
-              onSelect: handleScalingAxisChange
+              onSelect: handleScalingAxisChange,
+              disabledOptions: [ScalingAxis.Vertical, ScalingAxis.Auto, ScalingAxis.Dual]
             }
           )
         ] }),
@@ -30825,7 +30826,8 @@
             {
               options: DisplayMode,
               selectedValue: config.displayMode,
-              onSelect: handleDisplayModeChange
+              onSelect: handleDisplayModeChange,
+              disabledOptions: [DisplayMode["B/W"], DisplayMode.Mask]
             }
           )
         ] }),
