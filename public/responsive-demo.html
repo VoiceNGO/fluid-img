@@ -4,23 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Responsive Image Demo</title>
-    <script src="responsive-img.js"></script>
+    <script src="responsive-img-predictive.js"></script>
     <style>
         body {
             font-family: sans-serif;
             margin: 20px;
             background-color: #181818;
             color: #61b7ff;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
         }
         h1 {
             text-align: center;
             color: #0056b3;
         }
-        responsive-img {
+        responsive-img-predictive {
             display: block;
             border: 1px solid #CCC;
             max-width: 1000px;
-            margin: 20px auto;
+            height: 400px;
+            margin: 20px auto 5px auto;;
         }
 
         a {
@@ -49,13 +53,16 @@
         }
     </script>
 
-    <a href="https://github.com/VoiceNGO/responsive-img">Github Repo</a>
+    <a href="https://github.com/VoiceNGO/img-responsive">Github Repo</a>
 
-    <responsive-img src="./images/Broadway_tower.jpg" height="400" generator="random"></responsive-img>
-    <responsive-img src="./images/yosemite.jpg" height="400" generator="random"></responsive-img>
-    <responsive-img src="./images/kiyomizu.jpg" height="400" generator="random"></responsive-img>
-    <responsive-img src="./images/neuschwanstein.jpg" height="400" generator="random"></responsive-img>
-    <responsive-img src="./images/railay.jpg" height="400" generator="random" max-carve-up-seam-percentage="0.31"></responsive-img>
-    <responsive-img src="./images/great-wave.jpg" height="400" generator="random"></responsive-img>
+    <responsive-img-predictive src="./images/Broadway_tower.jpg" height="400" generator="random"></responsive-img-predictive>
+    <responsive-img-predictive src="./images/yosemite.jpg" height="400" generator="random" mask="./images/yosemite-mask.png"></responsive-img-predictive>
+    <responsive-img-predictive src="./images/dogs-on-beach.jpg" height="400" generator="random" mask="./images/dogs-on-beach-mask.png"></responsive-img-predictive>
+    The dog on the left is masked out
+
+    <responsive-img-predictive src="./images/kiyomizu.jpg" height="400" generator="random"></responsive-img-predictive>
+    <responsive-img-predictive src="./images/neuschwanstein.jpg" height="400" generator="random" mask="./images/neuschwanstein-mask.png"></responsive-img-predictive>
+    <responsive-img-predictive src="./images/railay.jpg" height="400" generator="random" max-carve-up-seam-percentage="0.31"></responsive-img-predictive>
+    <responsive-img-predictive src="./images/great-wave.jpg" height="400" generator="random"></responsive-img-predictive>
 </body>
 </html>

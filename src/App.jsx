@@ -8,12 +8,12 @@ import Controls from './components/Controls.jsx';
 import ResizableContainer from './components/ResizableContainer.jsx';
 import LogWindow from './components/LogWindow.jsx';
 import { ScalingAxis } from '../../src/utils/enums/enums';
+import useLocalStorage from './hooks/useLocalStorage.js';
 
-function App() {
-  const [selectedImage, setSelectedImage] = useState('Broadway_tower.jpg');
-  const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
-  const [logs, setLogs] = useState([]);
-  const [config, setConfig] = useState({
+const defaultState = {
+  selectedImage: 'Broadway_tower.jpg',
+  maskSrc: null,
+  config: {
     displayMode: '',
     showSeams: false,
     showEnergyMap: false,
@@ -23,7 +23,19 @@ function App() {
     maxCarveDownScale: 0.7,
     generator: 'random',
     scalingAxis: ScalingAxis.Horizontal,
-  });
+  },
+};
+
+function App() {
+  const [selectedImage, setSelectedImage] = useLocalStorage(
+    'selectedImage',
+    defaultState.selectedImage
+  );
+  const [maskSrc, setMaskSrc] = useLocalStorage('maskSrc', defaultState.maskSrc);
+  const [config, setConfig] = useLocalStorage('config', defaultState.config);
+
+  const [uploadedImageSrc, setUploadedImageSrc] = useState(null);
+  const [logs, setLogs] = useState([]);
   const imgResponsiveRef = useRef(null);
 
   const log = (message) => {
@@ -49,16 +61,18 @@ function App() {
     };
   }, [imageToDisplay, config.generator]);
 
-  const handleImageSelect = (imageName) => {
+  const handleImageSelect = (imageName, maskFile) => {
     setLogs([]);
     setSelectedImage(imageName);
     setUploadedImageSrc(null);
+    setMaskSrc(maskFile);
   };
 
   const handleImageUpload = (imageSrc) => {
     setLogs([]);
     setUploadedImageSrc(imageSrc);
     setSelectedImage(null);
+    setMaskSrc(null);
   };
 
   // Get the appropriate component tag name
@@ -99,6 +113,7 @@ function App() {
               <ComponentTag
                 ref={imgResponsiveRef}
                 src={imageToDisplay}
+                mask={maskSrc}
                 show-seams={config.showSeams}
                 {...(config.displayMode === 'energy' ? { 'show-energy-map': '' } : {})}
                 carving-priority={config.carvingPriority}

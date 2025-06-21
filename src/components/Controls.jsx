@@ -14,7 +14,8 @@ const Generator = {
 const DisplayMode = {
   Image: '',
   Energy: 'energy',
-  Grayscale: 'grayscale',
+  "B/W": 'grayscale',
+  Mask: 'mask',
 };
 
 function Controls({ config, setConfig, onImageUpload }) {

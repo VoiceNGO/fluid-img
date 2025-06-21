@@ -84,7 +84,7 @@
   border: 2px dashed #ccc;
   box-sizing: border-box;
   resize: both;
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
