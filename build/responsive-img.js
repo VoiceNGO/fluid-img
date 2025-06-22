@@ -1003,6 +1003,43 @@
     }
   };
 
+  // src/utils/sliding-window-maximum/sliding-window-maximum.ts
+  var SlidingWindowMaximum = class {
+    timing;
+    values;
+    head;
+    tail;
+    windowSize;
+    time;
+    constructor(windowSize, initialCapacity = 1e3, ValuesArrayConstructor = Uint16Array) {
+      this.windowSize = windowSize;
+      this.timing = new Uint16Array(initialCapacity);
+      this.values = new ValuesArrayConstructor(initialCapacity);
+      this.tail = 0;
+      this.head = 0;
+      this.time = 0;
+    }
+    addAndGetMax(value) {
+      this.time++;
+      while (this.timing[this.tail] <= this.time - this.windowSize && this.head > this.tail) {
+        this.tail++;
+      }
+      while (this.values[this.head - 1] <= value && this.head > this.tail) {
+        this.head--;
+      }
+      if (this.head >= this.timing.length) {
+        this.timing.set(this.timing.subarray(this.tail, this.head), 0);
+        this.values.set(this.values.subarray(this.tail, this.head), 0);
+        this.head = this.head - this.tail;
+        this.tail = 0;
+      }
+      this.values[this.head] = value;
+      this.timing[this.head] = this.time;
+      this.head++;
+      return this.values[this.tail];
+    }
+  };
+
   // src/generator/predictive-generator/predictive-generator.ts
   var defaultOptions2 = {
     batchPercentage: 0.1,
@@ -1033,7 +1070,8 @@
         const initialEnergy = energyMapData[0][x];
         seams.push({
           path: new Uint16Array(currentHeight),
-          energy: initialEnergy
+          energy: initialEnergy,
+          slidingWindowMaximum: new SlidingWindowMaximum(currentHeight * 0.2)
         });
         seams[x].path[0] = x;
       }
@@ -1044,7 +1082,9 @@
           const currentSeam = currentSeamsAtIndex[x];
           if (x === currentWidth - 1) {
             currentSeam.path[y] = x;
-            currentSeam.energy += energyMapData[y][x];
+            currentSeam.energy += currentSeam.slidingWindowMaximum.addAndGetMax(
+              energyMapData[y][x]
+            );
             nextSeamsAtIndex[x] = currentSeam;
             continue;
           }
@@ -1053,14 +1093,18 @@
           const currentPathLower = minimalEnergyMapData[y][x] < minimalEnergyMapData[y][x + 1];
           if (currentSeamLower === currentPathLower) {
             currentSeam.path[y] = x;
-            currentSeam.energy += energyMapData[y][x];
+            currentSeam.energy += currentSeam.slidingWindowMaximum.addAndGetMax(
+              energyMapData[y][x]
+            );
             nextSeamsAtIndex[x] = currentSeam;
           } else {
             currentSeam.path[y] = x + 1;
-            currentSeam.energy += energyMapData[y][x + 1];
+            currentSeam.energy += currentSeam.slidingWindowMaximum.addAndGetMax(
+              energyMapData[y][x + 1]
+            );
             nextSeamsAtIndex[x + 1] = currentSeam;
             nextSeam.path[y] = x;
-            nextSeam.energy += energyMapData[y][x];
+            nextSeam.energy += nextSeam.slidingWindowMaximum.addAndGetMax(energyMapData[y][x]);
             nextSeamsAtIndex[x] = nextSeam;
             x++;
           }

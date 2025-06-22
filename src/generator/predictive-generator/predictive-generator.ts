@@ -1,5 +1,6 @@
 import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
 import { MinimalCumulativeEnergyMap } from '../minimal-cumulative-energy-map/minimal-cumulative-energy-map';
+import { SlidingWindowMaximum } from '../../utils/sliding-window-maximum/sliding-window-maximum';
 
 type PredictiveSpecificOptions = {
   batchPercentage?: number;
@@ -44,6 +45,7 @@ export class PredictiveGenerator extends BaseGenerator {
     type Seam = {
       path: Uint16Array;
       energy: number;
+      slidingWindowMaximum: SlidingWindowMaximum;
     };
     const seams: Seam[] = [];
     const energyMapData = energyMap.energyMap;
@@ -53,6 +55,7 @@ export class PredictiveGenerator extends BaseGenerator {
       seams.push({
         path: new Uint16Array(currentHeight),
         energy: initialEnergy,
+        slidingWindowMaximum: new SlidingWindowMaximum(1),
       });
       seams[x]!.path[0] = x;
     }
@@ -70,7 +73,9 @@ export class PredictiveGenerator extends BaseGenerator {
         // Last column must go straight
         if (x === currentWidth - 1) {
           currentSeam.path[y] = x;
-          currentSeam.energy += energyMapData[y]![x]!;
+          currentSeam.energy += currentSeam.slidingWindowMaximum.addAndGetMax(
+            energyMapData[y]![x]!
+          );
           nextSeamsAtIndex[x] = currentSeam;
           continue;
         }
@@ -87,16 +92,20 @@ export class PredictiveGenerator extends BaseGenerator {
         if (currentSeamLower === currentPathLower) {
           // Go straight
           currentSeam.path[y] = x;
-          currentSeam.energy += energyMapData[y]![x]!;
+          currentSeam.energy += currentSeam.slidingWindowMaximum.addAndGetMax(
+            energyMapData[y]![x]!
+          );
           nextSeamsAtIndex[x] = currentSeam;
         } else {
           // Swap
           currentSeam.path[y] = x + 1;
-          currentSeam.energy += energyMapData[y]![x + 1]!;
+          currentSeam.energy += currentSeam.slidingWindowMaximum.addAndGetMax(
+            energyMapData[y]![x + 1]!
+          );
           nextSeamsAtIndex[x + 1] = currentSeam;
 
           nextSeam.path[y] = x;
-          nextSeam.energy += energyMapData[y]![x]!;
+          nextSeam.energy += nextSeam.slidingWindowMaximum.addAndGetMax(energyMapData[y]![x]!);
           nextSeamsAtIndex[x] = nextSeam;
 
           // Skip the next position since we processed both seams
