@@ -1,5 +1,5 @@
 {
-  "name": "fluid-img",
+  "name": "Fluid-Img",
   "version": "0.1.0",
   "description": "A web component for displaying images that intelligently resize to fit most any container.",
   "author": "Voice NPO, Inc.",
@@ -15,24 +15,24 @@
   ],
   "exports": {
     ".": "./dist/fluid-img.js",
-    "./predictive": "./dist/fluid-img-predictive.js",
-    "./full": "./dist/fluid-img-full.js",
-    "./cached": "./dist/fluid-img-cached.js"
+    "./random": "./dist/fluid-img-random.js",
+    "./predictive": "./dist/fluid-img-predictive.js"
   },
   "scripts": {
     "test": "vitest -t \"^[^@]+$\"",
     "test:live": "vitest -t \"@LIVE\"",
     "test:watch": "vitest watch",
-    "build": "npm run build:esbuild && npm run build:esbuild:predictive && npm run build:esbuild:full && npm run build:esbuild:cached && npm run copy-to-docs",
-    "watch": "npm run watch:esbuild & npm run watch:esbuild:predictive",
-    "build:esbuild": "esbuild src/renderer/web-component/web-component-random.ts --bundle --target=esnext --outfile=dist/fluid-img.js",
-    "build:esbuild:full": "esbuild src/renderer/web-component/web-component-full.ts --bundle --target=esnext --outfile=dist/fluid-img-full.js",
-    "build:esbuild:cached": "esbuild src/renderer/web-component/web-component-cached.ts --bundle --target=esnext --outfile=dist/fluid-img-cached.js",
-    "build:esbuild:predictive": "esbuild src/renderer/web-component/web-component-predictive.ts --bundle --target=esnext --outfile=dist/fluid-img-predictive.js",
-    "watch:esbuild": "esbuild src/renderer/web-component/web-component-random.ts --bundle --target=esnext --outfile=dist/fluid-img.js --watch",
-    "watch:esbuild:full": "esbuild src/renderer/web-component/web-component-full.ts --bundle --target=esnext --outfile=dist/fluid-img-full.js --watch",
-    "watch:esbuild:cached": "esbuild src/renderer/web-component/web-component-cached.ts --bundle --target=esnext --outfile=dist/fluid-img-cached.js --watch",
-    "watch:esbuild:predictive": "esbuild src/renderer/web-component/web-component-predictive.ts --bundle --target=esnext --outfile=dist/fluid-img-predictive.js --watch",
+    "build": "npm run build:esbuild:all && npm run build:esbuild:random && npm run build:esbuild:predictive && npm run build:esbuild:demo && npm run copy-to-docs",
+    "watch": "npm run watch:esbuild:all & npm run watch:esbuild:random & npm run watch:esbuild:predictive & npm run watch:esbuild:demo",
+    "build:esbuild": "esbuild src/renderer/web-component/web-component.ts --define:ALL_GENERATORS=false --define:RANDOM_GENERATOR=false --define:PREDICTIVE_GENERATOR=false --define:DEMO=false --bundle --minify --sourcemap --target=esnext",
+    "build:esbuild:demo": "npm run build:esbuild:all -- --define:DEMO=true --outfile=dist/fluid-img-demo.js",
+    "build:esbuild:all": "npm run build:esbuild -- --define:RANDOM_GENERATOR=true --define:PREDICTIVE_GENERATOR=true --outfile=dist/fluid-img.js",
+    "build:esbuild:random": "npm run build:esbuild -- --define:RANDOM_GENERATOR=true --outfile=dist/fluid-img-random.js",
+    "build:esbuild:predictive": "npm run build:esbuild -- --define:PREDICTIVE_GENERATOR=true --outfile=dist/fluid-img-predictive.js",
+    "watch:esbuild:demo": "npm run build:esbuild:demo -- --watch",
+    "watch:esbuild:all": "npm run build:esbuild:all -- --watch",
+    "watch:esbuild:random": "npm run build:esbuild:random -- --watch",
+    "watch:esbuild:predictive": "npm run build:esbuild:predictive -- --watch",
     "copy-to-docs": "cp ./dist/* ./docs/public/."
   },
   "devDependencies": {

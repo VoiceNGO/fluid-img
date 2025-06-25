@@ -1,12 +1,10 @@
 import { Renderer, RendererConfig } from '../renderer/renderer';
 import { ScalingAxis } from '../../utils/enums/enums';
 import { toKebabCase } from '../../utils/to-kebab-case/to-kebab-case';
-import { GeneratorType } from '../../utils/types/types';
 
 type SeamAttributes = Omit<RendererConfig, 'parentNode' | 'src' | 'width' | 'height' | 'logger'>;
 
-export class ImgResponsive extends HTMLElement {
-  protected GENERATOR!: GeneratorType;
+export class FluidImg extends HTMLElement {
   private renderer: Renderer | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private intersectionObserver: IntersectionObserver | null = null;
@@ -23,13 +21,14 @@ export class ImgResponsive extends HTMLElement {
     keyof SeamAttributes | 'src' | 'mask' | 'on-screen-threshold'
   > {
     const seamAttributes: Array<keyof SeamAttributes> = [
+      'generator',
       'carvingPriority',
       'maxCarveUpSeamPercentage',
       'maxCarveUpScale',
       'maxCarveDownScale',
       'scalingAxis',
       'showEnergyMap',
-      'demoMode',
+      'mask',
     ];
 
     const kebabCaseAttributes = seamAttributes.map(toKebabCase);
@@ -82,13 +81,7 @@ export class ImgResponsive extends HTMLElement {
       (acc, key) => {
         if (key !== 'src' && key !== 'on-screen-threshold') {
           const value = this.getAttribute(key);
-          // For boolean attributes, null (removed) should be explicitly passed
-          // For other attributes, null means keep the existing value
-          if (key === 'show-energy-map') {
-            acc[key] = value; // Pass null explicitly for boolean attributes
-          } else if (value !== null) {
-            acc[key] = value; // Only pass non-null values for other attributes
-          }
+          acc[key] = value;
         }
         return acc;
       },
@@ -116,7 +109,6 @@ export class ImgResponsive extends HTMLElement {
     this.renderer = new Renderer({
       parentNode: this,
       logger: this.dispatchLogEvent,
-      generator: this.GENERATOR,
       ...options,
     });
   }
@@ -130,17 +122,11 @@ export class ImgResponsive extends HTMLElement {
 
   private getOptions(): any {
     const options: Record<string, any> = {};
-    for (const attr of ImgResponsive.observedAttributes) {
+    for (const attr of FluidImg.observedAttributes) {
       const kebabCaseAttr = toKebabCase(attr);
       if (this.hasAttribute(kebabCaseAttr)) {
         const value = this.getAttribute(kebabCaseAttr);
-        if (value === '' || value === 'true') {
-          options[attr] = true;
-        } else if (value === 'false') {
-          options[attr] = false;
-        } else {
-          options[attr] = this.getAttribute(kebabCaseAttr);
-        }
+        options[attr] = { '': true, true: true, false: false }[value + ''] ?? value;
       }
     }
     return options;
@@ -182,6 +168,7 @@ export class ImgResponsive extends HTMLElement {
 
   private attemptSetSize(): void {
     if (!this.isIntersecting || !this.storedDimensions) return;
+
     this.renderer?.setSize(this.storedDimensions.width, this.storedDimensions.height);
     this.storedDimensions = null;
   }
@@ -215,3 +202,5 @@ export class ImgResponsive extends HTMLElement {
     return parseInt(threshold.replace('px', ''), 10);
   }
 }
+
+customElements.define('fluid-img', FluidImg);

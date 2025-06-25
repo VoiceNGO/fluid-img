@@ -3,27 +3,37 @@ import {
   PredictiveGenerator,
   PredictiveGeneratorOptions,
 } from '../predictive-generator/predictive-generator';
-import { CachedGenerator, CachedGeneratorOptions } from '../cached-generator/cached-generator';
-import { FullGenerator, FullGeneratorOptions } from '../full-generator/full-generator';
-import { GeneratorType } from '../../utils/types/types';
 
-export type Generator = RandomGenerator | PredictiveGenerator | CachedGenerator | FullGenerator;
 export type GeneratorOptions =
-  | RandomGeneratorOptions
-  | PredictiveGeneratorOptions
-  | CachedGeneratorOptions
-  | FullGeneratorOptions;
+  | ({ generator: 'random' } & RandomGeneratorOptions)
+  | ({ generator: 'predictive' } & PredictiveGeneratorOptions);
 
-export function createGenerator(type: GeneratorType, options: GeneratorOptions): Generator {
-  switch (type) {
-    case 'full':
-      return new FullGenerator(options as FullGeneratorOptions);
-    case 'cached':
-      return new CachedGenerator(options as CachedGeneratorOptions);
-    case 'predictive':
-      return new PredictiveGenerator(options as PredictiveGeneratorOptions);
-    case 'random':
-    default:
-      return new RandomGenerator(options as RandomGeneratorOptions);
+function getGenerator(options: GeneratorOptions, specificType?: string) {
+  if (
+    (!specificType || specificType === 'random') &&
+    typeof RANDOM_GENERATOR !== 'undefined' &&
+    RANDOM_GENERATOR
+  ) {
+    return new RandomGenerator(options);
   }
+
+  if (
+    (!specificType || specificType === 'predictive') &&
+    typeof PREDICTIVE_GENERATOR !== 'undefined' &&
+    PREDICTIVE_GENERATOR
+  ) {
+    return new PredictiveGenerator(options);
+  }
+
+  return null;
+}
+
+export function createGenerator(options: GeneratorOptions) {
+  const generator = getGenerator(options, options.generator) || getGenerator(options);
+
+  if (!generator) {
+    throw new Error(`[Fluid-Img] No generators are available.`);
+  }
+
+  return generator;
 }

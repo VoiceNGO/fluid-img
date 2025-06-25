@@ -1,12 +1,12 @@
-import { ConditionalKeys } from 'type-fest';
 import { toKebabCase } from '../to-kebab-case/to-kebab-case';
+import { name as packageName } from '../../../package.json';
 
 export const createOptionGetters = <T extends object>(options: T) => {
   const getConstrainedNumber = (_name: keyof T, defaultValue: number, min = 0, max = 1): number => {
     const name = String(_name);
     const value = Number(options[toKebabCase(name) as keyof T] ?? defaultValue);
     if (value < min || value > max) {
-      throw new Error(`[Seams] \`${name}\` must be between ${min} and ${max}.`);
+      throw new Error(`[${packageName}] \`${name}\` must be between ${min} and ${max}.`);
     }
     return value;
   };
@@ -36,7 +36,9 @@ export const createOptionGetters = <T extends object>(options: T) => {
       return value as E[keyof E];
     }
 
-    console.warn(`[Seams] Invalid value for ${name}: "${value}". Defaulting to "${defaultValue}".`);
+    console.warn(
+      `[${packageName}] Invalid value for ${name}: "${value}". Defaulting to "${defaultValue}".`
+    );
     return defaultValue;
   };
 

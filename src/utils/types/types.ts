@@ -1,10 +1,15 @@
 import type { Tagged } from 'type-fest';
 
+declare global {
+  const ALL_GENERATORS: boolean;
+  const RANDOM_GENERATOR: boolean;
+  const PREDICTIVE_GENERATOR: boolean;
+  const DEMO: boolean;
+}
+
 export const GENERATOR = {
   Random: 'random',
   Predictive: 'predictive',
-  Cached: 'cached',
-  Full: 'full',
 } as const;
 
 export type EnumKeys<T> = T[keyof T];

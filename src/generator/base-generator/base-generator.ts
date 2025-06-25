@@ -10,7 +10,7 @@ export type BaseGeneratorOptions = {
 
 export abstract class BaseGenerator implements SeamGenerator {
   protected imageLoader: ImageLoader;
-  protected maskLoader: ImageLoader | undefined;
+  protected maskLoader?: ImageLoader;
   protected energyMapPromise: Promise<EnergyMap>;
   protected seamGrid: SeamPixelPriorityGrid = new Uint16Array() as SeamPixelPriorityGrid;
   protected generatedSeams = 0;

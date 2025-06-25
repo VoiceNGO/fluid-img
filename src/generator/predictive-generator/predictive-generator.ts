@@ -21,6 +21,7 @@ export class PredictiveGenerator extends BaseGenerator {
 
   constructor(options: PredictiveGeneratorOptions) {
     super(options);
+
     this.options = { ...defaultOptions, ...options };
   }
 

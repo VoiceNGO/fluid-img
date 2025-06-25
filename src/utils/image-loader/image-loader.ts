@@ -24,9 +24,9 @@ export class ImageLoader {
   #imgPromise: Promise<HTMLImageElement>;
   #imageDataPromise: Promise<ImageData>;
   #rotate: boolean;
-  #profiler: Profiler;
+  #profiler?: Profiler;
 
-  constructor(src: string, options: { rotate: boolean; profiler: Profiler }) {
+  constructor(src: string, options: { rotate: boolean; profiler?: Profiler }) {
     this.#src = src;
     this.#rotate = options.rotate;
     this.#profiler = options.profiler;
@@ -49,7 +49,7 @@ export class ImageLoader {
     const profiler = this.#profiler;
 
     return new Promise((resolve) => {
-      profiler.start('loadImageData');
+      profiler?.start('loadImageData');
       const canvas = new OffscreenCanvas(image.width, image.height);
       const context = canvas.getContext('2d')!;
 
@@ -62,7 +62,7 @@ export class ImageLoader {
 
       const imageData = context.getImageData(0, 0, image.width, image.height);
 
-      profiler.end('loadImageData');
+      profiler?.end('loadImageData');
 
       resolve(imageData);
     });
