@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fluid Image Demo</title>
+    <script src="fluid-img.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #181818;
+            color: #61b7ff;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+        fluid-img {
+            display: block;
+            border: 1px solid #CCC;
+            max-width: 1000px;
+            height: 400px;
+            margin: 20px auto 5px auto;;
+        }
+
+        a {
+            color: #EEE;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="fluid-message"></h1>
+    <script>
+        const messageElement = document.getElementById('fluid-message');
+
+        if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+            messageElement.textContent = 'Rotate your device';
+        } else {
+            messageElement.textContent = 'Resize your browser';
+        }
+    </script>
+
+    <a href="https://github.com/VoiceNGO/fluid-img">Github Repo</a>
+
+    <fluid-img src="./images/Broadway_tower.jpg" height="400" generator="predictive"></fluid-img>
+    <fluid-img src="./images/railay.jpg" height="400" generator="predictive" max-carve-up-seam-percentage="0.31"></fluid-img>
+    <fluid-img src="./images/neuschwanstein.jpg" height="400" generator="predictive" mask="./images/neuschwanstein-mask.png"></fluid-img>
+    <fluid-img src="./images/yosemite.jpg" height="400" generator="predictive" mask="./images/yosemite-mask.png"></fluid-img>
+    <fluid-img src="./images/dogs-on-beach.jpg" height="400" generator="predictive" mask="./images/dogs-on-beach-mask.png"></fluid-img>
+    The dog on the left is masked out
+
+    <fluid-img src="./images/kiyomizu.jpg" height="400" generator="predictive"></fluid-img>
+    <fluid-img src="./images/great-wave.jpg" height="400" generator="predictive"></fluid-img>
+</body>
+</html>

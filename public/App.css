@@ -275,7 +275,7 @@
   height: 100%;
 }
 
-responsive-img, responsive-img-predictive, responsive-img-full, responsive-img-cached {
+fluid-img {
   display: block;
   width: 100%;
   height: 100%;

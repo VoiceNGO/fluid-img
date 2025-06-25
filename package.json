@@ -11,8 +11,8 @@
     "express": "^5.1.0"
   },
   "scripts": {
-    "build": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment",
-    "watch": "esbuild src/index.jsx --bundle --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment --watch"
+    "build": "esbuild src/index.jsx --bundle --minify --sourcemap --outfile=public/bundle.js --jsx-factory=React.createElement --jsx-fragment=React.Fragment",
+    "watch": "npm run build -- --watch"
   },
   "eslintConfig": {
     "extends": [

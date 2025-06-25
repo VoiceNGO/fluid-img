@@ -1,7 +1,4 @@
-import '../../build/responsive-img.js';
-import '../../build/responsive-img-predictive.js';
-import '../../build/responsive-img-full.js';
-import '../../build/responsive-img-cached.js';
+import '../../dist/fluid-img.js';
 import React, { useState, useEffect, useRef } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
 import Controls from './components/Controls.jsx';
@@ -75,23 +72,6 @@ function App() {
     setMaskSrc(null);
   };
 
-  // Get the appropriate component tag name
-  const getComponentTagName = () => {
-    switch (config.generator) {
-      case 'predictive':
-        return 'responsive-img-predictive';
-      case 'full':
-        return 'responsive-img-full';
-      case 'cached':
-        return 'responsive-img-cached';
-      case 'random':
-      default:
-        return 'responsive-img';
-    }
-  };
-
-  const ComponentTag = getComponentTagName();
-
   return (
     <div className="App">
       <header className="App-header">
@@ -110,17 +90,19 @@ function App() {
           <LogWindow logs={logs} />
           <ResizableContainer>
             {imageToDisplay && (
-              <ComponentTag
+              <fluid-img
                 ref={imgResponsiveRef}
                 src={imageToDisplay}
                 mask={maskSrc}
+                generator={config.generator}
                 show-seams={config.showSeams}
-                {...(config.displayMode === 'energy' ? { 'show-energy-map': '' } : {})}
                 carving-priority={config.carvingPriority}
                 max-carve-up-seam-percentage={config.maxCarveUpSeamPercentage}
                 max-carve-up-scale={config.maxCarveUpScale}
                 max-carve-down-scale={config.maxCarveDownScale}
                 scaling-axis={config.scalingAxis}
+                {...(config.displayMode === 'energy' ? { 'show-energy-map': '' } : {})}
+                {...(config.displayMode === 'grayscale' ? { 'grayscale': '' } : {})}
               />
             )}
           </ResizableContainer>
