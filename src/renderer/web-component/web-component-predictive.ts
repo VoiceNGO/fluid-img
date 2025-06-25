@@ -1,7 +1,7 @@
 import { GeneratorType } from '../../utils/types/types';
 import { ImgResponsive } from './web-component';
 
-class ImgResponsivePredictive extends ImgResponsive {
+class FluidImgPredictive extends ImgResponsive {
   protected override GENERATOR: GeneratorType = 'predictive';
 
   constructor() {
@@ -9,4 +9,4 @@ class ImgResponsivePredictive extends ImgResponsive {
   }
 }
 
-customElements.define('responsive-img-predictive', ImgResponsivePredictive);
+customElements.define('fluid-img-predictive', FluidImgPredictive);

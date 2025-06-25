@@ -224,3 +224,13 @@ Giant MEH. The random generator is literally better in many cases. So I need to 
 ### Pipe Dream
 
 - [ ] 2D carving
+
+## Licensing
+
+This software is free to use for individuals and organizations with annual gross revenue under $10,000,000 USD. Organizations exceeding this threshold require a commercial license.
+
+**License Summary:**
+
+- **Free**: Individuals, small businesses, and organizations under $10M annual revenue
+- **Commercial license required**: Organizations with $10M+ annual revenue
+- **Grace period**: 30 days to obtain commercial license after exceeding revenue threshold
