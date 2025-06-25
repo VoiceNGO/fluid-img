@@ -1,5 +1,6 @@
 import { EnergyMap } from '../energy-map/energy-map';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
+import { PickOptional } from '../../utils/types/types';
 
 export type CumulativeEnergyMapOptions = {
   energyMap: EnergyMap;

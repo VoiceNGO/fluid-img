@@ -14,7 +14,7 @@ export class SobelEnergyMap {
   #height: number;
   #grayscaleMap: Uint8Array[];
   #originalIndices: EnergyMapIndices[];
-  #maskData: GrayscalePixelArray | undefined;
+  #maskData?: GrayscalePixelArray;
 
   constructor(imageData: ImageData, maskData?: GrayscalePixelArray) {
     this.#width = imageData.width;

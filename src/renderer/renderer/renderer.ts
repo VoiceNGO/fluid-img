@@ -1,11 +1,13 @@
 import { ImageLoader } from '../../utils/image-loader/image-loader';
 import { GeneratorType, SeamPixelPriorityGrid } from '../../utils/types/types';
-import { GeneratorOptions, createGenerator } from '../../generator/generator/generator';
+import { createGenerator, GeneratorOptions } from '../../generator/generator/generator';
 import { Profiler } from '../../utils/profiler/profiler';
 import { errorBoundary } from '../../utils/error-boundary/error-boundary';
 import { EnergyMap } from '../../generator/energy-map/energy-map';
 import { createOptionGetters } from '../../utils/option-helpers/option-helpers';
 import { ScalingAxis } from '../../utils/enums/enums';
+
+import { name as packageName } from '../../../package.json';
 
 export interface SeamGenerator {
   generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid>;
@@ -25,15 +27,13 @@ type GeneralOptions = {
   demoMode?: boolean;
 };
 
-// filter out options that the renderer provides internally
-type FilterGeneratorOptions<T> = Omit<T, 'imageLoader'>;
-type TypedGeneratorOptions = FilterGeneratorOptions<GeneratorOptions>;
-type SeamOptions = GeneralOptions & TypedGeneratorOptions;
-type ProcessedSeamOptions = Required<GeneralOptions> & TypedGeneratorOptions;
+type SeamOptions = GeneralOptions & GeneratorOptions;
+type ProcessedSeamOptions = Required<GeneralOptions> & GeneratorOptions;
 
 export type RendererConfig = {
   parentNode: HTMLElement;
   src: string;
+  generator?: GeneratorType;
   mask?: string;
 } & SeamOptions;
 
@@ -43,7 +43,7 @@ export class Renderer {
   private height = 0;
   private width = 0;
   private imageLoader!: ImageLoader;
-  private maskLoader: ImageLoader | undefined;
+  private maskLoader?: ImageLoader;
   private options!: ProcessedSeamOptions;
   private generator!: SeamGenerator;
   private redrawQueued = false;
@@ -51,7 +51,7 @@ export class Renderer {
   private hasFailed = false;
   private parentNode: HTMLElement;
   private src: string;
-  private mask: string | undefined;
+  private mask?: string;
   private cachedEnergyMapImageData: ImageData | null = null;
 
   setOptions = errorBoundary(this._setOptions).bind(this);
@@ -65,17 +65,14 @@ export class Renderer {
 
     try {
       this.options = this.validateAndApplyDefaults(options);
+      const rotate = this.options.scalingAxis === 'vertical';
       this.profiler = new Profiler(this.options.logger);
-      this.imageLoader = new ImageLoader(src, {
-        rotate: this.options.scalingAxis === 'vertical',
-        profiler: this.profiler,
-      });
+      this.imageLoader = new ImageLoader(src, { rotate, profiler: this.profiler });
+
       if (this.mask) {
-        this.maskLoader = new ImageLoader(this.mask, {
-          rotate: false,
-          profiler: this.profiler,
-        });
+        this.maskLoader = new ImageLoader(this.mask, { rotate });
       }
+
       this.generator = this.createGenerator();
 
       this.initializeCanvas(parentNode);
@@ -95,7 +92,7 @@ export class Renderer {
       maskLoader: this.maskLoader,
     };
 
-    return createGenerator(this.options.generator, options);
+    return createGenerator(options);
   }
 
   private validateAndApplyDefaults(options: SeamOptions): ProcessedSeamOptions {
@@ -254,6 +251,8 @@ export class Renderer {
   }
 
   private async _redraw(): Promise<void> {
+    if (!this.width || !this.height) return;
+
     this.profiler.start('redraw');
     const originalImageData = await this.getSourceImageData();
 
@@ -381,7 +380,7 @@ export class Renderer {
 
     if (writeIndex !== newSize) {
       console.error(
-        `[Seams] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`
+        `[${packageName}] Mismatch during interpolation. Wrote ${writeIndex} bytes but expected ${newSize}.`
       );
     }
 
@@ -417,7 +416,7 @@ export class Renderer {
 
     if (writeIndex !== newSize) {
       console.error(
-        `[Seams] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`
+        `[${packageName}] Mismatch in pixel buffer size. Expected ${newSize}, but got ${writeIndex}.`
       );
     }
 
@@ -425,24 +424,21 @@ export class Renderer {
   }
 
   private handleFailure(error: unknown): void {
-    if (this.hasFailed) {
-      return;
-    }
+    if (this.hasFailed) return;
+
     this.hasFailed = true;
 
-    console.error('[Seams] A critical error occurred. Falling back to <img>.', error);
+    console.error(`[${packageName}] A critical error occurred. Falling back to <img>.`, error);
 
-    if (this.canvas) {
-      this.canvas.remove();
-    }
-
-    const { width, height } = this.options;
+    this.canvas?.remove();
 
     const img = document.createElement('img');
+
     img.src = this.src;
-    img.style.width = `${width}px`;
-    img.style.height = `${height}px`;
+    img.style.width = '100%';
+    img.style.height = '100%';
     img.style.display = 'block';
+
     this.parentNode.appendChild(img);
   }
 }
