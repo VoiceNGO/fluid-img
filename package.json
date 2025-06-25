@@ -1,5 +1,5 @@
 {
-  "name": "Fluid-Img",
+  "name": "fluid-img",
   "version": "0.1.0",
   "description": "A web component for displaying images that intelligently resize to fit most any container.",
   "author": "Voice NPO, Inc.",
