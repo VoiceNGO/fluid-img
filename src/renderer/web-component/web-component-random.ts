@@ -1,7 +1,7 @@
 import { GeneratorType } from '../../utils/types/types';
 import { ImgResponsive } from './web-component';
 
-class ImgResponsiveRandom extends ImgResponsive {
+class FluidImgRandom extends ImgResponsive {
   protected override GENERATOR: GeneratorType = 'random';
 
   constructor() {
@@ -9,4 +9,4 @@ class ImgResponsiveRandom extends ImgResponsive {
   }
 }
 
-customElements.define('responsive-img', ImgResponsiveRandom);
+customElements.define('fluid-img', FluidImgRandom);
