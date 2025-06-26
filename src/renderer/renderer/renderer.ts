@@ -11,6 +11,8 @@ import { name as packageName } from '../../../package.json';
 
 export interface SeamGenerator {
   generateSeamGrid(minSeams: number): Promise<SeamPixelPriorityGrid>;
+  getImage(): Promise<HTMLImageElement>;
+  getImageData(): Promise<ImageData>;
 }
 
 type GeneralOptions = {
@@ -42,10 +44,11 @@ export class Renderer {
   private ctx!: CanvasRenderingContext2D;
   private height = 0;
   private width = 0;
-  private imageLoader!: ImageLoader;
-  private maskLoader?: ImageLoader;
   private options!: ProcessedSeamOptions;
-  private generator!: SeamGenerator;
+  private internalHorizontalGenerator?: SeamGenerator;
+  private internalVerticalGenerator?: SeamGenerator;
+  private currentGenerator!: SeamGenerator;
+  private isVertical!: boolean;
   private redrawQueued = false;
   private profiler!: Profiler;
   private hasFailed = false;
@@ -65,16 +68,7 @@ export class Renderer {
 
     try {
       this.options = this.validateAndApplyDefaults(options);
-      const rotate = this.options.scalingAxis === 'vertical';
       this.profiler = new Profiler(this.options.logger);
-      this.imageLoader = new ImageLoader(src, { rotate, profiler: this.profiler });
-
-      if (this.mask) {
-        this.maskLoader = new ImageLoader(this.mask, { rotate });
-      }
-
-      this.generator = this.createGenerator();
-
       this.initializeCanvas(parentNode);
     } catch (e) {
       this.handleFailure(e);
@@ -85,11 +79,36 @@ export class Renderer {
     this.canvas.remove();
   }
 
-  private createGenerator(): SeamGenerator {
+  private get horizontalGenerator(): SeamGenerator {
+    if (!this.internalHorizontalGenerator) {
+      const imageLoader = new ImageLoader(this.src, { rotate: false, profiler: this.profiler });
+      const maskLoader = this.mask ? new ImageLoader(this.mask, { rotate: false }) : undefined;
+      this.internalHorizontalGenerator = this.createGenerator({ imageLoader, maskLoader });
+    }
+    return this.internalHorizontalGenerator;
+  }
+
+  private get verticalGenerator(): SeamGenerator {
+    if (!this.internalVerticalGenerator) {
+      const imageLoader = new ImageLoader(this.src, { rotate: true, profiler: this.profiler });
+      const maskLoader = this.mask ? new ImageLoader(this.mask, { rotate: true }) : undefined;
+      this.internalVerticalGenerator = this.createGenerator({ imageLoader, maskLoader });
+    }
+    return this.internalVerticalGenerator;
+  }
+
+  private determineCurrentGenerator(): SeamGenerator {
+    return this.isVertical ? this.verticalGenerator : this.horizontalGenerator;
+  }
+
+  private createGenerator(loaders: {
+    imageLoader: ImageLoader;
+    maskLoader?: ImageLoader;
+  }): SeamGenerator {
     const options = {
       ...this.options,
-      imageLoader: this.imageLoader,
-      maskLoader: this.maskLoader,
+      imageLoader: loaders.imageLoader,
+      maskLoader: loaders.maskLoader,
     };
 
     return createGenerator(options);
@@ -192,9 +211,9 @@ export class Renderer {
       this.options;
     const { width: originalWidth, height: originalHeight } = imageData;
 
-    const isVertical = this.options.scalingAxis === 'vertical';
-    const logicalCanvasWidth = isVertical ? this.height : this.width;
-    const logicalCanvasHeight = isVertical ? this.width : this.height;
+    const { isVertical, width, height } = this;
+    const logicalCanvasWidth = isVertical ? height : width;
+    const logicalCanvasHeight = isVertical ? width : height;
 
     const targetAspectRatio = logicalCanvasWidth / logicalCanvasHeight;
     const targetWidth = Math.round(originalHeight * targetAspectRatio);
@@ -236,12 +255,28 @@ export class Renderer {
     }
   }
 
+  private async determineOrientation(): Promise<boolean> {
+    if (this.options.scalingAxis === ScalingAxis.Horizontal) return false;
+    if (this.options.scalingAxis === ScalingAxis.Vertical) return true;
+
+    const { width: imageWidth, height: imageHeight } = await this.horizontalGenerator.getImage();
+    const originalAspectRatio = imageWidth / imageHeight;
+    const targetAspectRatio = this.width / this.height;
+
+    return targetAspectRatio > originalAspectRatio;
+  }
+
+  private async refreshCachedArgs(): Promise<void> {
+    this.isVertical = await this.determineOrientation();
+    this.currentGenerator = this.determineCurrentGenerator();
+  }
+
   private async getEnergyMapImageData(): Promise<ImageData> {
     if (this.cachedEnergyMapImageData) {
       return this.cachedEnergyMapImageData;
     }
 
-    const originalImageData = await this.imageLoader.imageData;
+    const originalImageData = await this.currentGenerator.getImageData();
     const energyMap = new EnergyMap({ imageData: originalImageData });
     this.cachedEnergyMapImageData = energyMap.getEnergyMapAsImageData();
 
@@ -252,7 +287,7 @@ export class Renderer {
     if (this.options.showEnergyMap) {
       return await this.getEnergyMapImageData();
     } else {
-      return await this.imageLoader.imageData;
+      return await this.currentGenerator.getImageData();
     }
   }
 
@@ -260,6 +295,8 @@ export class Renderer {
     if (!this.width || !this.height) return;
 
     this.profiler.start('redraw');
+
+    await this.refreshCachedArgs();
     const originalImageData = await this.getSourceImageData();
 
     const { availableSeams, interpolationPixels, carveDown } =
@@ -271,7 +308,7 @@ export class Renderer {
       finalImageData = originalImageData;
     } else {
       this.profiler.start('generateSeamGrid', 1);
-      const seamGrid = await this.generator.generateSeamGrid(availableSeams);
+      const seamGrid = await this.currentGenerator.generateSeamGrid(Math.abs(availableSeams));
       this.profiler.end('generateSeamGrid');
 
       if (carveDown) {
@@ -291,13 +328,13 @@ export class Renderer {
     this.ctx.putImageData(finalImageData, 0, 0);
 
     const styleRef = this.canvas.style;
-    const isVertical = this.options.scalingAxis === 'vertical';
+    const { isVertical, width, height } = this;
 
     styleRef.transformOrigin = '0 0';
     styleRef.transform = isVertical ? 'rotate(-90deg) translateX(-100%)' : '';
 
-    styleRef.width = `${isVertical ? this.height : this.width}px`;
-    styleRef.height = `${isVertical ? this.width : this.height}px`;
+    styleRef.width = `${isVertical ? height : width}px`;
+    styleRef.height = `${isVertical ? width : height}px`;
 
     this.profiler.end('redraw');
   }

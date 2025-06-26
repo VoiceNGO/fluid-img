@@ -13,6 +13,13 @@ export class FluidImg extends HTMLElement {
   private storedDimensions: { width: number; height: number } | null = null;
   private options: Record<string, string | number | boolean> = {};
 
+  private static readonly destructiveProperties = new Set([
+    'src',
+    'scaling-axis',
+    'mask',
+    'generator',
+  ]);
+
   constructor() {
     super();
   }
@@ -64,7 +71,7 @@ export class FluidImg extends HTMLElement {
     const changes = Array.from(this.updateQueue);
     this.updateQueue.clear();
 
-    if (changes.includes('src') || changes.includes('scaling-axis') || changes.includes('mask')) {
+    if (changes.some((change) => FluidImg.destructiveProperties.has(change))) {
       this.renderer?.destroy();
       this.renderer = null;
       this.initializeRenderer();

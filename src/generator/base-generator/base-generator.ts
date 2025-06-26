@@ -21,6 +21,14 @@ export abstract class BaseGenerator implements SeamGenerator {
     this.energyMapPromise = this.createEnergyMap();
   }
 
+  async getImageData(): Promise<ImageData> {
+    return this.imageLoader.imageData;
+  }
+
+  async getImage(): Promise<HTMLImageElement> {
+    return this.imageLoader.image;
+  }
+
   protected async createEnergyMap(): Promise<EnergyMap> {
     const imageData = await this.imageLoader.imageData;
     const maskData = await this.getMaskData();
