@@ -1,6 +1,10 @@
 import type { Tagged } from 'type-fest';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
 import { GrayscalePixelArray } from '../../utils/types/types';
+import {
+  registerEnergyMap,
+  BoundaryAwareEnergyMapOptions,
+} from '../energy-map-registry/energy-map-registry';
 
 function getPixelIndex(x: number, y: number, width: number): number {
   return (y * width + x) * 4;
@@ -81,6 +85,18 @@ function getRegionVariance(
 type EnergyMapData = Tagged<Uint16Array, 'energyMapData'>;
 type EnergyMapIndices = Tagged<Uint32Array, 'energyMapIndices'>;
 
+const defaultOptions = {
+  boundaryPenaltyWeight: 5.0,
+  uniformityThreshold: 10.0,
+  edgeThreshold: 20.0,
+};
+
+type BoundaryAwareInstanceOptions = Required<
+  Omit<BoundaryAwareEnergyMapOptions, 'algorithm' | 'maskData'>
+> & {
+  maskData?: GrayscalePixelArray;
+};
+
 export class BoundaryAwareEnergyMap {
   #data: EnergyMapData[];
   #width: number;
@@ -88,29 +104,19 @@ export class BoundaryAwareEnergyMap {
   #grayscaleMap: Uint8Array[];
   #originalIndices: EnergyMapIndices[];
   #imageData: ImageData;
-  #boundaryPenaltyWeight: number;
-  #uniformityThreshold: number;
-  #edgeThreshold: number;
+  #options: BoundaryAwareInstanceOptions;
 
-  constructor(
-    imageData: ImageData,
-    boundaryPenaltyWeight: number = 5.0,
-    uniformityThreshold: number = 10.0,
-    edgeThreshold: number = 20.0,
-    maskData?: GrayscalePixelArray
-  ) {
-    this.#width = imageData.width;
-    this.#height = imageData.height;
-    this.#imageData = imageData;
-    this.#boundaryPenaltyWeight = boundaryPenaltyWeight;
-    this.#uniformityThreshold = uniformityThreshold;
-    this.#edgeThreshold = edgeThreshold;
+  constructor(options: BoundaryAwareEnergyMapOptions) {
+    this.#options = { ...defaultOptions, ...options };
+    this.#width = options.imageData.width;
+    this.#height = options.imageData.height;
+    this.#imageData = options.imageData;
     this.#data = new Array(this.#height);
     this.#grayscaleMap = new Array(this.#height);
     this.#originalIndices = new Array(this.#height);
 
     this.#fillOriginalIndices();
-    this.#computeGrayscaleMap(imageData);
+    this.#computeGrayscaleMap(options.imageData);
     this.#data = this.#computeFullEnergyMap();
   }
 
@@ -182,7 +188,7 @@ export class BoundaryAwareEnergyMap {
 
     // Check if this pixel is on a meaningful edge
     const gradientEnergy = this.#computeGradientEnergy(x, y);
-    if (gradientEnergy < this.#edgeThreshold * 0.3) {
+    if (gradientEnergy < this.#options.edgeThreshold * 0.3) {
       return 0; // Very weak edge, no penalty
     }
 
@@ -198,11 +204,12 @@ export class BoundaryAwareEnergyMap {
 
     // Strategy 1: Perfect boundaries (one side very uniform - like building vs sky)
     const minVariance = Math.min(leftVariance, rightVariance, topVariance, bottomVariance);
-    if (minVariance < this.#uniformityThreshold * 0.5) {
+    if (minVariance < this.#options.uniformityThreshold * 0.5) {
       // Only very uniform regions count as perfect boundaries
       const uniformityFactor = Math.max(
         0,
-        (this.#uniformityThreshold * 0.5 - minVariance) / (this.#uniformityThreshold * 0.5)
+        (this.#options.uniformityThreshold * 0.5 - minVariance) /
+          (this.#options.uniformityThreshold * 0.5)
       );
       boundaryStrength = Math.max(boundaryStrength, uniformityFactor * 0.3);
     }
@@ -212,22 +219,25 @@ export class BoundaryAwareEnergyMap {
     const verticalDiff = Math.abs(topVariance - bottomVariance);
     const maxTextureDiff = Math.max(horizontalDiff, verticalDiff);
 
-    if (maxTextureDiff > this.#uniformityThreshold * 4 && gradientEnergy > this.#edgeThreshold) {
+    if (
+      maxTextureDiff > this.#options.uniformityThreshold * 4 &&
+      gradientEnergy > this.#options.edgeThreshold
+    ) {
       // Much higher threshold for texture differences, and require strong gradient
-      const textureFactor = Math.min(1, maxTextureDiff / (this.#uniformityThreshold * 8));
+      const textureFactor = Math.min(1, maxTextureDiff / (this.#options.uniformityThreshold * 8));
       boundaryStrength = Math.max(boundaryStrength, textureFactor * 0.2);
     }
 
     // Strategy 3: Strong edges get protection regardless (catch-all for missed boundaries)
-    if (gradientEnergy > this.#edgeThreshold * 2.5) {
+    if (gradientEnergy > this.#options.edgeThreshold * 2.5) {
       // Only very strong edges get this protection
-      const strongEdgeFactor = Math.min(1, gradientEnergy / (this.#edgeThreshold * 4));
+      const strongEdgeFactor = Math.min(1, gradientEnergy / (this.#options.edgeThreshold * 4));
       boundaryStrength = Math.max(boundaryStrength, strongEdgeFactor * 0.15);
     }
 
     if (boundaryStrength > 0) {
       // Much smaller base penalty
-      const edgeFactor = Math.min(1, gradientEnergy / (this.#edgeThreshold * 2));
+      const edgeFactor = Math.min(1, gradientEnergy / (this.#options.edgeThreshold * 2));
       return boundaryStrength * edgeFactor * 200; // Reduced from 1000 to 200
     }
 
@@ -249,7 +259,7 @@ export class BoundaryAwareEnergyMap {
         const boundaryPenalty = this.#detectBoundaryPenalty(x, y);
 
         const totalEnergy =
-          gradientEnergy + forwardEnergy + this.#boundaryPenaltyWeight * boundaryPenalty;
+          gradientEnergy + forwardEnergy + this.#options.boundaryPenaltyWeight * boundaryPenalty;
         energyMapData[y]![x] = Math.min(65535, Math.max(0, Math.round(totalEnergy)));
       }
     }
@@ -319,7 +329,7 @@ export class BoundaryAwareEnergyMap {
         const boundaryPenalty = this.#detectBoundaryPenalty(xCurrent, y);
 
         const totalEnergy =
-          gradientEnergy + forwardEnergy + this.#boundaryPenaltyWeight * boundaryPenalty;
+          gradientEnergy + forwardEnergy + this.#options.boundaryPenaltyWeight * boundaryPenalty;
         this.#data[y]![xCurrent] = Math.min(65535, Math.max(0, Math.round(totalEnergy)));
       }
     }
@@ -412,4 +422,8 @@ export class BoundaryAwareEnergyMap {
 
     return imageData;
   }
+}
+
+if (typeof BOUNDARY_AWARE_ENERGY_MAP !== 'undefined' && BOUNDARY_AWARE_ENERGY_MAP) {
+  registerEnergyMap('boundary-aware', BoundaryAwareEnergyMap);
 }

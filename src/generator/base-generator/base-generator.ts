@@ -29,7 +29,7 @@ export abstract class BaseGenerator implements SeamGenerator {
       65535
     ) as SeamPixelPriorityGrid;
 
-    return new EnergyMap(imageData, maskData);
+    return new EnergyMap({ imageData, maskData });
   }
 
   abstract generateSeamBatch(): Promise<void>;

@@ -1,6 +1,7 @@
 import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
 import { MinimalCumulativeEnergyMap } from '../minimal-cumulative-energy-map/minimal-cumulative-energy-map';
 import { SlidingWindowMaximum } from '../../utils/sliding-window-maximum/sliding-window-maximum';
+import { registerGenerator } from '../generator/generator';
 
 type PredictiveSpecificOptions = {
   batchPercentage?: number;
@@ -143,4 +144,8 @@ export class PredictiveGenerator extends BaseGenerator {
     energyMap.removeSeams(batchSeams.map((seam) => seam.path));
     this.generatedSeams += batchSeams.length;
   }
+}
+
+if (typeof PREDICTIVE_GENERATOR !== 'undefined' && PREDICTIVE_GENERATOR) {
+  registerGenerator('predictive', PredictiveGenerator);
 }

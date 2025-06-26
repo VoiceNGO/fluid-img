@@ -4,6 +4,10 @@ import type { Tagged } from 'type-fest';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
 import { getGrayscaleImageData } from '../grayscale/grayscale';
 import { GrayscalePixelArray } from '../../utils/types/types';
+import {
+  registerEnergyMap,
+  SobelEnergyMapOptions,
+} from '../energy-map-registry/energy-map-registry';
 
 type EnergyMapData = Tagged<Uint16Array, 'energyMapData'>;
 type EnergyMapIndices = Tagged<Uint32Array, 'energyMapIndices'>;
@@ -16,14 +20,14 @@ export class SobelEnergyMap {
   #originalIndices: EnergyMapIndices[];
   #maskData?: GrayscalePixelArray;
 
-  constructor(imageData: ImageData, maskData?: GrayscalePixelArray) {
-    this.#width = imageData.width;
-    this.#height = imageData.height;
+  constructor(options: SobelEnergyMapOptions) {
+    this.#width = options.imageData.width;
+    this.#height = options.imageData.height;
     this.#data = new Array(this.#height);
     this.#originalIndices = new Array(this.#height);
-    this.#maskData = maskData;
+    this.#maskData = options.maskData;
 
-    this.#grayscaleMap = getGrayscaleImageData(imageData, true);
+    this.#grayscaleMap = getGrayscaleImageData(options.imageData, true);
     this.#fillOriginalIndices();
     this.#data = this.#computeFullEnergyMap();
   }
@@ -225,4 +229,8 @@ export class SobelEnergyMap {
 
     return imageData;
   }
+}
+
+if (typeof SOBEL_ENERGY_MAP !== 'undefined' && SOBEL_ENERGY_MAP) {
+  registerEnergyMap('sobel', SobelEnergyMap);
 }

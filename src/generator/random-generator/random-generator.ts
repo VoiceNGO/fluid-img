@@ -1,6 +1,7 @@
 import { deterministicBinaryRnd } from '../../utils/deterministic-binary-rnd/deterministic-binary-rnd';
 import { EnergyMap } from '../energy-map/energy-map';
 import { BaseGenerator, BaseGeneratorOptions } from '../base-generator/base-generator';
+import { registerGenerator } from '../generator/generator';
 
 /**
  * The general idea here is to create random, but deterministic seams for the entire image.  They
@@ -107,4 +108,8 @@ export class RandomGenerator extends BaseGenerator {
 
     return { seam, energy };
   }
+}
+
+if (typeof RANDOM_GENERATOR !== 'undefined' && RANDOM_GENERATOR) {
+  registerGenerator('random', RandomGenerator);
 }
