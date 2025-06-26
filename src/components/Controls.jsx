@@ -96,7 +96,7 @@ function Controls({ config, setConfig, onImageUpload }) {
               options={ScalingAxis}
               selectedValue={config.scalingAxis}
               onSelect={handleScalingAxisChange}
-              disabledOptions={[ScalingAxis.Vertical, ScalingAxis.Auto, ScalingAxis.Dual]}
+              disabledOptions={[ScalingAxis.Dual]}
             />
           </div>
           <div className="control-group">
