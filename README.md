@@ -2,7 +2,7 @@
 
 Images that scale intelligently to any desired size (within reasonable limits).
 
-![Fluid Images](./resources/images/responsive-images.jpg)
+![Fluid Images](https://raw.githubusercontent.com/VoiceNGO/fluid-img/refs/heads/main/resources/images/responsive-images.jpg)
 
 ## Usage
 
