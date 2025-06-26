@@ -192,7 +192,11 @@ export class Renderer {
       this.options;
     const { width: originalWidth, height: originalHeight } = imageData;
 
-    const targetAspectRatio = this.width / this.height;
+    const isVertical = this.options.scalingAxis === 'vertical';
+    const logicalCanvasWidth = isVertical ? this.height : this.width;
+    const logicalCanvasHeight = isVertical ? this.width : this.height;
+
+    const targetAspectRatio = logicalCanvasWidth / logicalCanvasHeight;
     const targetWidth = Math.round(originalHeight * targetAspectRatio);
     const pixelDelta = originalWidth - targetWidth;
 
@@ -215,7 +219,9 @@ export class Renderer {
     } else {
       // Calculate totalPixelsToInsert based on the effective target width driven by aspect ratio and canvas dimensions,
       // capped by maxCarveUpScale.
-      const targetEffectiveWidthByRatio = Math.round((originalHeight / this.height) * this.width);
+      const targetEffectiveWidthByRatio = Math.round(
+        (originalHeight / logicalCanvasHeight) * logicalCanvasWidth
+      );
       const targetPixelsNeeded = targetEffectiveWidthByRatio - originalWidth;
 
       const maxCarveUpImageDataWidth = Math.floor(originalWidth * maxCarveUpScale);
@@ -236,7 +242,7 @@ export class Renderer {
     }
 
     const originalImageData = await this.imageLoader.imageData;
-    const energyMap = new EnergyMap(originalImageData);
+    const energyMap = new EnergyMap({ imageData: originalImageData });
     this.cachedEnergyMapImageData = energyMap.getEnergyMapAsImageData();
 
     return this.cachedEnergyMapImageData;
