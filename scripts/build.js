@@ -64,7 +64,8 @@ function parseOptions() {
 }
 
 function logBuildOptions({ options, watch }) {
-  console.log('Building with options:', { ...options, watch });
+  const { reserveProps, ...rest } = options;
+  console.log('Building with options:', { ...rest, watch });
 }
 
 async function startWatch(options) {
