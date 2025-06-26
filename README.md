@@ -36,11 +36,11 @@ import 'fluid-img';
 Or include the script from jsdelivr or unpkg:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/fluid-img@version/dist/fluid-img.js" />
+<script src="https://cdn.jsdelivr.net/npm/fluid-img@latest/dist/fluid-img.js" />
 
 <!-- or -->
 
-<script src="https://unpkg.com/fluid-img@version/dist/fluid-img.js" />
+<script src="https://unpkg.com/fluid-img@latest/dist/fluid-img.js" />
 ```
 
 ### Caveats
@@ -53,9 +53,11 @@ Due to browser security restrictions, images loaded from a different origin (dom
 
 To use images from a different origin, the server hosting the images must be configured to send appropriate CORS headers (e.g., `Access-Control-Allow-Origin: *` or `Access-Control-Allow-Origin: your-domain.com`). Without these headers, the component will not be able to process the image.
 
+(FYI, for testing purposes, any image on imgur has the necessary CORS headers)
+
 #### Fallback
 
-If the component fails to load or process the image, or throws an internal error, it will gracefully degrade to a standard `<img>` tag, ensuring the image is still displayed.
+If the component fails to load or process the image, or throws an internal error, it will gracefully degrade to injecting a standard `<img>` tag into the `<fluid-img>` component, with 100% width & height, ensuring the image is still displayed.
 
 ## Options
 

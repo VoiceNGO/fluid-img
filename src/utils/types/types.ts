@@ -1,10 +1,12 @@
 import type { Tagged } from 'type-fest';
 
 declare global {
-  const ALL_GENERATORS: boolean;
   const RANDOM_GENERATOR: boolean;
   const PREDICTIVE_GENERATOR: boolean;
   const DEMO: boolean;
+  const SOBEL_ENERGY_MAP: boolean;
+  const DUAL_ENERGY_MAP: boolean;
+  const BOUNDARY_AWARE_ENERGY_MAP: boolean;
 }
 
 export const GENERATOR = {

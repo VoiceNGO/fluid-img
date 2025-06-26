@@ -1,6 +1,10 @@
 import type { Tagged } from 'type-fest';
 import { deleteArrayIndices } from '../../utils/delete-array-indicies/delete-array-indicies';
 import { GrayscalePixelArray } from '../../utils/types/types';
+import {
+  registerEnergyMap,
+  DualEnergyMapOptions,
+} from '../energy-map-registry/energy-map-registry';
 
 function getPixelIndex(x: number, y: number, width: number): number {
   return (y * width + x) * 4;
@@ -49,6 +53,14 @@ function getColorDistance(
 type EnergyMapData = Tagged<Uint16Array, 'energyMapData'>;
 type EnergyMapIndices = Tagged<Uint32Array, 'energyMapIndices'>;
 
+const defaultOptions = {
+  forwardEnergyWeight: 1.0,
+};
+
+type DualInstanceOptions = Required<Omit<DualEnergyMapOptions, 'algorithm' | 'maskData'>> & {
+  maskData?: GrayscalePixelArray;
+};
+
 export class DualEnergyMap {
   #data: EnergyMapData[];
   #width: number;
@@ -56,23 +68,19 @@ export class DualEnergyMap {
   #grayscaleMap: Uint8Array[];
   #originalIndices: EnergyMapIndices[];
   #imageData: ImageData;
-  #forwardEnergyWeight: number;
+  #options: DualInstanceOptions;
 
-  constructor(
-    imageData: ImageData,
-    forwardEnergyWeight: number = 1.0,
-    maskData?: GrayscalePixelArray
-  ) {
-    this.#width = imageData.width;
-    this.#height = imageData.height;
-    this.#imageData = imageData;
-    this.#forwardEnergyWeight = forwardEnergyWeight;
+  constructor(options: DualEnergyMapOptions) {
+    this.#options = { ...defaultOptions, ...options };
+    this.#width = options.imageData.width;
+    this.#height = options.imageData.height;
+    this.#imageData = options.imageData;
     this.#data = new Array(this.#height);
     this.#grayscaleMap = new Array(this.#height);
     this.#originalIndices = new Array(this.#height);
 
     this.#fillOriginalIndices();
-    this.#computeGrayscaleMap(imageData);
+    this.#computeGrayscaleMap(options.imageData);
     this.#data = this.#computeFullEnergyMap();
   }
 
@@ -163,7 +171,7 @@ export class DualEnergyMap {
         const backwardEnergy = this.#computeBackwardEnergy(x, y);
         const forwardEnergy = this.#computeForwardEnergy(x, y);
 
-        const totalEnergy = backwardEnergy + this.#forwardEnergyWeight * forwardEnergy;
+        const totalEnergy = backwardEnergy + this.#options.forwardEnergyWeight * forwardEnergy;
         energyMapData[y]![x] = Math.min(65535, Math.max(0, Math.round(totalEnergy)));
       }
     }
@@ -233,7 +241,7 @@ export class DualEnergyMap {
       for (const xCurrent of columnsInNewDataToUpdate) {
         const backwardEnergy = this.#computeBackwardEnergy(xCurrent, y);
         const forwardEnergy = this.#computeForwardEnergy(xCurrent, y);
-        const totalEnergy = backwardEnergy + this.#forwardEnergyWeight * forwardEnergy;
+        const totalEnergy = backwardEnergy + this.#options.forwardEnergyWeight * forwardEnergy;
         this.#data[y]![xCurrent] = Math.min(65535, Math.max(0, Math.round(totalEnergy)));
       }
     }
@@ -326,4 +334,8 @@ export class DualEnergyMap {
 
     return imageData;
   }
+}
+
+if (typeof DUAL_ENERGY_MAP !== 'undefined' && DUAL_ENERGY_MAP) {
+  registerEnergyMap('dual', DualEnergyMap);
 }

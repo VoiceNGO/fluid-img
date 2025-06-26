@@ -3,37 +3,39 @@ import {
   PredictiveGenerator,
   PredictiveGeneratorOptions,
 } from '../predictive-generator/predictive-generator';
+import { name as packageName } from '../../../package.json';
+
+export type GeneratorType = 'random' | 'predictive';
+export type GeneratorImpl = RandomGenerator | PredictiveGenerator;
 
 export type GeneratorOptions =
-  | ({ generator: 'random' } & RandomGeneratorOptions)
+  | ({ generator?: 'random' } & RandomGeneratorOptions)
   | ({ generator: 'predictive' } & PredictiveGeneratorOptions);
 
-function getGenerator(options: GeneratorOptions, specificType?: string) {
-  if (
-    (!specificType || specificType === 'random') &&
-    typeof RANDOM_GENERATOR !== 'undefined' &&
-    RANDOM_GENERATOR
-  ) {
-    return new RandomGenerator(options);
-  }
+const generatorRegistry = new Map<GeneratorType, new (options: any) => GeneratorImpl>();
 
-  if (
-    (!specificType || specificType === 'predictive') &&
-    typeof PREDICTIVE_GENERATOR !== 'undefined' &&
-    PREDICTIVE_GENERATOR
-  ) {
-    return new PredictiveGenerator(options);
-  }
-
-  return null;
+export function registerGenerator(
+  algorithm: GeneratorType,
+  constructor: new (options: any) => GeneratorImpl
+) {
+  Promise.resolve().then(() => {
+    generatorRegistry.set(algorithm, constructor);
+  });
 }
 
 export function createGenerator(options: GeneratorOptions) {
-  const generator = getGenerator(options, options.generator) || getGenerator(options);
+  const algorithm = options.generator ?? 'random';
+  const GeneratorConstructor = generatorRegistry.get(algorithm);
 
-  if (!generator) {
-    throw new Error(`[Fluid-Img] No generators are available.`);
+  if (!GeneratorConstructor) {
+    throw new Error(
+      `[${packageName}] Generator '${algorithm}' is not registered or included in the build.`
+    );
   }
 
-  return generator;
+  return new GeneratorConstructor(options);
 }
+
+// These will self-register
+import '../random-generator/random-generator';
+import '../predictive-generator/predictive-generator';
