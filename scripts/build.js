@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { build } from 'esbuild';
+import noMangle from './no-mangle.js';
 
 const DEFINES = {
   RANDOM_GENERATOR: false,
@@ -11,14 +12,20 @@ const DEFINES = {
   BOUNDARY_AWARE_ENERGY_MAP: false,
 };
 
+const webComponentProps =
+  'connectedCallback|disconnectedCallback|attributeChangedCallback|observedAttributes|transformOrigin';
+const appProps =
+  'src|scalingAxis|scaling-axis|mask|generator|carvingPriority|carving-priority|maxCarveUpSeamPercentage|max-carve-up-seam-percentage|maxCarveUpScale|max-carve-up-scale|maxCarveDownScale|max-carve-down-scale|showEnergyMap|show-energy-map|onScreenThreshold|on-screen-threshold';
+
 const ESBUILD_OPTIONS = {
   entryPoints: ['src/renderer/web-component/web-component.ts'],
   bundle: true,
   minify: true,
   sourcemap: true,
   target: 'esnext',
-  format: 'esm',
   watch: false,
+  mangleProps: /.*/,
+  reserveProps: new RegExp(`^(${noMangle}|${webComponentProps}|${appProps})$`),
 };
 
 function parseOptions() {
