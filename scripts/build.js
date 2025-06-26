@@ -14,7 +14,7 @@ const DEFINES = {
 const ESBUILD_OPTIONS = {
   entryPoints: ['src/renderer/web-component/web-component.ts'],
   bundle: true,
-  minify: false,
+  minify: true,
   sourcemap: true,
   target: 'esnext',
   format: 'esm',

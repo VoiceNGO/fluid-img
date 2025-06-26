@@ -1,9 +1,17 @@
 {
   "name": "fluid-img",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A web component for displaying images that intelligently resize to fit most any container.",
   "author": "Voice NPO, Inc.",
   "license": "Fluid-Img Revenue-Limited License",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VoiceNGO/fluid-img.git"
+  },
+  "bugs": {
+    "url": "https://github.com/VoiceNGO/fluid-img/issues"
+  },
+  "homepage": "https://voicengo.github.io/fluid-img/public/fluid-demo.html",
   "type": "module",
   "main": "./dist/fluid-img.js",
   "module": "./dist/fluid-img.js",
