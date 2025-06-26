@@ -4,6 +4,8 @@ Images that scale intelligently to any desired size (within reasonable limits).
 
 ![Fluid Images](https://raw.githubusercontent.com/VoiceNGO/fluid-img/refs/heads/main/resources/images/responsive-images.jpg)
 
+**Tiny!:** 7kb minified & gzipped
+
 ## Usage
 
 ```html
@@ -65,19 +67,21 @@ Usage: `<fluid-img src="image.jpg" generator="random" max-carve-up-scale="5"></f
 
 By default, the `random` generator is used as it is the fastest.
 
-| Option                         | Values                   | Default  | Description                                                                                                                                                                    |
-| ------------------------------ | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src`                          | URL                      |          | The URL of the image to be processed.                                                                                                                                          |
-| `generator`                    | `random`, `predictive`   | `random` | The seam carving generator to use.                                                                                                                                             |
-| `seam-priority`                | Number (0-1, e.g. `0.5`) | `1`      | If set to any value under `1`, the renderer will mix seam carving and traditional image scaling together                                                                       |
-| `max-carve-up-seam-percentage` | Number (0-1, e.g. `0.5`) | `0.6`    | The maximum percentage of seams to remove when scaling the image up.                                                                                                           |
-| `max-carve-up-scale`           | Number (e.g. `3`)        | `10`     | The maximum scale factor for carving the image up.                                                                                                                             |
-| `max-carve-down-scale`         | Number (e.g. `0.5`)      | `1`      | The maximum scale factor for carving the image down.                                                                                                                           |
-| `prepare`                      | Boolean                  | false    | If set, generators will create a full set of seams immediately upon load. This prevents a stuttering effect when images are resized fluidly but may add unnecessary processing |
+| Option                         | Values                           | Default      | Description                                                                                                            |
+| ------------------------------ | -------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `src`                          | URL                              |              | The URL of the image to be processed.                                                                                  |
+| `generator`                    | `random`, `predictive`           | `predictive` | The seam carving generator to use. `random` is faster but lower quality.                                               |
+| `scaling-axis`                 | `horizontal`, `vertical`, `auto` | `horizontal` | The axis for scaling. `auto` scales horizontally or vertically based on aspect ratio changes.                          |
+| `mask`                         | URL                              |              | The URL of a mask image. Black areas of the mask have a lower energy and are more likely to be preserved.              |
+| `carving-priority`             | Number (0-1, e.g. `0.5`)         | `1`          | The percentage of scaling to be done by seam carving vs. traditional image scaling.                                    |
+| `max-carve-up-seam-percentage` | Number (0-1, e.g. `0.5`)         | `0.6`        | The maximum percentage of seams to insert when scaling up. Limits the creation of new seams to preserve image quality. |
+| `max-carve-up-scale`           | Number (e.g. `3`)                | `3`          | The maximum enlargement factor using seam carving. Beyond this, traditional scaling is used.                           |
+| `max-carve-down-scale`         | Number (0-1, e.g. `0.7`)         | `0.7`        | The maximum percentage of the image to be removed by seam carving when downscaling.                                    |
 
 ### Generator specific options
 
-Generator-specific options are added to the `<fluid-img>` component but are only valid when the corresponding `generator` attribute is also set
+Generator-specific options are added to the `<fluid-img>` component but are only valid when the corresponding
+`generator` attribute is also set
 
 #### Random & Predictive Generator Options
 
@@ -117,7 +121,7 @@ The result is one truly optimal seam, many "very good" seams, many "very bad" se
 - [x] Web component
 - [x] Renderer that takes data from generators and scales to any size
 - [x] Random generator
-- [ ] Vertical carving
+- [x] Vertical carving
 - [x] Predictive generator
 - [ ] Web workers for all generators
 
