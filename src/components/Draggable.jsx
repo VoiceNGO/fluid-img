@@ -43,6 +43,7 @@ function Draggable({ children }) {
         transform: `translate(${position.x}px, ${position.y}px)`,
         cursor: isDragging ? 'grabbing' : 'grab',
       }}
+      className="draggable"
       onMouseDown={handleMouseDown}
     >
       {children}

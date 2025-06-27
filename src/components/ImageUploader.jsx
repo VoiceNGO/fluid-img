@@ -4,7 +4,10 @@ function ImageUploader({ onImageUpload }) {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      onImageUpload(URL.createObjectURL(file));
+      onImageUpload({
+        src: URL.createObjectURL(file),
+        name: file.name,
+      });
     }
   };
 
@@ -15,4 +18,4 @@ function ImageUploader({ onImageUpload }) {
   );
 }
 
-export default ImageUploader; 
+export default ImageUploader;

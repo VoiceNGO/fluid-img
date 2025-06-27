@@ -14,36 +14,37 @@ const Generator = {
 const DisplayMode = {
   Image: '',
   Energy: 'energy',
-  "B/W": 'grayscale',
+  'B/W': 'grayscale',
   Mask: 'mask',
 };
 
-function Controls({ config, setConfig, onImageUpload }) {
+function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const shouldShowSeamPercentageControl = config.scalingAxis !== ScalingAxis.Auto;
 
   const handleConfigChange = (key, value) => {
-    setConfig(prevConfig => ({
+    setConfig((prevConfig) => ({
       ...prevConfig,
-      [key]: value
+      [key]: value,
     }));
   };
 
-  const handleScalingAxisChange = axis => {
-    setConfig(prevConfig => ({
+  const handleScalingAxisChange = (axis) => {
+    setConfig((prevConfig) => ({
       ...prevConfig,
       scalingAxis: axis,
     }));
   };
 
-  const handleGeneratorChange = generator => {
-    setConfig(prevConfig => ({
+  const handleGeneratorChange = (generator) => {
+    setConfig((prevConfig) => ({
       ...prevConfig,
       generator,
     }));
   };
 
-  const handleDisplayModeChange = displayMode => {
-    setConfig(prevConfig => ({
+  const handleDisplayModeChange = (displayMode) => {
+    setConfig((prevConfig) => ({
       ...prevConfig,
       displayMode,
     }));
@@ -102,7 +103,8 @@ function Controls({ config, setConfig, onImageUpload }) {
           <div className="control-group">
             <label>
               Display Mode
-              <HelpTooltip>{`Image: Shows the normal image.
+              <HelpTooltip>
+                {`Image: Shows the normal image.
                 
                 Energy: Displays a grayscale 'energy map' where
                 darker areas have lower energy and are more likely to be carved out by seams.
@@ -114,9 +116,25 @@ function Controls({ config, setConfig, onImageUpload }) {
               options={DisplayMode}
               selectedValue={config.displayMode}
               onSelect={handleDisplayModeChange}
-              disabledOptions={[DisplayMode['B/W'], DisplayMode.Mask]}
+              disabledOptions={[DisplayMode['B/W'], !hasMask && DisplayMode.Mask].filter(Boolean)}
             />
           </div>
+          {hasMask && (
+            <div className="control-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={config.useMask}
+                  onChange={(e) => handleConfigChange('useMask', e.target.checked)}
+                />
+                Use Mask
+                <HelpTooltip>
+                  When enabled, the selected mask will be used to protect areas of the image from
+                  being carved.
+                </HelpTooltip>
+              </label>
+            </div>
+          )}
           <div className="control-group">
             <label>
               Carving priority: {Math.round(config.carvingPriority * 100)}%
@@ -131,16 +149,16 @@ function Controls({ config, setConfig, onImageUpload }) {
               min="0"
               max="100"
               value={config.carvingPriority * 100}
-              onChange={e => handleConfigChange('carvingPriority', e.target.value / 100)}
+              onChange={(e) => handleConfigChange('carvingPriority', e.target.value / 100)}
             />
           </div>
           <div className="control-group">
             <label>
               Max down scaling: {Math.round(config.maxCarveDownScale * 100)}%
               <HelpTooltip>
-                Remove up to this percentage of seams when downscaling.
-                Beyond this, normal image scaling is used.  This prevents seam carving from carving up
-                important structural elements, opting to squish them instead.
+                Remove up to this percentage of seams when downscaling. Beyond this, normal image
+                scaling is used. This prevents seam carving from carving up important structural
+                elements, opting to squish them instead.
               </HelpTooltip>
             </label>
             <input
@@ -148,7 +166,7 @@ function Controls({ config, setConfig, onImageUpload }) {
               min="0"
               max="100"
               value={config.maxCarveDownScale * 100}
-              onChange={e => handleConfigChange('maxCarveDownScale', e.target.value / 100)}
+              onChange={(e) => handleConfigChange('maxCarveDownScale', e.target.value / 100)}
             />
           </div>
           <div className="control-group">
@@ -165,26 +183,65 @@ function Controls({ config, setConfig, onImageUpload }) {
               max="10"
               step="0.1"
               value={config.maxCarveUpScale}
-              onChange={e => handleConfigChange('maxCarveUpScale', e.target.value)}
+              onChange={(e) => handleConfigChange('maxCarveUpScale', e.target.value)}
             />
           </div>
+          {shouldShowSeamPercentageControl && (
+            <div className="control-group">
+              <label>
+                % of seams to use for enlarging: {Math.round(config.maxCarveUpSeamPercentage * 100)}
+                %
+                <HelpTooltip>
+                  Only interpolate this % of seams when up-scaling, which prevents seam carving
+                  imporant structural elements. If set to 100%, the effective result is normal image
+                  scaling above 2x as every single pixel will be interpolated.
+                </HelpTooltip>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={config.maxCarveUpSeamPercentage * 100}
+                onChange={(e) =>
+                  handleConfigChange('maxCarveUpSeamPercentage', e.target.value / 100)
+                }
+              />
+            </div>
+          )}
           <div className="control-group">
             <label>
-              % of seams to use for enlarging:{' '}
-              {Math.round(config.maxCarveUpSeamPercentage * 100)}%
+              Batch Percentage: {Math.round(config.batchPercentage * 100)}%
               <HelpTooltip>
-                Only interpolate this % of seams when up-scaling, which prevents seam carving imporant structural elements.  If set to 100%, the effective result is normal image scaling above 2x as every single pixel will be interpolated.
+                Min batch size & percentage control how many seams to generate at once. Larger
+                batches = faster overall processing & less accuracy.
               </HelpTooltip>
             </label>
             <input
               type="range"
               min="0"
               max="100"
-              value={config.maxCarveUpSeamPercentage * 100}
-              onChange={e =>
-                handleConfigChange('maxCarveUpSeamPercentage', e.target.value / 100)
-              }
+              value={config.batchPercentage * 100}
+              onChange={(e) => handleConfigChange('batchPercentage', e.target.value / 100)}
             />
+          </div>
+          <div className="control-group">
+            <label>
+              Min Batch Size: {config.minBatchSize}
+              <HelpTooltip>
+                Min batch size & percentage control how many seams to generate at once. Larger
+                batches = faster overall processing & less accuracy.
+              </HelpTooltip>
+            </label>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value={config.minBatchSize}
+              onChange={(e) => handleConfigChange('minBatchSize', e.target.value)}
+            />
+          </div>
+          <div className="control-group">
+            <button onClick={onReset}>Reset to Defaults</button>
           </div>
         </div>
       )}
@@ -192,4 +249,4 @@ function Controls({ config, setConfig, onImageUpload }) {
   );
 }
 
-export default Controls; 
+export default Controls;

@@ -16,19 +16,6 @@
   height: 100vh;
 }
 
-.App-header {
-  background-color: #282c34;
-  padding: 5px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.App-header h1 {
-  font-size: 1.2rem;
-  margin: 0;
-}
 
 .App-main {
   display: flex;
@@ -72,7 +59,8 @@
 .main-content {
   overflow: hidden;
   flex-grow: 1;
-  padding: 0 20px 0 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .seam-container-resizable {
@@ -82,6 +70,7 @@
   max-height: 99%;
   margin: 0;
   border: 2px dashed #ccc;
+  margin: 0 20px 20px 0;
   box-sizing: border-box;
   resize: both;
   overflow: hidden;
@@ -143,10 +132,26 @@
   width: 100%;
 }
 
+.control-group > button {
+  width: 100%;
+  padding: 5px 10px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+  transition: background-color 0.2s;
+}
+
+.control-group > button:hover {
+  background-color: #ddd;
+  cursor: pointer;
+}
 
 .button-group {
   display: flex;
   margin-top: 5px;
+  resize: both;
+  flex-grow: 1;
 }
 
 .button-group button {
@@ -254,7 +259,6 @@
   position: fixed;
   top: 50px;
   right: 20px;
-  z-index: 1000;
 }
 
 .log-window {
@@ -295,5 +299,39 @@ fluid-img {
   font-weight: bold;
   background: #eee;
   user-select: none;
-  z-index: 1;
+}
+
+.draggable {
+  position: relative;
+  z-index: 100;
+}
+
+.code-preview {
+  margin-top: auto;
+  padding: 5px;
+  border-top: 1px solid black;
+  text-align: center;
+}
+
+.code-preview h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.code-preview pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.code-preview code {
+  color: #555;
+}
+
+.resizable-container {
+  position: relative;
+  overflow: auto;
+  border: 1px solid #ccc;
+  resize: both;
+  flex-grow: 1;
 }
