@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Draggable from './Draggable';
+import Draggable from '../Draggable';
+import './log-window.css';
 
 function LogWindow({ logs }) {
   const [isVisible, setIsVisible] = useState(true);
@@ -21,7 +22,7 @@ function LogWindow({ logs }) {
         </div>
         <div className="log-window" ref={logContainerRef}>
           {logs.map((log, index) => (
-            <div key={index} className="log-message">
+            <div key={index} className="log-window-message">
               {log}
             </div>
           ))}

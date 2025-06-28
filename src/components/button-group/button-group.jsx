@@ -1,4 +1,5 @@
 import React from 'react';
+import './button-group.css';
 
 export const ButtonGroup = ({ options, selectedValue, onSelect, disabledOptions = [] }) => {
   return (
@@ -6,7 +7,7 @@ export const ButtonGroup = ({ options, selectedValue, onSelect, disabledOptions 
       {Object.entries(options).map(([key, value]) => (
         <button
           key={value}
-          className={selectedValue === value ? 'active' : ''}
+          className={selectedValue === value ? 'button-group-active' : ''}
           onClick={() => onSelect(value)}
           disabled={disabledOptions.includes(value)}
         >

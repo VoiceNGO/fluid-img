@@ -1,10 +1,10 @@
 import '../../dist/fluid-img.js';
 import React, { useState, useEffect, useRef } from 'react';
 import ImageSelector from './components/ImageSelector.jsx';
-import Controls from './components/Controls.jsx';
+import Controls from './components/controls/controls.jsx';
 import ResizableContainer from './components/ResizableContainer.jsx';
-import LogWindow from './components/LogWindow.jsx';
-import CodePreview from './components/CodePreview.jsx';
+import LogWindow from './components/log-window/log-window.jsx';
+import CodePreview from './components/code-preview/code-preview.jsx';
 import { ScalingAxis } from '../../src/utils/enums/enums';
 import useLocalStorage from './hooks/useLocalStorage.js';
 

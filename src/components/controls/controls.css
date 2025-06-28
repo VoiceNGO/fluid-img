@@ -1,0 +1,67 @@
+.controls-panel {
+  padding: 15px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+  max-height: 400px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.controls-container {
+  margin-top: auto;
+}
+
+.controls-config-tab {
+  background-color: #e0e0e0;
+  padding: 10px;
+  cursor: pointer;
+  border-top: 1px solid #ccc;
+  text-align: center;
+  font-weight: bold;
+}
+
+.controls-controls {
+  background: #f7f7f7;
+  padding: 1rem;
+  border-right: 1px solid #ddd;
+  min-width: 250px;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.controls-group {
+  margin-bottom: 15px;
+  text-align: center;
+  flex-direction: column;
+}
+
+.controls-group:last-child {
+  margin-bottom: 0;
+}
+
+.controls-group label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.controls-group input[type="range"], .controls-group input[type="file"] {
+  width: 100%;
+}
+
+.controls-group > button {
+  width: 100%;
+  padding: 5px 10px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 5px;
+  transition: background-color 0.2s;
+}
+
+.controls-group > button:hover {
+  background-color: #ddd;
+  cursor: pointer;
+}

@@ -1,3 +1,5 @@
+import './code-preview.css';
+
 const defaultConfig = {
   carvingPriority: 1,
   maxCarveUpSeamPercentage: 0.6,

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import ImageUploader from './ImageUploader.jsx';
-import HelpTooltip from './HelpTooltip.jsx';
-import { ScalingAxis } from '../../../src/utils/enums/enums';
-import { ButtonGroup } from './ButtonGroup';
+import ImageUploader from '../ImageUploader.jsx';
+import HelpTooltip from '../HelpTooltip.jsx';
+import { ScalingAxis } from '../../../../src/utils/enums/enums.js';
+import { ButtonGroup } from '../button-group/button-group.jsx';
+import './controls.css';
 
 const Generator = {
   Random: 'random',
@@ -52,15 +53,15 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
 
   return (
     <div className="controls-container">
-      <div className="config-tab" onClick={() => setIsCollapsed(!isCollapsed)}>
+      <div className="controls-config-tab" onClick={() => setIsCollapsed(!isCollapsed)}>
         Config {isCollapsed ? '▲' : '▼'}
       </div>
       {!isCollapsed && (
         <div className="controls-panel">
-          <div className="control-group">
+          <div className="controls-group">
             <ImageUploader onImageUpload={onImageUpload} />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Generator
               <HelpTooltip>
@@ -80,7 +81,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               disabledOptions={[Generator.Cached, Generator.Full]}
             />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Scaling Axis
               <HelpTooltip>{`Determines the axis for scaling.
@@ -100,7 +101,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               disabledOptions={[ScalingAxis.Dual]}
             />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Display Mode
               <HelpTooltip>
@@ -120,7 +121,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
             />
           </div>
           {hasMask && (
-            <div className="control-group">
+            <div className="controls-group">
               <label>
                 <input
                   type="checkbox"
@@ -135,7 +136,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               </label>
             </div>
           )}
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Carving priority: {Math.round(config.carvingPriority * 100)}%
               <HelpTooltip>
@@ -152,7 +153,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               onChange={(e) => handleConfigChange('carvingPriority', e.target.value / 100)}
             />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Max down scaling: {Math.round(config.maxCarveDownScale * 100)}%
               <HelpTooltip>
@@ -169,7 +170,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               onChange={(e) => handleConfigChange('maxCarveDownScale', e.target.value / 100)}
             />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Max up scaling: {config.maxCarveUpScale}x
               <HelpTooltip>
@@ -187,7 +188,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
             />
           </div>
           {shouldShowSeamPercentageControl && (
-            <div className="control-group">
+            <div className="controls-group">
               <label>
                 % of seams to use for enlarging: {Math.round(config.maxCarveUpSeamPercentage * 100)}
                 %
@@ -208,7 +209,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               />
             </div>
           )}
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Batch Percentage: {Math.round(config.batchPercentage * 100)}%
               <HelpTooltip>
@@ -224,7 +225,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               onChange={(e) => handleConfigChange('batchPercentage', e.target.value / 100)}
             />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <label>
               Min Batch Size: {config.minBatchSize}
               <HelpTooltip>
@@ -240,7 +241,7 @@ function Controls({ config, setConfig, onImageUpload, hasMask, onReset }) {
               onChange={(e) => handleConfigChange('minBatchSize', e.target.value)}
             />
           </div>
-          <div className="control-group">
+          <div className="controls-group">
             <button onClick={onReset}>Reset to Defaults</button>
           </div>
         </div>
