@@ -1,4 +1,5 @@
 import React, { useRef, useState, useLayoutEffect } from 'react';
+import SizeIndicator from './SizeIndicator';
 
 const ResizableContainer = ({ children }) => {
   const containerRef = useRef(null);
@@ -7,37 +8,50 @@ const ResizableContainer = ({ children }) => {
   const cornerHandleRef = useRef(null);
 
   const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
-  const [visible, setVisible] = useState(false);
-  const [fading, setFading] = useState(false);
-  const timeoutRef = useRef(null);
+  const [showIndicator, setShowIndicator] = useState(false);
+
+  const stateRef = useRef({
+    isResizing: false,
+    handle: null,
+    userWidth: 2000,
+    userHeight: 2000,
+    maxWidth: Infinity,
+    maxHeight: Infinity,
+    initialUserWidth: 0,
+    initialUserHeight: 0,
+    initialMouseX: 0,
+    initialMouseY: 0,
+  });
 
   useLayoutEffect(() => {
     const container = containerRef.current;
     const rightHandle = rightHandleRef.current;
     const bottomHandle = bottomHandleRef.current;
     const cornerHandle = cornerHandleRef.current;
+    const state = stateRef.current;
 
     if (!container || !rightHandle || !bottomHandle || !cornerHandle) return;
 
-    const state = {
-      isResizing: false,
-      handle: null,
-      width: 0,
-      height: 0,
-      initialWidth: 0,
-      initialHeight: 0,
-      initialMouseX: 0,
-      initialMouseY: 0,
+    const triggerIndicator = () => {
+      setShowIndicator(false);
+      setShowIndicator(true);
+    };
+
+    const applySize = () => {
+      const newWidth = Math.min(state.userWidth, state.maxWidth);
+      const newHeight = Math.min(state.userHeight, state.maxHeight);
+      container.style.width = `${newWidth}px`;
+      container.style.height = `${newHeight}px`;
+      setDisplaySize({ width: newWidth, height: newHeight });
     };
 
     const handleMouseMove = (e) => {
       if (!state.isResizing) return;
-
       const totalDx = e.clientX - state.initialMouseX;
       const totalDy = e.clientY - state.initialMouseY;
 
-      let newWidth = state.initialWidth;
-      let newHeight = state.initialHeight;
+      let newWidth = state.initialUserWidth;
+      let newHeight = state.initialUserHeight;
 
       if (state.handle.includes('right') || state.handle.includes('corner')) newWidth += totalDx;
       if (state.handle.includes('bottom') || state.handle.includes('corner')) newHeight += totalDy;
@@ -46,64 +60,40 @@ const ResizableContainer = ({ children }) => {
         newWidth = Math.round(newWidth / 10) * 10;
         newHeight = Math.round(newHeight / 10) * 10;
       }
-
-      const maxWidth = container.parentElement.clientWidth - 20;
-      const maxHeight = container.parentElement.clientHeight - 20;
-      newWidth = Math.min(newWidth, maxWidth);
-      newHeight = Math.min(newHeight, maxHeight);
-
-      container.style.width = `${newWidth}px`;
-      container.style.height = `${newHeight}px`;
-
-      state.width = newWidth;
-      state.height = newHeight;
-      setDisplaySize({ width: newWidth, height: newHeight });
+      state.userWidth = newWidth;
+      state.userHeight = newHeight;
+      applySize();
     };
 
     const handleMouseUp = () => {
       state.isResizing = false;
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => setFading(true), 2000);
+      triggerIndicator();
     };
 
     const handleMouseDown = (e, handle) => {
       e.preventDefault();
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
       state.isResizing = true;
       state.handle = handle;
-      state.initialWidth = state.width;
-      state.initialHeight = state.height;
+      state.initialUserWidth = parseFloat(container.style.width);
+      state.initialUserHeight = parseFloat(container.style.height);
       state.initialMouseX = e.clientX;
       state.initialMouseY = e.clientY;
 
+      window.removeEventListener('mousemove', handleMouseMove);
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
-      setVisible(true);
-      setFading(false);
+      triggerIndicator();
     };
 
     const handleWindowResize = () => {
       if (!container.parentElement) return;
       const parent = container.parentElement;
-      const newWidth = parent.clientWidth - 20;
-      const newHeight = parent.clientHeight - 20;
-
-      state.width = newWidth;
-      state.height = newHeight;
-      container.style.width = `${newWidth}px`;
-      container.style.height = `${newHeight}px`;
-
-      setDisplaySize({ width: newWidth, height: newHeight });
-
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setVisible(true);
-      setFading(false);
-      timeoutRef.current = setTimeout(() => setFading(true), 2000);
+      state.maxWidth = parent.clientWidth - 20;
+      state.maxHeight = parent.clientHeight - 20;
+      applySize();
+      triggerIndicator();
     };
 
     handleWindowResize();
@@ -127,19 +117,29 @@ const ResizableContainer = ({ children }) => {
     };
   }, []);
 
+  const handleSizeChange = (newSize) => {
+    const container = containerRef.current;
+    const state = stateRef.current;
+    if (!container || !container.parentElement) return;
+
+    const maxWidth = container.parentElement.clientWidth - 20;
+    const maxHeight = container.parentElement.clientHeight - 20;
+    const newWidth = Math.min(newSize.width, maxWidth);
+    const newHeight = Math.min(newSize.height, maxHeight);
+
+    container.style.width = `${newWidth}px`;
+    container.style.height = `${newHeight}px`;
+
+    state.userWidth = newWidth;
+    state.userHeight = newHeight;
+
+    setDisplaySize({ width: newWidth, height: newHeight });
+  };
+
   return (
     <div ref={containerRef} className="seam-container-resizable">
       <div className="resizable-content">{children}</div>
-      {visible && (
-        <div
-          className={`resize-indicator ${fading ? 'fade-out' : ''}`}
-          onAnimationEnd={() => {
-            if (fading) setVisible(false);
-          }}
-        >
-          {Math.round(displaySize.width)} &times; {Math.round(displaySize.height)}
-        </div>
-      )}
+      <SizeIndicator size={displaySize} onSizeChange={handleSizeChange} show={showIndicator} />
       <div ref={rightHandleRef} className="resize-handle-right">
         <div className="handle-dots handle-dots-vertical">
           <span>&middot;</span>

@@ -331,17 +331,34 @@
   font-size: 12px;
   font-family: monospace;
   z-index: 100;
-  pointer-events: none;
-  white-space: nowrap;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+  cursor: pointer;
 }
 
-.resize-indicator.fade-out {
-  animation: fadeOutAnimation 0.5s ease-out forwards;
+.resize-indicator.show,
+.resize-indicator:hover {
+  opacity: 1;
+  transition: opacity 0.1s ease-in;
 }
 
-@keyframes fadeOutAnimation {
-  from { opacity: 1; }
-  to { opacity: 0; }
+.resize-indicator input {
+  width: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid #999;
+  color: white;
+  text-align: center;
+  font-family: monospace;
+  font-size: 12px;
+  -moz-appearance: textfield;
+  cursor: initial;
+}
+
+.resize-indicator input::-webkit-outer-spin-button,
+.resize-indicator input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Log Window */
