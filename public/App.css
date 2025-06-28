@@ -72,12 +72,76 @@
   border: 2px dashed #ccc;
   margin: 0 20px 20px 0;
   box-sizing: border-box;
-  resize: both;
   overflow: hidden;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   position: relative;
+}
+
+.resizable-content {
+  width: calc(100% - 5px);
+  height: calc(100% - 5px);
+  overflow: hidden;
+  position: relative;
+}
+
+.resize-handle-right,
+.resize-handle-bottom,
+.resize-handle-corner {
+  position: absolute;
+  background: #4a4a4a;
+  z-index: 10;
+}
+
+.resize-handle-right {
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+.resize-handle-bottom {
+  bottom: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  cursor: ns-resize;
+}
+
+.resize-handle-corner {
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 20;
+  background: transparent;
+}
+
+.handle-dots {
+  position: absolute;
+  color: white;
+  pointer-events: none;
+  font-size: 16px;
+  line-height: 4px;
+  display: flex;
+}
+
+.handle-dots-vertical {
+  flex-direction: column;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.handle-dots-horizontal {
+  flex-direction: row;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -87%);
+  gap: 2px;
 }
 
 .controls-panel {
