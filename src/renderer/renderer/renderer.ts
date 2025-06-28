@@ -216,43 +216,34 @@ export class Renderer {
     const logicalCanvasHeight = isVertical ? width : height;
 
     const targetAspectRatio = logicalCanvasWidth / logicalCanvasHeight;
-    const targetWidth = Math.round(originalHeight * targetAspectRatio);
+    const fullTargetWidth = Math.round(originalHeight * targetAspectRatio);
+    const targetWidth = Math.round(
+      originalWidth * (1 - carvingPriority) + fullTargetWidth * carvingPriority
+    );
+
     const pixelDelta = originalWidth - targetWidth;
 
-    //
     if (pixelDelta === 0) {
       return { availableSeams: 0, interpolationPixels: 0, carveDown: false };
     }
 
-    const seamsToCalculate = Math.abs(pixelDelta) * carvingPriority;
-    const maxRatio = pixelDelta > 0 ? maxCarveDownScale : maxCarveUpSeamPercentage;
-    const maxSeams = originalWidth * maxRatio;
-    const direction = pixelDelta > 0 ? 1 : -1;
+    const seamsToCalculate = Math.abs(pixelDelta);
     const carveDown = pixelDelta > 0;
+    const maxRatio = carveDown ? maxCarveDownScale : maxCarveUpSeamPercentage;
+    const maxSeams = originalWidth * maxRatio;
+    const direction = carveDown ? 1 : -1;
 
     const availableSeams = Math.floor(Math.min(seamsToCalculate, maxSeams)) * direction;
 
-    // if shrinking
     if (carveDown) {
       return { availableSeams, interpolationPixels: 0, carveDown };
-    } else {
-      // Calculate totalPixelsToInsert based on the effective target width driven by aspect ratio and canvas dimensions,
-      // capped by maxCarveUpScale.
-      const targetEffectiveWidthByRatio = Math.round(
-        (originalHeight / logicalCanvasHeight) * logicalCanvasWidth
-      );
-      const targetPixelsNeeded = targetEffectiveWidthByRatio - originalWidth;
-
-      const maxCarveUpImageDataWidth = Math.floor(originalWidth * maxCarveUpScale);
-      const maxPixelsByScale = maxCarveUpImageDataWidth - originalWidth;
-
-      // The total pixels to insert is the minimum of what's needed for the target ratio, and what's allowed by maxCarveUpScale.
-      const totalPixelsToInsert = Math.max(0, Math.min(targetPixelsNeeded, maxPixelsByScale));
-
-      const interpolationPixels = totalPixelsToInsert;
-
-      return { availableSeams: -availableSeams, interpolationPixels, carveDown };
     }
+
+    const maxCarveUpImageDataWidth = Math.floor(originalWidth * maxCarveUpScale);
+    const maxPixelsByScale = maxCarveUpImageDataWidth - originalWidth;
+    const interpolationPixels = Math.max(0, Math.min(seamsToCalculate, maxPixelsByScale));
+
+    return { availableSeams: -availableSeams, interpolationPixels, carveDown };
   }
 
   private async determineOrientation(): Promise<boolean> {
