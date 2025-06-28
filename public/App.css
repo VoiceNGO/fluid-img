@@ -332,6 +332,7 @@
   font-family: monospace;
   z-index: 100;
   pointer-events: none;
+  white-space: nowrap;
 }
 
 .resize-indicator.fade-out {

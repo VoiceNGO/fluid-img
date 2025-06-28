@@ -24,20 +24,23 @@ const ResizableContainer = ({ children }) => {
       handle: null,
       width: 0,
       height: 0,
-      lastMouseX: 0,
-      lastMouseY: 0,
+      initialWidth: 0,
+      initialHeight: 0,
+      initialMouseX: 0,
+      initialMouseY: 0,
     };
 
     const handleMouseMove = (e) => {
       if (!state.isResizing) return;
-      const dx = e.clientX - state.lastMouseX;
-      const dy = e.clientY - state.lastMouseY;
 
-      let newWidth = state.width;
-      let newHeight = state.height;
+      const totalDx = e.clientX - state.initialMouseX;
+      const totalDy = e.clientY - state.initialMouseY;
 
-      if (state.handle.includes('right') || state.handle.includes('corner')) newWidth += dx;
-      if (state.handle.includes('bottom') || state.handle.includes('corner')) newHeight += dy;
+      let newWidth = state.initialWidth;
+      let newHeight = state.initialHeight;
+
+      if (state.handle.includes('right') || state.handle.includes('corner')) newWidth += totalDx;
+      if (state.handle.includes('bottom') || state.handle.includes('corner')) newHeight += totalDy;
 
       if (e.shiftKey) {
         newWidth = Math.round(newWidth / 10) * 10;
@@ -55,9 +58,6 @@ const ResizableContainer = ({ children }) => {
       state.width = newWidth;
       state.height = newHeight;
       setDisplaySize({ width: newWidth, height: newHeight });
-
-      state.lastMouseX = e.clientX;
-      state.lastMouseY = e.clientY;
     };
 
     const handleMouseUp = () => {
@@ -76,8 +76,10 @@ const ResizableContainer = ({ children }) => {
       }
       state.isResizing = true;
       state.handle = handle;
-      state.lastMouseX = e.clientX;
-      state.lastMouseY = e.clientY;
+      state.initialWidth = state.width;
+      state.initialHeight = state.height;
+      state.initialMouseX = e.clientX;
+      state.initialMouseY = e.clientY;
 
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
