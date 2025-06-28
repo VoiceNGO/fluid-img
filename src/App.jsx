@@ -85,9 +85,6 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Live Seam Carving Demo</h1>
-      </header>
       <main className="App-main">
         <div className="left-panel">
           <ImageSelector onSelect={handleImageSelect} />

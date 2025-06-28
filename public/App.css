@@ -77,6 +77,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
+  position: relative;
 }
 
 .controls-panel {
@@ -255,8 +256,32 @@
   border-color: #555 transparent transparent transparent;
 }
 
+.resize-indicator {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.resize-indicator.fade-out {
+  animation: fadeOutAnimation 0.5s ease-out forwards;
+}
+
+@keyframes fadeOutAnimation {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Log Window */
 .log-window-container {
-  position: fixed;
+  position: absolute;
   top: 50px;
   right: 20px;
 }
