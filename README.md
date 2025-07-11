@@ -1,3 +1,34 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="right">
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=en">English</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=zh-CN">简体中文</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=zh-TW">繁體中文</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=ja">日本語</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=ko">한국어</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=hi">हिन्दी</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=th">ไทย</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=fr">Français</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=de">Deutsch</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=es">Español</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=it">Itapano</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=ru">Русский</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=pt">Português</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=nl">Nederlands</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=pl">Polski</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=ar">العربية</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=fa">فارسی</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=tr">Türkçe</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=vi">Tiếng Việt</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=VoiceNGO&project=fluid-img&lang=id">Bahasa Indonesia</a></p>
+      </div>
+    </div>
+  </details>
+</div>
+
 # Fluid Image Web Component
 
 Images that scale intelligently to any desired size (within reasonable limits).
